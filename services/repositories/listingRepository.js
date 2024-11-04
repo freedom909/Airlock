@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { AuthenticationError, ForbiddenError } from '../utils/errors.js';
+import { AuthenticationError, ForbiddenError } from '../../infrastructure/utils/errors.js';
 import connectMysql from '../DB/connectMysqlDB.js'
 import Listing from '../models/listing.js';
 class ListingRepository {
@@ -12,8 +12,8 @@ class ListingRepository {
     async init() {
         this.db = await connectMysql()
     }
-       
-    
+
+
     async findAll() {
         try {
             return await this.db.collection('listings').find().toArray();
@@ -25,7 +25,7 @@ class ListingRepository {
     async getListingsTop5ByMoneyBooking() {
         await this.initPromise; // Ensure the database is initialized before proceeding
         if (!this.db) {
-          throw new Error('Database not initialized');
+            throw new Error('Database not initialized');
         }
         try {
             //TypeError: Cannot read properties of null (reading 'query')  
@@ -49,11 +49,11 @@ class ListingRepository {
     }
 
 
-    async findOne({id}){
+    async findOne({ id }) {
         try {
-            const listing=await Listing.findOne({ where: { id: id } })
+            const listing = await Listing.findOne({ where: { id: id } })
             return listing;
-        }catch (error) {
+        } catch (error) {
             console.error('Error fetching listing:', error);
             throw error;
         }
@@ -134,26 +134,26 @@ class ListingRepository {
     async createListing({ title, description, photoThumbnail, numOfBeds, costPerNight, locationType, amenities, hostId }) {
         // Implementation of the database interaction to create a listing
         const newListing = await this.database.Listing.create({
-          title,
-          description,
-          photoThumbnail,
-          numOfBeds,
-          costPerNight,
-          locationType,
-          amenities,
-          hostId,
+            title,
+            description,
+            photoThumbnail,
+            numOfBeds,
+            costPerNight,
+            locationType,
+            amenities,
+            hostId,
         });
-    
+
         // Assuming amenities is an array of IDs, you might need to handle its association separately.
         if (amenities && amenities.length > 0) {
-          // Handle association logic here
-          await this.database.ListingAmenities.bulkCreate(
-            amenities.map(amenityId => ({ listingId: newListing.id, amenityId }))
-          );
+            // Handle association logic here
+            await this.database.ListingAmenities.bulkCreate(
+                amenities.map(amenityId => ({ listingId: newListing.id, amenityId }))
+            );
         }
-    
+
         return newListing;
-      }
+    }
 
     async getBookingsForListing(listingId) {
         try {

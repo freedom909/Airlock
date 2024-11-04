@@ -6,7 +6,7 @@ import express from 'express';
 import http from 'http';
 import { expressMiddleware } from '@apollo/server/express4';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
-import initProfileContainer from '../infrastructure/DB/initProfileContainer.js';
+import initProfileContainer from '../services/DB/initProfileContainer.js';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import resolvers from './resolvers.js';

@@ -1,11 +1,11 @@
 import { AuthenticationError, ForbiddenError } from '../infrastructure/utils/errors.js';
 import { permissions } from '../infrastructure/auth/permission.js';
-import Listing from '../infrastructure/models/listing.js';
-import Coordinate from '../infrastructure/models/location.js';
-import dbConfig from '../infrastructure/DB/dbconfig.js';
-import Location from '../infrastructure/models/location.js';
+import Listing from '../services/models/listing.js';
+import Coordinate from '../services/models/location.js';
+import dbConfig from '../services/DB/dbconfig.js';
+import Location from '../services/models/location.js';
 import { GraphQLError } from 'graphql';
-import Amenity from '../infrastructure/models/amenity.js';
+import Amenity from '../services/models/amenity.js';
 import { Op } from '@sequelize/core'
 const { listingWithPermissions, isHostOfListing, isAdmin } = permissions;
 
@@ -282,10 +282,10 @@ const resolvers = {
       }
     },
     createListing: async (_, { input }, { dataSources, userId }) => {
-      if (!userId) throw new AuthenticationError('User not authenticated');
-      if (!listingWithPermissions) {
-        throw new AuthenticationError('User does not have permissions to create a listing');
-      }
+      // if (!userId) throw new AuthenticationError('User not authenticated');
+      // if (!listingWithPermissions) {
+      //   throw new AuthenticationError('User does not have permissions to create a listing');
+      // }
 
       const { listingService, amenityService } = dataSources;
       const { status = "PENDING", ...listingInput } = input;
@@ -358,10 +358,10 @@ const resolvers = {
     },
 
     createListing: async (_, { listing }, { dataSources, userId }) => {
-      if (!userId) throw new AuthenticationError('User not authenticated');
-      if (!listingWithPermissions) {
-        throw new AuthenticationError('User does not have permissions to create a listing');
-      }
+      // if (!userId) throw new AuthenticationError('User not authenticated');
+      // if (!listingWithPermissions) {
+      //   throw new AuthenticationError('User does not have permissions to create a listing');
+      // }
 
       const { listingService, amenityService } = dataSources;
       const { amenities } = listing;

@@ -1,12 +1,13 @@
 // services/amenityService.js
 import { QueryTypes } from 'sequelize';
 import Amenity from '../models/amenity.js'; // Assuming you have an Amenity model
+import { CanceledError } from 'axios';
 
 class AmenityService {
-  constructor(sequelize, httpClient) {
+  constructor({ sequelize }) {
     this.sequelize = sequelize;
-    this.httpClient = httpClient;
-    this.Amenity = Amenity;
+    // this.httpClient = httpClient;
+    // this.Amenity = Amenity;
   }
 
   async getAllAmenities() {
@@ -65,6 +66,51 @@ class AmenityService {
     } catch (error) {
       console.error('Error adding amenity:', error);
       throw new Error('Failed to add amenity');
+    }
+  }
+
+  async getAmenityIds(amenities) {
+    if (!amenities || !Array.isArray(amenities)) {
+      throw new Error('Invalid amenities array');
+    }
+
+    const amenityIds = await Promise.all( //Error: Column 'id' cannot be null
+      amenities.map(async (amenity) => {
+        const { name, category, description } = amenity;
+        if (!name || !category) {
+          throw new Error('Missing name or category in amenity');
+        }
+        const [amenityRecord] = await this.sequelize.models.Amenity.findOrCreate({
+          where: { name, category: category.replace(' ', '_').toUpperCase(), description },
+          defaults: {
+            name: name,
+            category: category.replace(' ', '_').toUpperCase(),
+            description,
+          },
+        });
+        console.log(amenityRecord.id);
+        return amenityRecord.id;
+      })
+    );
+
+    return amenityIds;
+  }
+
+
+  async linkAmenitiesToListing(listingId, amenityIds) {
+    // Construct an array of objects to insert into ListingAmenities
+    const listingAmenitiesData = amenityIds.map(amenityId => ({
+      listingId,
+      amenityId,
+    }));
+
+    // Insert the records using bulkCreate
+    try {
+      await ListingAmenities.bulkCreate(listingAmenitiesData);
+      console.log('Amenities linked to listing successfully.');
+    } catch (error) {
+      console.error('Error linking amenities to listing:', error);
+      throw new Error('Error linking amenities to listing.');
     }
   }
 

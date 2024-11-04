@@ -11,12 +11,12 @@ import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHt
 import cors from 'cors';
 import dotenv from 'dotenv';
 import resolvers from './resolvers.js';
-import initMongoContainer from '../infrastructure/DB/initMongoContainer.js'
-import initializeAmenityContainer from '../infrastructure/DB/initAmenityContainer.js';
-import ListingService from '../infrastructure/services/listingService.js';
-import AmenityService from '../infrastructure/services/amenityService.js';
+import initMongoContainer from '../services/DB/initMongoContainer.js'
+import initializeAmenityContainer from '../services/DB/initAmenityContainer.js';
+import ListingService from '../services/services/listingService.js';
+import AmenityService from '../services/services/amenityService.js';
 import getUserFromToken from '../infrastructure/auth/getUserFromToken.js';
-import UserService from '../infrastructure/services/userService.js';
+import UserService from '../services/services/userService.js';
 
 
 dotenv.config();

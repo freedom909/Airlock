@@ -1,11 +1,11 @@
-import Amenity from './models/Amenity.js';
-import ListingAmenities from '../models/ListingAmenities.js';
+import Amenity from '../models/amenity.js';
+import ListingAmenities from '../models/listingAmenities.js';
 
 class AmenityRepository {
   async findAmenitiesByName(amenities) {
     return await Amenity.findAll({
       where: {
-        name: amenities,
+        [Op.in]: amenities, // Sequelize "in" operator to handle array
       },
       attributes: ['id'],
     });

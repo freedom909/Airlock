@@ -7,7 +7,7 @@ import { readFileSync } from 'fs';
 import http from 'http';
 import express from 'express';
 import cors from 'cors';
-import initAccountContainer  from '../infrastructure/DB/initAccountContainer.js';
+import initAccountContainer from '../services/DB/initAccountContainer.js';
 import resolvers from './resolvers.js';
 
 

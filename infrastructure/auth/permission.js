@@ -1,8 +1,8 @@
 import { rule, shield, and, or } from 'graphql-shield';
 import jwt from 'jsonwebtoken';
-import User from '../models/user.js';
-import Booking from '../models/booking.js';
-import Listing from '../models/listing.js';
+import User from '../../services/models/user.js';
+import Booking from '../../services/models/booking.js';
+import Listing from '../../services/models/listing.js';
 
 // Rule to check if the user is authenticated
 const isAuthenticated = rule()(async (parent, args, ctx, info) => {
@@ -27,14 +27,14 @@ const isHost = rule()(async (parent, args, ctx, info) => {
   return user && user.role === 'HOST';
 });
 
-const isHostOfListing=rule()(async (_,__,ctx,info)=>{
-  const listing =await Listing.findOne({where:{id:__.id}})
-  return listing && listing.hostId===ctx.user.id
+const isHostOfListing = rule()(async (_, __, ctx, info) => {
+  const listing = await Listing.findOne({ where: { id: __.id } })
+  return listing && listing.hostId === ctx.user.id
 })
 
-const isGuest=rule()(async (_,__,ctx, info)=>{
-  const user= await User.findOne({where: { id:ctx.user.id}})
-  return user && user.role ==='GUEST'
+const isGuest = rule()(async (_, __, ctx, info) => {
+  const user = await User.findOne({ where: { id: ctx.user.id } })
+  return user && user.role === 'GUEST'
 })
 // Permissions
 // Define bookingsWithPermission and listingsWithPermission

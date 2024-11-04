@@ -7,16 +7,16 @@ import http from 'http';
 import { expressMiddleware } from '@apollo/server/express4';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 
-import initializeBookingContainer from '../infrastructure/DB/initBookingContainer.js';
+import initializeBookingContainer from '../services/DB/initBookingContainer.js';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import resolvers from './resolvers.js';
-import ListingService from '../infrastructure/services/listingService.js'; 
-import BookingService from '../infrastructure/services/bookingService.js';  
-import UserService from '../infrastructure/services/userService.js';
-import initMongoContainer from '../infrastructure/DB/initMongoContainer.js';
-import initializeCartContainer from '../infrastructure/DB/initCartContainer.js';
-import CartService from '../infrastructure/services/cartService.js';
+import ListingService from '../services/listingService.js';
+import BookingService from '../services/bookingService.js';
+import UserService from '../services/userService.js';
+import initMongoContainer from '../services/DB/initMongoContainer.js';
+import initializeCartContainer from '../services/DB/initCartContainer.js';
+import CartService from '../services/cartService.js';
 
 dotenv.config();
 
@@ -26,7 +26,7 @@ const startApolloServer = async () => {
   try {
     // Initialize MySQL and MongoDB containers
     const mysqlContainer = await initializeCartContainer({
-      services: [ListingService, BookingService,CartService]
+      services: [ListingService, BookingService, CartService]
     });
 
     const mongoContainer = await initMongoContainer({
@@ -57,7 +57,7 @@ const startApolloServer = async () => {
         dataSources: {
           listingService: mysqlContainer.resolve('listingService'),  // Ensure correct resolution of services
           bookingService: mysqlContainer.resolve('bookingService'),  // Ensure correct resolution of services 
-          cartService:mysqlContainer.resolve('cartService'), 
+          cartService: mysqlContainer.resolve('cartService'),
           userService: mongoContainer.resolve('userService') // Ensure correct resolution of services
         }
       })

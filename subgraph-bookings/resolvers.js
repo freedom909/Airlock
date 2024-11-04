@@ -4,9 +4,9 @@ import { createClient } from 'graphql-ws';
 import WebSocket from 'ws'
 import { requireAuth, requireRole } from '../infrastructure/auth/authAndRole.js';
 import { permissions } from '../infrastructure/auth/permission.js';
-import Booking from '../infrastructure/models/booking.js';
-import User from '../infrastructure/models/user.js';
-import Listing from '../infrastructure/models/listing.js';
+import Booking from '../services/models/booking.js';
+import User from '../services/models/user.js';
+import Listing from '../services/models/listing.js';
 import cacheClient from '../cache/cacheClient.js';
 import { broadcast, subscriptionTopics } from '../cache/cachePubSub.js';
 const { bookingsWithPermission } = permissions;

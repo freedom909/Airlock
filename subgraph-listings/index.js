@@ -6,7 +6,7 @@ import express from 'express';
 import http from 'http';
 import { expressMiddleware } from '@apollo/server/express4';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
-import initializeListingContainer from '../infrastructure/DB/initListingContainer.js';
+import initializeListingContainer from '../services/DB/initListingContainer.js';
 import { GraphQLError } from 'graphql';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -26,7 +26,7 @@ const startApolloServer = async () => {
 
     const server = new ApolloServer({
       schema: buildSubgraphSchema({ typeDefs, resolvers }),
-      introspection: true, // Enable introspection
+
       plugins: [
         ApolloServerPluginDrainHttpServer({ httpServer }),
         {

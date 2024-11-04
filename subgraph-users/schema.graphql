@@ -1,16 +1,66 @@
 extend schema
   @link(url: "https://specs.apollo.dev/federation/v2.7",
-  import: ["@key", "@shareable", "@external","cacheControl"])
+  import: ["@key", "@shareable", "@external", "cacheControl"])
 
+# Enums
 enum Role {
   ADMIN
   HOST
   GUEST
 }
 
-# SCALARS
+# Scalars
 scalar DateTime
 
+# Common Interfaces
+interface Node {
+  id: ID!
+}
+
+interface Response {
+  "Represents the status of the response"
+  code: Int!
+  "Indicates whether the operation was successful"
+  success: Boolean!
+  "Human-readable message for UI"
+  message: String!
+}
+
+interface User @key(fields: "id") {
+  id: ID!
+  "The user's full name"
+  name: String!
+  "The user's role"
+  role: Role!
+  "The user's profile photo URL"
+  picture: String
+  "The nickname of the user"
+  nickname: String!
+  "e.g., GOOGLE, FACEBOOK, etc."
+  provider: String!
+}
+
+# User Types
+type Guest implements User @key(fields: "id") @cacheControl(maxAge: 6000) {
+  id: ID!
+  name: String!
+  picture: String @cacheControl(maxAge: 300)
+  nickname: String! @cacheControl(maxAge: 300)
+  role: Role! @cacheControl(maxAge: 300)
+  provider: String!
+}
+
+type Host implements User @key(fields: "id") @cacheControl(maxAge: 6000) {
+  id: ID!
+  name: String!
+  picture: String @cacheControl(maxAge: 300)
+  nickname: String! @cacheControl(maxAge: 300)
+  role: Role! @cacheControl(maxAge: 300)
+  provider: String!
+  description: String @shareable
+}
+
+# Authentication Inputs
 input SignInInput {
   email: String!
   password: String!
@@ -32,119 +82,96 @@ input UpdatePasswordInput {
   password: String!
 }
 
-interface Node {
-  id: ID!
+input ThirdPartyLoginInput {
+  provider: String! # e.g., "GOOGLE", "FACEBOOK", etc.
+  token: String! # Token from the third-party service
 }
 
-"The response after updating a profile"
-type UpdateProfileResponse implements Response {
-  "Similar to HTTP status code, represents the status of the mutation"
-  code: Int!  @shareable
-  "Indicates whether the mutation was successful"
-  success: Boolean!  @shareable
-  "Human-readable message for the UI"
-  message: String!  @shareable
-  "Updated user"
-  user: User @shareable
-}
-
-"Fields that can be updated"
-input UpdateProfileInput {
-  "The user's first and last name"
-  name: String
-  "The user's profile photo URL"
-  picture: String
-  "The host's profile bio description, will be shown in the listing"
-  description: String
-}
-
-interface Response {
-  "Similar to HTTP status code, represents the status of the response"
-  code: Int! 
-  "Indicates whether the mutation was successful"
-  success: Boolean! 
-  "Human-readable message for the UI"
-  message: String! 
-}
-
-interface User @key(fields: "id") {
-  id: ID!
-  "The user's first and last name"
-  name: String!
-  "The user's role"
-  role: Role!
-  "The user's profile photo URL"
-  picture: String
-  "The nickname of the user"
-  nickname: String!
+# Authentication Responses
+type AuthPayload {
+  token: String! @cacheControl(maxAge: 3600)
+  userId: ID! @cacheControl(maxAge: 3600)
+  role: Role @cacheControl(maxAge: 3600)
 }
 
 type SignInResponse implements Response {
-  "Similar to HTTP status code, represents the status of the mutation"
-  code: Int! @shareable
-  "Indicates whether the mutation was successful"
-  success: Boolean! @shareable
-  "Human-readable message for the UI"
-  message: String! @shareable
-  "The user's JWT"
-  token: String! @shareable
-  "The user's ID"
-  userId: ID! @shareable
-  "The user's role"
-  role: Role @shareable
+  code: Int!
+  success: Boolean!
+  message: String!
+  token: String!
+  userId: ID!
+  role: Role
 }
 
-type AuthPayload @cacheControl{
-  "The user's JWT"
-  token: String! @shareable 
-  "The user's ID"
-  userId: ID! @shareable @cacheControl(maxAge: 3600)
-  "The user's role"
-  role: Role @shareable @cacheControl(maxAge:3600)
+type ThirdPartyLoginResponse implements Response {
+  code: Int!
+  success: Boolean!
+  message: String!
+  token: String! # JWT token after successful third-party login
+  userId: ID!
+  role: Role
 }
 
-type Guest implements User @key(fields: "id") @cacheControl(maxAge: 6000) {
-  id: ID!
-  "The user's first and last name"
-  name: String! @shareable
-  "The user's profile photo URL"
-  picture: String @shareable @cacheControl(maxAge: 300) # Reduced cache duration for sensitive info
-  "The user's chosen nickname (must be unique)"
-  nickname: String! @shareable @cacheControl(maxAge: 300) # Reduced cache duration
-  "The role of the user"
-  role: Role! @shareable @cacheControl(maxAge: 300)
+# Profile Update
+input UpdateProfileInput {
+  name: String
+  picture: String
+  description: String
 }
 
-type Host implements User @key(fields: "id") @cacheControl(maxAge: 6000) {
-  id: ID!
-  "The user's first and last name"
-  name: String! @shareable
-  "The user's profile photo URL"
-  picture: String @shareable @cacheControl(maxAge: 300) # Reduced cache duration for sensitive info
-  "The host's profile bio description, will be shown in the listing"
-  description: String @shareable
-  "The user's chosen nickname (must be unique)"
-  nickname: String! @shareable @cacheControl(maxAge: 300)
-  "The role of the user"
-  role: Role! @shareable @cacheControl(maxAge: 300)
+type UpdateProfileResponse implements Response {
+  code: Int!
+  success: Boolean!
+  message: String!
+  user: User
 }
 
-
-type _Service {
-  sdl: String
+# Password and Invite Management
+type ReqResetPwdResponse implements Response {
+  code: Int!
+  success: Boolean!
+  message: String!
+  link: String!
 }
 
-type UserId {
-  id: ID! @shareable
+type ForgotPasswordResponse implements Response {
+  code: Int!
+  success: Boolean!
+  message: String!
+  email: String!
 }
 
-scalar _Any
+type InviteCodeResponse implements Response {
+  code: Int!
+  success: Boolean!
+  message: String!
+}
 
-union _Entity = Host | Guest | Generator
+# Queries and Mutations
+type Mutation {
+  signUp(input: SignUpInput!): AuthPayload!
+  signIn(input: SignInInput!): SignInResponse!
+  thirdPartyLogin(input: ThirdPartyLoginInput!): ThirdPartyLoginResponse!
+  updateProfile(updateProfileInput: UpdateProfileInput): UpdateProfileResponse!
+  updatePassword(newPassword: String!, password: String!, userId: ID!): AuthPayload!
+  requestResetPassword(email: String!): ReqResetPwdResponse!
+  forgotPassword(email: String!): ForgotPasswordResponse!
+  sendInviteCode(email: String!): InviteCodeResponse!
+  logout: Boolean!
+  loginWithOAuth(provider: String!,token:String!): LoginWithOAuth!
+}
 
 type Query {
   getUser(id: ID!): User @shareable
 }
+
+# Federation and Service-Related
+type _Service {
+  sdl: String
+}
+
+scalar _Any
+union _Entity = Host | Guest | Generator
 
 type Generator {
   id: ID! @shareable
@@ -153,44 +180,4 @@ type Generator {
   createdAt: DateTime! @shareable
   createdBy: User! @shareable
   isActive: Boolean! @shareable
-}
-
-type ReqResetPwdResponse implements Response {
-  message: String! @shareable
-  code: Int! @shareable
-  success: Boolean! @shareable
-  link: String! @shareable
-  authPayload: AuthPayload! @shareable
-}
-
-type ForgotPasswordResponse implements Response {
-  "Similar to HTTP status code, represents the status of the mutation"
-  code: Int! @shareable
-  "Indicates whether the mutation was successful"
-  success: Boolean! @shareable
-  "Human-readable message for the UI"
-  message: String! @shareable
-  "The user's email address"
-  email: String! @shareable
-}
-
-type InviteCodeResponse implements Response {
-  "Similar to HTTP status code, represents the status of the mutation"
-  code: Int! @shareable
-  "Indicates whether the mutation was successful"
-  success: Boolean! @shareable
-  "Human-readable message for the UI"
-  message: String! @shareable
-}
-
-type Mutation {
-  signUp(input: SignUpInput!): AuthPayload! @shareable
-  signIn(input: SignInInput!): SignInResponse! @shareable
-  requestResetPassword(email: String!): ReqResetPwdResponse! @shareable
-  logout: Boolean! @shareable
-  forgotPassword(email: String!): ForgotPasswordResponse! @shareable
-  updatePassword(newPassword: String!, password: String!, userId: ID!): AuthPayload! @shareable
-  sendInviteCode(email: String!): InviteCodeResponse! @shareable
-  "Updates the logged-in user's profile information"
-  updateProfile(updateProfileInput: UpdateProfileInput): UpdateProfileResponse! @shareable
 }

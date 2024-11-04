@@ -7,18 +7,18 @@ import http from 'http';
 import { expressMiddleware } from '@apollo/server/express4';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 
-import initializeBookingContainer from '../infrastructure/DB/initBookingContainer.js';
+import initializeBookingContainer from '../services/DB/initBookingContainer.js';
 import cors from 'cors';
 
 import resolvers from './resolvers.js';
-import ListingService from '../infrastructure/services/listingService.js'; 
-import BookingService from '../infrastructure/services/bookingService.js';  
-import UserService from '../infrastructure/services/userService.js';
+import ListingService from '../services/services/listingService.js';
+import BookingService from '../services/bookingService.js';
+import UserService from '../services/userService.js';
 import initMongoContainer from '../infrastructure/DB/initMongoContainer.js';
-import initializeCartContainer from '../infrastructure/DB/initCartContainer.js';
-import CartService from '../infrastructure/services/cartService.js';
-// import PaymentRepository from '../infrastructure/repositories/paymentRepository.js';
-// import PaymentService from '../infrastructure/services/paymentService.js';
+import initializeCartContainer from '../services/DB/initCartContainer.js';
+import CartService from '../services/services/cartService.js';
+// import PaymentRepository from '../services/repositories/paymentRepository.js';
+// import PaymentService from '../services/paymentService.js';
 
 
 const typeDefs = gql(readFileSync('./schema.graphql', { encoding: 'utf-8' }));
@@ -57,7 +57,7 @@ const startApolloServer = async () => {
         dataSources: {
           listingService: mysqlContainer.resolve('listingService'),  // Ensure correct resolution of services
           bookingService: mysqlContainer.resolve('bookingService'),  // Ensure correct resolution of services 
-          cartService: mysqlContainer.resolve('cartService'), 
+          cartService: mysqlContainer.resolve('cartService'),
           // paymentService: mysqlContainer.resolve('paymentService'),
           userService: mongoContainer.resolve('userService')
           // Ensure correct resolution of services

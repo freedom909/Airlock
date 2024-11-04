@@ -1,39 +1,45 @@
-import { RESTDataSource } from '@apollo/datasource-rest';
-import { QueryTypes } from 'sequelize'; // Ensure this is imported
+
+import { QueryTypes, UUIDV4 } from 'sequelize'; // Ensure this is imported
 import { GraphQLError } from 'graphql';
 import { GraphQLClient } from 'graphql-request';
-import { shield, allow } from 'graphql-shield';
-import { permissions } from '../auth/permission.js';
-import ListingRepository from '../repositories/listingRepository.js';
+//import { shield, allow } from 'graphql-shield';
+import { permissions } from '../infrastructure/auth/permission.js';
+import ListingRepository from './repositories/listingRepository.js';
 import dotenv from 'dotenv';
-import connectMysql from '../DB/connectMysqlDB.js';
+import connectMysql from './DB/connectMysqlDB.js';
 import mysql from 'mysql2/promise';
-import sequelize from '../models/seq.js';
-import queryDatabase from '../DB/dbUtils.js'
-import Listing from '../models/listing.js';
-import Coordinate from '../models/location.js'
-import dbConfig from '../DB/dbconfig.js';
-import Location from '../models/location.js';
+import sequelize from './models/seq.js';
+import queryDatabase from './DB/dbUtils.js'
+import Listing from './models/listing.js';
+import Amenity from './models/amenity.js';
+import Coordinate from './models/location.js'
+import dbConfig from './DB/dbconfig.js';
+import Location from './models/location.js';
+// import UUIDV4 from 'uuid';
 
 
 dotenv.config();
 
 // Applying the permissions middleware
-const permissionsMiddleware = shield({
-  Query: {
-    "*": allow,  // Allow all queries by default, customize as needed
-  },
-  Mutation: {
-    "*": allow,  // Allow all mutations by default, customize as needed
-  },
-});
-// or wherever your GraphQL endpoint is
+// const permissionsMiddleware = shield({
+//   Query: {
+//     "*": allow,  // Allow all queries by default, customize as needed
+//   },
+//   Mutation: {
+//     "*": allow,  // Allow all mutations by default, customize as needed
+//   },
+// });
+// // or wherever your GraphQL endpoint is
 
 class ListingService {
   constructor({ listingRepository, sequelize }) {
     this.listingRepository = listingRepository;
     this.sequelize = sequelize;
-    this.graphQLClient = new GraphQLClient('http://localhost:4040/graphql');; // Your GraphQL endpoint
+    this.graphQLClient = new GraphQLClient('http://localhost:4040/graphql', {
+      headers: {
+        'Authorization': `Bearer ${process.env.JWT_SECRET}`
+      }
+    });
   }
 
   willSendRequest(request) {
@@ -78,17 +84,24 @@ class ListingService {
   }
 
   async getAllListings() {
-    try {
-      const query = `
-      SELECT * FROM listings
-      `;
-      const response = await this.sequelize.query(query, { type: QueryTypes.SELECT })
-      return response
-    } catch (error) {
-      console.error('Error fetching all listings:', error);
-      throw new GraphQLError('Error fetching listings', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
-    }
+    const listings = await Listing.findAll({
+      include: [
+        {
+          model: Location, // Assuming you have a Location model
+          as: 'location', // Use the proper alias if needed
+        },
+        {
+          model: Amenity, // Assuming you have an Amenity model
+          as: 'amenities', // Use the proper alias if needed
+        }
+      ],
+    });
+    return listings;
+  } catch(error) {
+    console.error('Error fetching listing:', error);
+    throw new GraphQLError('Error fetching listing', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
   }
+
 
   async getListingsByUser(userId) {
     try {
@@ -119,7 +132,7 @@ class ListingService {
     }
   }
 
-  async getListing(id) {
+  async getListingById(id) {
     try {
       const listing = await this.sequelize.models.Listing.findByPk(id, {
         include: [{
@@ -138,28 +151,6 @@ class ListingService {
       throw new GraphQLError('Error fetching listing', {
         extensions: { code: 'INTERNAL_SERVER_ERROR' }
       });
-    }
-  }
-
-  async getListingById(id) {
-    // if (!this.context.user) {
-    //   throw new GraphQLError('You must be logged in to view listings', { extensions: { code: 'UNAUTHENTICATED' } });
-    // }
-
-    try {
-      const query = `SELECT * FROM listings WHERE id = :id`;
-      const response = await this.sequelize.query(query, {
-        type: QueryTypes.SELECT,
-        replacements: { id },
-      });
-      if (response.length > 0) {
-        return response[0]; // Return the first (and only) listing
-      } else {
-        throw new GraphQLError('Listing not found', { extensions: { code: 'NOT_FOUND' } });
-      }
-    } catch (error) {
-      console.error('Error fetching listing by ID:', error);
-      throw new GraphQLError('Error fetching listing', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
     }
   }
 
@@ -205,22 +196,6 @@ class ListingService {
     }
   }
 
-
-  // async getFeaturedListings(limit) {
-  //   if (!Number.isInteger(limit) || limit <= 0) {
-  //     throw new Error('Limit must be a positive integer');
-  //   }
-  //   try {
-  //     const query = `select * from listings where isFeatured=1 LIMIT ${limit}`
-  //     const response = await this.sequelize.query(query, { type: QueryTypes.SELECT });
-
-  //     return response;
-  //   } catch (error) {
-  //     console.error('Error fetching featured listings:', error);
-  //     throw new GraphQLError('Error fetching featured listings', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
-  //   }
-  // }
-
   async getFeaturedListings() {
     try {
       const listings = await this.sequelize.models.Listing.findAll({
@@ -235,15 +210,18 @@ class ListingService {
 
   async getListing(id) {  // Updated to match the resolver method name
     try {
-      const query = `SELECT * FROM listings WHERE id = :id LIMIT 1`
-      const [listing] = await this.sequelize.query(query, {
-        type: QueryTypes.SELECT,
-        replacements: { id } // Using replacements to safely insert the id into the query
+      return await Listing.findByPk(id, {
+        include: [
+          {
+            model: Amenity,
+            as: 'amenities' // Adjust this to match your association
+          },
+          {
+            model: Location,
+            as: 'location'  // Adjust this to match your association
+          }
+        ]
       });
-      if (!listing) {
-        throw new Error('Listing not found');
-      }
-      return listing;
     } catch (error) {
       console.error('Error fetching listing:', error);
       throw new GraphQLError('Error fetching listing', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
@@ -357,24 +335,6 @@ class ListingService {
       throw new GraphQLError('Error fetching total cost', {
         extensions: { code: 'INTERNAL_SERVER_ERROR' },
       });
-    }
-  }
-
-
-  async getListing(id) {
-    try {
-      const query = `SELECT * FROM listings WHERE id = :id LIMIT 1`
-      const [listing] = await this.sequelize.query(query, {
-        type: QueryTypes.SELECT,
-        replacements: { id } // Using replacements to safely insert the id into the query
-      });
-      if (!listing) {
-        throw new Error('Listing not found');
-      }
-      return listing;
-    } catch (error) {
-      console.error('Error fetching listing:', error);
-      throw new GraphQLError('Error fetching listing', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
     }
   }
 
@@ -545,22 +505,61 @@ class ListingService {
   }
 
 
-  async createListing({ title, description, price, locationId, hostId }) {
-    if (!this.context.user) {
-      throw new GraphQLError('You must be logged in to create listings', { extensions: { code: 'UNAUTHENTICATED' } });
-    }
+  async createListing(_, { title, description, location, hostId, photoThumbnail, numOfBeds, costPerNight, locationType, amenities, listingStatus }, { dataSource, user }) {
+    const { listingService, amenityService } = dataSource;
+    const currentUserId = user?.id ? user.id : null;
+    const { locationId } = location;
+
     try {
-      const response = await this.post('listings', {
+      // Generate a UUID for the listing
+      const listingId = UUIDV4();
+      const currentListingStatus = (listingStatus === "PUBLISHED") ? listingStatus : "PENDING";
+
+      // Create the new listing using Sequelize's ORM
+      const newListing = await Listing.create({
+        id: listingId,
         title,
         description,
-        price,
         locationId,
         hostId,
+        photoThumbnail,
+        numOfBeds,
+        costPerNight,
+        locationType,
+        listingStatus: currentListingStatus,
       });
-      return response.data;
+
+      // Insert the amenities and associate them with the listing
+      const amenityPromises = amenities.map(async (amenity) => {
+        const amenityId = UUIDV4(); // Generate UUID for each amenity
+        const createdAt = new Date();
+        const updatedAt = createdAt;
+
+        // Create the amenity
+        const newAmenity = await Amenity.create({
+          id: amenityId,
+          category: amenity.category,
+          name: amenity.name,
+          description: amenity.description,
+          createdAt,
+          updatedAt
+        });
+
+        // Create the association between the listing and the amenity
+        await ListingAmenities.create({
+          listingId: newListing.id,  // Use the newly created listing ID
+          amenityId: newAmenity.id,  // Use the newly created amenity ID
+        });
+      });
+
+      // Wait for all amenities to be processed
+      await Promise.all(amenityPromises);
+
     } catch (error) {
       console.error('Error creating listing:', error);
-      throw new GraphQLError('Error creating listing', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
+      throw new GraphQLError('Error creating listing', {
+        extensions: { code: 'INTERNAL_SERVER_ERROR' }
+      });
     }
   }
 
@@ -618,6 +617,47 @@ class ListingService {
     } catch (error) {
       console.error('Error fetching locations:', error);
       throw new GraphQLError('Error fetching locations', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
+    }
+  }
+
+  async updateListing({ listingId, listing }) {
+    try {
+      const { title, description, costPerNight } = listing;
+
+      console.log("Updating listing with id:", listingId, "and data:", listing);
+
+      const query = `
+      UPDATE listings
+      SET title = :title, description = :description, costPerNight = :costPerNight
+      WHERE id = :listingId
+    `;
+
+      console.log("Executing query:", query);
+      console.log("With replacements:", { title, description, costPerNight, listingId });
+
+      const [results, metadata] = await this.sequelize.query(query, {
+        type: QueryTypes.UPDATE,
+        replacements: {
+          title,
+          description,
+          costPerNight,
+          listingId, // Include listingId here for :listingId replacement
+        },
+      });
+
+      console.log("Results from query execution:", results);
+      console.log("Metadata from query execution:", metadata);
+
+      // Handle MySQL vs PostgreSQL result structures
+      const affectedRows = metadata?.rowCount || results; // rowCount for PostgreSQL, results for MySQL
+
+      console.log('Update query affected rows:', affectedRows);
+
+      // Return true if one or more rows were updated
+      return affectedRows > 0;
+    } catch (error) {
+      console.error('Error updating listing:', error);
+      throw new GraphQLError('Error updating listing', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
     }
   }
 

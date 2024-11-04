@@ -11,12 +11,12 @@ import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHt
 import cors from 'cors';
 import dotenv from 'dotenv';
 import resolvers from './resolvers.js';
-import initializeBookingContainer from '../infrastructure/DB/initBookingContainer.js'
-import ListingService from '../infrastructure/services/listingService.js';
-import BookingService from '../infrastructure/services/bookingService.js'
-import UserService from '../infrastructure/services/userService.js';
-import initMongoContainer from '../infrastructure/DB/initMongoContainer.js';
-import getUserFromToken from '../infrastructure/auth/getUserFromToken.js';
+import initializeBookingContainer from '../services/DB/initBookingContainer.js'
+import ListingService from '../services/listingService.js';
+import BookingService from '../services/bookingService.js'
+import UserService from '../services/userService.js';
+import initMongoContainer from '../services/DB/initMongoContainer.js';
+import getUserFromToken from '../services/auth/getUserFromToken.js';
 import { useServer } from 'graphql-ws/lib/use/ws';
 import { WebSocketServer } from 'ws';
 

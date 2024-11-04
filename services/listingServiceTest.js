@@ -1,8 +1,8 @@
 import { Sequelize } from 'sequelize';
-import ListingService from './listingService.js'; // Adjust the path as necessary
+import ListingService from './services/listingService.js'; // Adjust the path as necessary
 import ListingRepository from '../repositories/listingRepository.js'; // Adjust the path as necessary
 
-const sequelize = new Sequelize('air', 'root', 'princess', {
+const sequelize = new Sequelize('food', 'root', 'princess', {
   host: 'localhost',
   dialect: 'mysql',
 });
