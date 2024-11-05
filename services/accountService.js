@@ -1,6 +1,6 @@
-import { hashPassword } from '../helpers/passwords.js';
+import { hashPassword } from '../infrastructure/helpers/passwords.js';
 import { GraphQLError } from 'graphql';
-import { ForbiddenError } from '../utils/errors.js';
+import { ForbiddenError } from '../infrastructure/utils/errors.js';
 
 class AccountService {
   constructor({ accountRepository, listingRepository, cartRepository }) {

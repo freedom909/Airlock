@@ -171,6 +171,16 @@ const resolvers = {
       const { reviewService } = dataSources;
       return reviewService.getDislikeCount(id);
     },
+    booking: async ({ bookingId }, _, { dataSources }) => {
+      return dataSources.bookingService.getBooking(bookingId);
+    },
+
+    createdAt: ({ createdAt }) => new Date(createdAt).toISOString(),
+
+    // Resolve reference for federated queries
+    __resolveReference: async (review, { dataSources }) => {
+      return dataSources.reviewService.getReview(review.id);
+    },
   },
 
   User: {

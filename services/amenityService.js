@@ -1,6 +1,6 @@
 // services/amenityService.js
 import { QueryTypes } from 'sequelize';
-import Amenity from '../models/amenity.js'; // Assuming you have an Amenity model
+import Amenity from './models/amenity.js'; // Assuming you have an Amenity model
 import { CanceledError } from 'axios';
 
 class AmenityService {

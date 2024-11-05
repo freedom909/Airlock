@@ -1,6 +1,6 @@
 // File: infrastructure/auth/auth.js
 import jwt from 'jsonwebtoken';
-import User from '../models/user.js'
+import User from '../../services/models/user.js'
 
 
 // Middleware to check if the user is authenticated and set the user in the request context

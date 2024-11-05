@@ -128,7 +128,7 @@ input CreateListingInput {
   "The ID of the host"
   hostId: String!
   "The photo thumbnail of the listing"
-  photoThumbnail: String!
+  pictures: [String!]!
   "The number of beds in the listing"
   numOfBeds: Int!
   "The cost per night of the listing"
@@ -164,7 +164,7 @@ input UpdateListingInput {
   "The listing's description"
   description: String
   "The thumbnail image for the listing"
-  photoThumbnail: String
+  pictures: [String!]!
   "The number of beds available"
   numOfBeds: Int
   "The cost per night"
@@ -213,10 +213,10 @@ enum SortByCriteria {
 
 # Type representing a listing
 type Listing @key(fields: "id") {
-id: ID!
+  id: ID!
   title: String! @shareable
   description: String! @shareable
-  photoThumbnail: String! @shareable
+  picture: String! @shareable
   numOfBeds: Int! @shareable
   costPerNight: Float! @shareable
   locationType: LocationType! @shareable

@@ -1,4 +1,4 @@
-import ReviewRepository from "../repositories/reviewRepository.js";
+import ReviewRepository from "./repositories/reviewRepository.js";
 class ReviewService {
   constructor(reviewRepository) {
     this.reviewRepository = reviewRepository;

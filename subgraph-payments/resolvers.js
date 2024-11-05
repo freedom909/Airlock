@@ -20,21 +20,34 @@ const resolvers = {
     },
   },
   Mutation: {
-    addFundsToWallet: async (_, { amount }, { dataSources, user }) => {
-      const userId = user?.id;
-      if (!userId) {
-        throw new AuthenticationError('You must be logged in to add funds to your wallet');
+    addFundsToWallet: requireAuth(async (_, { amount }, { dataSources, userId }) => {
+      try {
+        const updateWallet = await dataSources.paymentService.addFunds({ userId, amount });
+
+        if (!updateWallet) {
+          throw new Error('Unable to add funds to wallet');
+        }
+
+        // Broadcast updated wallet info via subscription
+        broadcast(subscriptionTopics.USER_UPDATED, updateWallet);
+
+        // Return success response
+        return {
+          code: 200,
+          success: true,
+          message: 'Funds added successfully',
+          amount: updateWallet.amount,
+        };
+      } catch (error) {
+        // Return failure response with appropriate error message
+        return {
+          code: 400,
+          success: false,
+          message: 'We couldn’t complete your request due to insufficient funds or an error occurred.',
+        };
       }
-      const { paymentService } = dataSources;
-      // Implement the logic to add funds to the wallet
-      const funds = await paymentService.addFunds({ userId, amount });
-      return {
-        code: 200,
-        success: true,
-        message: 'Funds added successfully',
-        amount: funds.amount, // assuming the response contains the updated amount
-      };
-    },
+    }),
+
     cancelBooking: async (_, { bookingId }, { dataSources, user }) => {
       const userId = user?.id;
       if (!{ guestId: userId }) {

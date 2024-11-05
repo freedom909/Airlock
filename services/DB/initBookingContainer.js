@@ -39,8 +39,8 @@ const initializeBookingContainer = async ({ services = [] } = {}) => {
     userService: asClass(UserService).singleton(),
     listingRepository: asClass(ListingRepository).singleton(),
     listingService: asClass(ListingService).singleton(),
-    bookingRepository: asValue(BookingRepository),  // Register the Listing model here
-    bookingService: asValue(BookingService),     // Reusing Listing model for the service
+    bookingRepository: asValue(BookingRepository).singleton(),  // Register the Listing model here
+    bookingService: asValue(BookingService).singleton(),     // Reusing Listing model for the service
   });
 
   services.forEach(service => {

@@ -1,5 +1,5 @@
-import UserRepository from '../repositories/userRepository.js'
-// import AccountRepository from '../repositories/accountRepository.js';
+import UserRepository from './repositories/userRepository.js'
+// import AccountRepository from './repositories/accountRepository.js';
 import UserService from './userService.js';
 // import BookingService from './bookingService.js';
 // import AccountService from './accountService.js';

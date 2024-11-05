@@ -146,13 +146,13 @@ const resolvers = {
 
   Mutation: {
     createBooking: requireAuth(async (_, { input }, { dataSources, user }) => {
-      const { listingService, bookingService } = dataSources
-      const guestId = user?.id;
-      if (!guestId) {
-        throw new AuthenticationError('You need to be logged in as a guest to create a booking');
+      const { checkInDate, checkOutDate, guestId, listingId } = input;
+      // Validate input data
+      if (!listingId || !checkInDate || !checkOutDate || new Date(checkInDate) > new Date(checkOutDate)) {
+        throw new UserInputError('All booking details must be provided and check-out date must be after check-in date.');
       }
+      const { listingService, bookingService } = dataSources
 
-      const { checkInDate, checkOutDate, listingId } = input
       console.log('Data Sources:', dataSources); // Debugging line 
 
       if (!listingService || !bookingService) {
@@ -160,9 +160,7 @@ const resolvers = {
       }
       console.log('Creating bookingService for listingService:' `${bookingService}`, `${listingService}`)
       // Validate input data
-      if (!listingId || !checkInDate || !checkOutDate || new Date(checkInDate) > new Date(checkOutDate)) {
-        throw new UserInputError('All booking details must be provided');
-      }
+
       // Fetch total cost from the listing service
       const { totalCost } = await listingService.getTotalCost({ id: listingId, checkInDate, checkOutDate });
       // Create booking
