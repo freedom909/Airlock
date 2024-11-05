@@ -1,0 +1,240 @@
+enum CacheControlScope {  
+  PUBLIC  
+  PRIVATE  
+  INHERIT  
+}
+
+extend schema
+  @link(
+    url: "https://specs.apollo.dev/federation/v2.7"
+    import: ["@key", "@shareable"]
+  )
+
+scalar DateTime
+directive @cacheControl(maxAge: Int, scope: CacheControlScope) on FIELD_DEFINITION | OBJECT | INTERFACE  
+  directive @auth(requires: AuthLevel) on FIELD_DEFINITION | OBJECT | INTERFACE
+
+type Mutation {
+  sendMessageToChatGPT(message: String!): ChatGPTResponse!
+  getListingInfo(listingTitle: String!): Listing!
+}
+
+type ChatGPTResponse {
+  reply: String!
+}
+
+type Listing {
+  id: ID!
+  title: String! @shareable
+  description: String! @shareable
+  pictures: [Picture!]! @shareable  
+  numOfBeds: Int! @shareable
+  costPerNight: Float! @shareable
+  locationType: LocationType! @shareable
+  hostId: ID! @shareable
+  amenities: [Amenity!]! @shareable
+  numberOfUpcomingBookings: Int! @shareable
+  currentlyBookedDates: [ReservedDate]! @shareable @auth(requires: "GUEST")
+  totalCost(checkInDate: String!, checkOutDate: String!): Float @shareable
+  locationId: ID! @shareable
+  saleAmount: Float @shareable
+  bookingNumber: Int @shareable
+  checkInDate: String! @shareable
+  checkOutDate: String! @shareable
+  listingStatus: ListingStatus @shareable
+  bookings: [Booking!]! @auth(requires: "GUEST")
+  availability: [Availability]! @shareable
+  priceRange: PriceRange! @shareable
+  totalCostRange: TotalCostRange! @shareable
+  locationFilter: Location! @shareable
+  distance: Float @shareable
+  filterListings(filter: ListingFilterInput): [Listing!]! @shareable
+}
+
+type Picture {
+  id: ID!
+  url: String!
+}
+
+enum LocationType {
+  SPACESHIP
+  HOUSE
+  CAMPSITE
+  APARTMENT
+  ROOM
+}
+
+type Amenity {
+  id: ID! @shareable
+  name: String! @shareable
+}
+
+enum ListingStatus {
+  PUBLISHED
+  ACTIVE
+  PENDING
+  SOLD
+  DELETED
+  REJECT
+  CANCELLED
+  EXPIRED
+  COMPLETED
+}
+
+type Booking @key(fields: "id") {
+  id: ID!
+  listing: Listing! @shareable @cacheControl(maxAge: 3600) 
+  guest: Guest! @shareable @cacheControl(maxAge: 3600) 
+  review: Review @shareable
+  checkInDate: DateTime! @shareable @cacheControl(maxAge: 3600) 
+  checkOutDate: DateTime! @shareable @cacheControl(maxAge: 3600) 
+  totalPrice: Float! @shareable @cacheControl(maxAge: 3600) 
+  criteriaTime: Int! @shareable @cacheControl(maxAge: 3600) 
+  status: BookingStatus! @shareable @cacheControl(maxAge: 60) 
+  cancelledAt: DateTime @shareable @cacheControl(maxAge: 60)
+  confirmedAt: DateTime @shareable @cacheControl(maxAge: 60)
+}
+
+type Availability {
+  id: ID!
+  date: DateTime! @shareable @cacheControl(maxAge: 3600)
+  status: AvailabilityStatus! @shareable @cacheControl(maxAge: 3600)
+}
+
+enum AvailabilityStatus {
+  AVAILABLE
+  UNAVAILABLE
+}
+
+input PriceRangeInput {
+  min: Float
+  max: Float
+}
+
+input TotalCostRangeInput {
+  min: Float
+  max: Float
+}
+
+input AmenityInput {
+  id: ID
+  name: String
+}
+
+type Location {
+  id: ID! @shareable
+  name: String! @shareable
+  address: String! @shareable
+  city: String! @shareable
+  state: String! @shareable
+  country: String! @shareable
+}
+
+input ListingFilterInput {
+  location: String
+  priceRange: PriceRangeInput
+  totalCostRange: TotalCostRangeInput
+  locationType: [LocationType]
+  amenities: [AmenityInput]
+}
+
+enum BookingStatus {
+  CURRENT
+  COMPLETED
+  UPCOMING
+  PAST
+  CANCELLED
+  CONFIRMED
+}
+
+type Review @key(fields: "id") {
+   id: ID!
+  rating: Float! @shareable
+  content: String! @shareable
+  author: User! @shareable
+  bookingId: ID! @shareable
+  locationId: ID @shareable
+  guestId: ID @shareable
+  hostId: ID @shareable
+  location: Location @shareable
+  createdAt: String! @shareable
+  updatedAt: String! @shareable
+  round: Int! @shareable
+  likes: [Like!] 
+  dislikes: [Like!] 
+  likesCount: Int!
+  dislikesCount: Int!
+  title: String! @shareable
+  isFeatured: Boolean! @shareable
+  isPinned: Boolean! @shareable
+  "to allow users to comment on reviews"
+  comment: Comment 
+  comments: [Comment!]
+}
+
+type Like @key(fields: "id") {
+  id: ID!
+  user: User! @shareable
+  review: Review! @shareable
+}
+
+type Comment @key(fields: "id") {
+  id: ID!
+  user: User! @shareable
+  review: Review! @shareable
+  content: String! @shareable
+  createdAt: String! @shareable
+  updatedAt: String! @shareable
+}
+
+type ReservedDate {
+  id: ID!
+  date: DateTime! @shareable @cacheControl(maxAge: 3600)
+}
+
+type PriceRange {
+  min: Float! @shareable
+  max: Float! @shareable
+}
+
+type TotalCostRange {
+  min: Float! @shareable
+  max: Float! @shareable
+}
+
+interface User {
+  id: ID!
+  name: String!
+  role: Role!
+  picture: String
+  nickname: String!
+}
+
+enum Role {
+  ADMIN
+  USER
+  GUEST
+}
+
+type Guest implements User @key(fields: "id")  {
+  id: ID!
+  name: String! @shareable
+  picture: String @shareable
+  nickname: String! @shareable
+  role: Role! @shareable
+}
+
+type Host implements User @key(fields: "id")  {
+  id: ID!
+  name: String! @shareable
+  picture: String @shareable
+  description: String @shareable
+  nickname: String! @shareable
+  role: Role! @shareable
+}
+
+enum AuthLevel{
+  ADMIN
+  USER
+  GUEST
+}
