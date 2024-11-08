@@ -11,6 +11,7 @@ import { GraphQLError } from 'graphql';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import resolvers from './resolvers.js';
+import LocationService from '../services/locationService.js';
 
 dotenv.config();
 
@@ -42,7 +43,8 @@ const startApolloServer = async () => {
       context: async ({ req }) => ({
         token: req.headers.authorization || '',
         dataSources: {
-          listingService: mysqlContainer.resolve('listingService')
+          listingService: mysqlContainer.resolve('listingService'),
+          locationService: mysqlContainer.resolve('locationService')
         },
       })
     });
@@ -57,7 +59,8 @@ const startApolloServer = async () => {
         context: async ({ req }) => ({
           token: req.headers.authorization || '',
           dataSources: {
-            listingService: mysqlContainer.resolve('listingService')
+            listingService: mysqlContainer.resolve('listingService'),
+            locationService: mysqlContainer.resolve('locationService')
           },
         })
       })

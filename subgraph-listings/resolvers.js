@@ -7,6 +7,7 @@ import Location from '../services/models/location.js';
 import { GraphQLError } from 'graphql';
 import Amenity from '../services/models/amenity.js';
 import { Op } from '@sequelize/core'
+import calculateDistance from './calculateDistance.js';
 const { listingWithPermissions, isHostOfListing, isAdmin } = permissions;
 
 
@@ -19,9 +20,39 @@ const { listingWithPermissions, isHostOfListing, isAdmin } = permissions;
 const resolvers = {
 
   Query: {
+    getNearbyListings: async (_, { latitude, longitude, radius }, { dataSources }) => {
+      if (!latitude || !longitude) throw new Error('You must provide a latitude and longitude');
+      const { listingService, locationService } = dataSources;
+      if (!locationService) throw new Error('LocationService is not available in dataSources');
+
+      try {
+        const listings = await listingService.getAllListings();
+        // Convert each listing instance to a plain JavaScript object
+        const validListings = listings.map(listing => ({
+          id: listing.id,
+          title: listing.title,
+          description: listing.description,
+          costPerNight: listing.costPerNight,
+          // ... add other fields explicitly as needed
+        }));
+
+        console.log('Valid listings:', validListings.map(listing => listing.title));
+        return validListings;
+      } catch (error) {
+        console.error('Error fetching nearby listings:', error);
+        throw new Error('Failed to fetch nearby listings');
+      }
+    },
+
+
     fullTextSearchListings: async (_, { input }, { dataSources }) => {
+      const { listingService } = dataSources
+      if (!listingService) {
+        throw new Error("ListingService is not initialized.");
+      }
+
+
       const { searchText, limit = 10, offset = 0 } = input;
-      const { listingService } = dataSources;
       // Search in the `description` field using LIKE or other full-text search methods
       const listings = await Listing.findAll({
         where: {
@@ -390,15 +421,15 @@ const resolvers = {
     },
 
     updateListing: async (_, { listingId, listing }, { dataSources, userId }) => {
-      if (!userId) throw new AuthenticationError('User not authenticated');
-      if (!isHostOfListing || !isAdmin) {
-        throw new AuthenticationError(`you don't have right to update this list`)
-      }
+      // if (!userId) throw new AuthenticationError('User not authenticated');
+      //if (!isHostOfListing || !isAdmin) {
+      //  throw new AuthenticationError(`you don't have right to update this list`)
+      //}
       const { listingService } = dataSources;
 
       if (!listingId) throw new Error('Listing ID not provided');
       try {
-        const updatedListing = await listingService.updateListing({ ...listing, id: listingId });
+        const updatedListing = await listingService.updateListing({ listing, listingId });
         return {
           code: 200,
           success: true,

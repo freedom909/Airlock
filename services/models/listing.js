@@ -19,7 +19,11 @@ Listing.init({
   hostId: DataTypes.STRING,
   locationType: DataTypes.STRING,
   numOfBeds: DataTypes.INTEGER,
-  photoThumbnail: DataTypes.STRING,
+  pictures: {
+    type: DataTypes.JSON, // Use JSON to store an array of URLs or image data
+    allowNull: true,
+    defaultValue: [] // Initialize as an empty array
+  },
   isFeatured: DataTypes.BOOLEAN,
   saleAmount: DataTypes.FLOAT,
   bookingNumber: DataTypes.INTEGER,

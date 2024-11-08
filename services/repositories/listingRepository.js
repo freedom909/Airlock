@@ -2,9 +2,9 @@ import axios from 'axios';
 import { AuthenticationError, ForbiddenError } from '../../infrastructure/utils/errors.js';
 import connectMysql from '../DB/connectMysqlDB.js'
 import Listing from '../models/listing.js';
+import Location from '../models/location.js';
 class ListingRepository {
     constructor(httpClient) {
-        this.db = null;
         this.initPromise = this.init();
         this.httpClient = httpClient;
     }
@@ -16,12 +16,27 @@ class ListingRepository {
 
     async findAll() {
         try {
-            return await this.db.collection('listings').find().toArray();
+            const listings = await Listing.findAll({
+                include: [
+                    {
+                        model: Location,  // Include the associated Location model  
+                        required: true,
+                        as: 'location',   // Use the alias defined in your association  
+                        attributes: ['latitude', 'longitude', 'city', 'state', 'country', 'radius'],
+                    },
+                ],
+            });
+
+            // Debug output for fetched listings, can be uncommented for troubleshooting  
+            // console.log('Fetched listings with location data:', JSON.stringify(listings, null, 2));  
+
+            return listings;
         } catch (error) {
             console.error('Error fetching listings from the database:', error);
             throw new Error('Error fetching listings from the database');
         }
     }
+
     async getListingsTop5ByMoneyBooking() {
         await this.initPromise; // Ensure the database is initialized before proceeding
         if (!this.db) {

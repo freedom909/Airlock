@@ -22,6 +22,7 @@ Object.keys(models).forEach((modelName) => {
   }
 });
 
+
 // Define associations
 // Listing.hasOne(Coordinate, { foreignKey: 'listingId', as: 'coordinate' });
 Listing.hasOne(Location, { foreignKey: 'listingId', as: 'location' });

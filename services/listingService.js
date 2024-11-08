@@ -1,5 +1,5 @@
 
-import { QueryTypes, UUIDV4 } from 'sequelize'; // Ensure this is imported
+import { QueryTypes, UUIDV4, literal, Op } from 'sequelize'; // Ensure this is imported
 import { GraphQLError } from 'graphql';
 import { GraphQLClient } from 'graphql-request';
 //import { shield, allow } from 'graphql-shield';
@@ -15,6 +15,7 @@ import Amenity from './models/amenity.js';
 import Coordinate from './models/location.js'
 import dbConfig from './DB/dbconfig.js';
 import Location from './models/location.js';
+import { query } from 'express';
 // import UUIDV4 from 'uuid';
 
 
@@ -45,6 +46,108 @@ class ListingService {
   willSendRequest(request) {
     if (this.context && this.context.user) {
       request.headers.set('Authorization', this.context.user.token);
+    }
+  }
+
+  async findNearbyListings({ longitude, latitude, radius }) {
+    console.log("Inside findNearbyListings with params:", { longitude, latitude, radius });
+    const earthRadiusInKm = 6371;
+
+    try {
+      // Query the database for nearby listings  
+      let nearbyListings = await this.listingRepository.findAll({
+        attributes: {
+          include: [
+            'id', 'title', 'description', 'costPerNight', 'hostId',
+            'locationType', 'numOfBeds', 'pictures', 'isFeatured',
+            'saleAmount',
+            [
+              sequelize.literal(`   
+                            (  
+                                ${earthRadiusInKm} * ACOS(  
+                                    COS(RADIANS(:latitude)) * COS(RADIANS(location.latitude)) *  
+                                    COS(RADIANS(location.longitude) - RADIANS(:longitude)) +  
+                                    SIN(RADIANS(:latitude)) * SIN(RADIANS(location.latitude))  
+                                )  
+                            )  
+                        `),
+              'distance'
+            ],
+          ],
+        },
+        include: [
+          {
+            model: Location,
+            required: true,
+            as: 'location',
+            attributes: ['latitude', 'longitude'],
+          },
+        ],
+        where: sequelize.where(
+          sequelize.literal(`  
+                    (  
+                        ${earthRadiusInKm} * ACOS(  
+                            COS(RADIANS(:latitude)) * COS(RADIANS(location.latitude)) *  
+                            COS(RADIANS(location.longitude) - RADIANS(:longitude)) +  
+                            SIN(RADIANS(:latitude)) * SIN(RADIANS(location.latitude))  
+                        )  
+                    )   
+                `),
+          { [Op.lte]: radius }
+        ),
+        replacements: { latitude, longitude },
+      });
+      console.log("Raw nearby listings before filtering:", nearbyListings);
+      console.log("Listing titles:", nearbyListings.map(listing => listing.dataValues.title));
+      // Ensure it's an array  
+      if (!Array.isArray(nearbyListings)) {
+        console.error("Expected an array but got:", nearbyListings);
+        return [];
+      }
+
+      // Logging to debug  
+      console.log("Nearby Listings Before Mapping:", nearbyListings);
+
+      // Sample output from your logging (simulating the provided data)  
+
+
+      // Filtering process  
+      const processedListings = nearbyListings
+        .filter(listing => {
+          const values = listing.dataValues;
+          return values && values.title && values.title.trim() !== '' && values.listingStatus !== 'DELETED';
+        })
+        .map(listing => {
+          const values = listing.dataValues;
+          // Additional processing logic  
+          return {
+            id: values.id,
+            title: values.title || "Untitled", // Provide a fallback  
+            costPerNight: values.costPerNight,
+            numOfBeds: values.numOfBeds,
+            pictures: values.pictures || [], // Handle if pictures is not set  
+            distance: distance <= radius ? {
+              id: listing.id,
+              name: listing.title,
+              pricePerNight: listing.costPerNight,
+              numOfBeds: listing.numOfBeds,
+              distance, // Include distance in the response
+            } : null
+          };
+        });
+
+      // Check the processed listings  
+      if (processedListings.length === 0) {
+        console.error("No valid listings found after filtering.");
+      } else {
+        console.log("Filtered listings:", processedListings);
+      }
+
+      // Return processed listings  
+      return processedListings;
+    } catch (error) {
+      console.error("Error fetching nearby listings:", error);
+      throw new Error('Failed to fetch nearby listings');
     }
   }
 
@@ -489,7 +592,6 @@ class ListingService {
     }
   }
 
-
   async getTop5Listings() {
     const pool = await dbConfig.mysql(); // Get the MySQL connection pool
 
@@ -504,8 +606,7 @@ class ListingService {
     }
   }
 
-
-  async createListing(_, { title, description, location, hostId, photoThumbnail, numOfBeds, costPerNight, locationType, amenities, listingStatus }, { dataSource, user }) {
+  async createListing(_, { title, description, location, hostId, pictures, numOfBeds, costPerNight, locationType, amenities, listingStatus }, { dataSource, user }) {
     const { listingService, amenityService } = dataSource;
     const currentUserId = user?.id ? user.id : null;
     const { locationId } = location;
@@ -522,7 +623,7 @@ class ListingService {
         description,
         locationId,
         hostId,
-        photoThumbnail,
+        pictures,
         numOfBeds,
         costPerNight,
         locationType,
@@ -620,47 +721,49 @@ class ListingService {
     }
   }
 
-  async updateListing({ listingId, listing }) {
+  async updateListing({ listing, listingId }) {
     try {
-      const { title, description, costPerNight } = listing;
+      if (!listing || !listingId) {
+        throw new Error("Missing required fields: listing or listingId"); // Error updating listing: Error: Missing required fields: listing or listingId
+      }
+      const { title, description, costPerNight, pictures } = listing; //TypeError: Cannot destructure property 'title' of 'listing' as it is undefined.
 
       console.log("Updating listing with id:", listingId, "and data:", listing);
+      let query = `UPDATE listings SET title = :title`;
+      const replacements = { title, listingId };
+      if (description !== undefined) {
+        query += `, description = :description`;
+        replacements.description = description;
+      }
 
-      const query = `
-      UPDATE listings
-      SET title = :title, description = :description, costPerNight = :costPerNight
-      WHERE id = :listingId
-    `;
-
+      if (costPerNight !== undefined) {
+        query += `, costPerNight = :costPerNight`;
+        replacements.costPerNight = costPerNight;
+      }
+      if (pictures !== undefined) {
+        query += `, pictures = :pictures`;
+        replacements.pictures = JSON.stringify(pictures); // Convert array to JSON string
+      }
+      query += ` WHERE id = :listingId`;
+      await sequelize.query(query, {
+        replacements,
+      });
       console.log("Executing query:", query);
       console.log("With replacements:", { title, description, costPerNight, listingId });
 
-      const [results, metadata] = await this.sequelize.query(query, {
-        type: QueryTypes.UPDATE,
-        replacements: {
-          title,
-          description,
-          costPerNight,
-          listingId, // Include listingId here for :listingId replacement
-        },
-      });
+      const [updateResult] = await this.sequelize.query(query, {
+        replacements
+      },
+      );
 
-      console.log("Results from query execution:", results);
-      console.log("Metadata from query execution:", metadata);
-
-      // Handle MySQL vs PostgreSQL result structures
-      const affectedRows = metadata?.rowCount || results; // rowCount for PostgreSQL, results for MySQL
-
-      console.log('Update query affected rows:', affectedRows);
-
-      // Return true if one or more rows were updated
-      return affectedRows > 0;
+      // Fetch the updated listing to include location and other fields
+      const updatedListing = await Listing.findByPk(listingId);
+      return updatedListing
     } catch (error) {
       console.error('Error updating listing:', error);
       throw new GraphQLError('Error updating listing', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
     }
   }
-
 
   async hotListingsByMoneyBookingTop5() {
     const query = `

@@ -59,6 +59,7 @@ Location.init({
 }, {
   sequelize,
   modelName: 'Location',
+  tableName: 'locations',
   timestamps: false,
 
 });

@@ -6,14 +6,17 @@
     "description": "Enjoy this amazing cave campsite in snow MoundiiX, where you'll be one with the nature and wildlife in this wintery planet. All space survival amenities are available. We have complementary dehydrated wine upon your arrival. Check in between 34:00 and 72:00. The nearest village is 3AU away, so please plan accordingly. Recommended for extreme outdoor adventurers.",
     "id": "listing-1",
     "numOfBeds": 2,
-    "photoThumbnail": "https://res.cloudinary.com/apollographql/image/upload/v1644350721/odyssey/federation-course2/illustrations/listings-01.png",
+    "pictures": [
+      "https://res.cloudinary.com/listings-01.png",
+      "https://res.cloudinary.com/listings-02.png"
+    ],
     "hostId": "user-1",
     "isFeatured": true,
     "saleAmount": 20.1,
     "bookingNumber": 109,
     "checkInDate": "2021-02-08 04:00:00",
     "checkOutDate": "2021-03-17 04:00:00",
-    "listingStatus": "REJECT",
+    "listingStatus": "EXPIRED",
     "locationId": "location-1",
     "coordinateId": "coordinate-1"
   },
@@ -24,14 +27,17 @@
     "description": "Thiz cozy yurt has an aerodyne hull and efficient sublight engines. It is equipped with an advanced sensor system and defensive force shield. Meteor showers are quite common, please rest assured that our Kevlar-level shields will keep you safe from any space debris. Mraza suns are known to have high levels of UV hyper radiation, which we counteract with the yurt's UV protection shield.",
     "id": "listing-2",
     "numOfBeds": 1,
-    "photoThumbnail": "https://res.cloudinary.com/apollographql/image/upload/v1644350839/odyssey/federation-course2/illustrations/listings-02.png",
+    "pictures": [
+      "https://res.cloudinary.com/listings-03.png",
+      "https://res.cloudinary.com/listings-04.png"
+    ],
     "hostId": "user-1",
     "isFeatured": true,
     "saleAmount": 10.1,
     "bookingNumber": 108,
     "checkInDate": "2021-02-08 04:00:00",
     "checkOutDate": "2024-03-17 04:00:00",
-    "listingStatus": "REJECT",
+    "listingStatus": "PENDING",
     "locationId": "location-2",
     "coordinateId": "coordinate-2"
   },
@@ -42,13 +48,16 @@
     "description": "Enjoy this floaty, repurposed aircraft reminiscent of Earth’s former converted airstreams. Includes lake access!",
     "id": "listing-3",
     "numOfBeds": 5,
-    "photoThumbnail": "https://res.cloudinary.com/apollographql/image/upload/v1644353887/odyssey/federation-course2/illustrations/listings-03.png",
+    "pictures": [
+      "https://res.cloudinary.com/listings-015.png",
+      "https://res.cloudinary.com/listings-026.png"
+    ],
     "hostId": "user-1",
     "saleAmount": 0.91,
     "bookingNumber": 107,
     "checkInDate": "2021-02-08 04:00:00",
     "checkOutDate": "2022-03-17 04:00:00",
-    "listingStatus": "REJECT",
+    "listingStatus": "SOLD",
     "locationId": "location-3",
     "coordinateId": "coordinate-3"
   },
@@ -59,14 +68,17 @@
     "description": "Enjoy a converted mid-century home in Kessail. Originally from Earth, this craft has been completely renovated for outer space. Kessail features sunny weather with a chance of deorbitting debris. We have many transportation options available to you should you choose to venture outside.",
     "id": "listing-4",
     "numOfBeds": 3,
-    "photoThumbnail": "https://res.cloudinary.com/apollographql/image/upload/v1644353888/odyssey/federation-course2/illustrations/listings-04.png",
+    "pictures": [
+      "https://res.cloudinary.com/listings-017.png",
+      "https://res.cloudinary.com/listings-028.png"
+    ],
     "hostId": "user-1",
     "isFeatured": true,
     "saleAmount": 0.81,
     "bookingNumber": 106,
     "checkInDate": "2021-02-08 04:00:00",
     "checkOutDate": "2021-09-17 04:00:00",
-    "listingStatus": "REJECT",
+    "listingStatus": "ACTIVE",
     "locationId": "location-4",
     "coordinateId": "coordinate-4"
   },
@@ -77,13 +89,16 @@
     "description": "The name speaks for itself! Come enjoy our comfortable cabin with amazing views of neighboring planets.",
     "id": "listing-5",
     "numOfBeds": 1,
-    "photoThumbnail": "https://res.cloudinary.com/apollographql/image/upload/v1644353889/odyssey/federation-course2/illustrations/listings-05.png",
+    "pictures": [
+      "https://res.cloudinary.com/listings-019.png",
+      "https://res.cloudinary.com/listings-020.png"
+    ],
     "hostId": "user-1",
     "saleAmount": 0.71,
     "bookingNumber": 105,
     "checkInDate": "2021-01-08 04:00:00",
     "checkOutDate": "2021-03-17 04:00:00",
-    "listingStatus": "REJECT",
+    "listingStatus": "ACTIVE",
     "locationId": "location-5",
     "coordinateId": "coordinate-5"
   },
@@ -94,13 +109,16 @@
     "description": "Just like the cottages one might find on Earth, but on an entirely different planet.",
     "id": "listing-6",
     "numOfBeds": 1,
-    "photoThumbnail": "https://res.cloudinary.com/apollographql/image/upload/v1644353890/odyssey/federation-course2/illustrations/listings-06.png",
+    "pictures": [
+      "https://res.cloudinary.com/listings-011.png",
+      "https://res.cloudinary.com/listings-022.png"
+    ],
     "hostId": "user-4",
     "saleAmount": 0.61,
     "bookingNumber": 104,
     "checkInDate": "2021-01-08 04:00:00",
     "checkOutDate": "2021-03-17 04:00:00",
-    "listingStatus": "REJECT",
+    "listingStatus": "ACTIVE",
     "locationId": "location-6",
     "coordinateId": "coordinate-6"
   },
@@ -111,13 +129,16 @@
     "description": "Just like the cottages one might find on Earth, but on an entirely different planet.",
     "id": "listing-7",
     "numOfBeds": 2,
-    "photoThumbnail": "https://res.cloudinary.com/apollographql/image/upload/v1644353890/odyssey/federation-course2/illustrations/listings-07.png",
+    "pictures": [
+      "https://res.cloudinary.com/listings-013.png",
+      "https://res.cloudinary.com/listings-024.png"
+    ],
     "hostId": "user-4",
     "saleAmount": 0.51,
     "bookingNumber": 103,
     "checkInDate": "2021-02-08 04:00:00",
     "checkOutDate": "2021-05-17 04:00:00",
-    "listingStatus": "REJECT",
+    "listingStatus": "DELETED",
     "locationId": "location-7",
     "coordinateId": "coordinate-7"
   },
@@ -128,13 +149,16 @@
     "description": "Enjoy a converted pod in Origae-6! Originally from Earth, this craft has been completely renovated for space travel. We offer complimentary home-away-from-homeworld breakfast from 0800 to 0802. This spaceship features a full temperature control system, a droid concierge and a self-cleaning bathroom. Plasma lighting system is all automatic and cannot be manually overriden. Though this pod is small, it is homey.",
     "id": "listing-8",
     "numOfBeds": 3,
-    "photoThumbnail": "https://res.cloudinary.com/apollographql/image/upload/v1644353890/odyssey/federation-course2/illustrations/listings-08.png",
+    "pictures": [
+      "https://res.cloudinary.com/listings-011.png",
+      "https://res.cloudinary.com/listings-012.png"
+    ],
     "hostId": "user-5",
     "saleAmount": 0.41,
     "bookingNumber": 102,
     "checkInDate": "2021-02-01 04:00:00",
     "checkOutDate": "2021-03-17 04:00:00",
-    "listingStatus": "REJECT",
+    "listingStatus": "DELETED",
     "locationId": "location-8",
     "coordinateId": "coordinate-8"
   },
@@ -145,14 +169,17 @@
     "description": "Ever wondered what it must be like to be aboard The Nostromo, minus the Xenomorph? Now you can find out!",
     "id": "listing-9",
     "numOfBeds": 4,
-    "photoThumbnail": "https://res.cloudinary.com/apollographql/image/upload/v1644353889/odyssey/federation-course2/illustrations/listings-09.png",
+    "pictures": [
+      "https://res.cloudinary.com/listings-031.png",
+      "https://res.cloudinary.com/listings-032.png"
+    ],
     "hostId": "user-6",
     "isFeatured": true,
     "saleAmount": 0.31,
     "bookingNumber": 101,
     "checkInDate": "2021-02-08 04:00:00",
     "checkOutDate": "2021-03-18 04:00:00",
-    "listingStatus": "REJECT",
+    "listingStatus": "CANCELLED",
     "locationId": "location-9",
     "coordinateId": "coordinate-9"
   },
@@ -163,13 +190,16 @@
     "description": "Just like the cottages one might find on Earth, but on an entirely different planet.",
     "id": "listing-10",
     "numOfBeds": 4,
-    "photoThumbnail": "https://res.cloudinary.com/apollographql/image/upload/v1644353890/odyssey/federation-course2/illustrations/listings-10.png",
+    "pictures": [
+      "https://res.cloudinary.com/listings-041.png",
+      "https://res.cloudinary.com/listings-042.png"
+    ],
     "hostId": "user-6",
     "saleAmount": 0.21,
     "bookingNumber": 100,
     "checkInDate": "2021-02-08 04:00:00",
     "checkOutDate": "2021-03-13 04:00:00",
-    "listingStatus": "REJECT",
+    "listingStatus": "CANCELLED",
     "locationId": "location-10",
     "coordinateId": "coordinate-10"
   }
