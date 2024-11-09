@@ -49,107 +49,74 @@ class ListingService {
     }
   }
 
-  async findNearbyListings({ longitude, latitude, radius }) {
-    console.log("Inside findNearbyListings with params:", { longitude, latitude, radius });
-    const earthRadiusInKm = 6371;
-
+  async getNearbyListings(latitude, longitude, radius) {
     try {
-      // Query the database for nearby listings  
-      let nearbyListings = await this.listingRepository.findAll({
-        attributes: {
-          include: [
-            'id', 'title', 'description', 'costPerNight', 'hostId',
-            'locationType', 'numOfBeds', 'pictures', 'isFeatured',
-            'saleAmount',
-            [
-              sequelize.literal(`   
-                            (  
-                                ${earthRadiusInKm} * ACOS(  
-                                    COS(RADIANS(:latitude)) * COS(RADIANS(location.latitude)) *  
-                                    COS(RADIANS(location.longitude) - RADIANS(:longitude)) +  
-                                    SIN(RADIANS(:latitude)) * SIN(RADIANS(location.latitude))  
-                                )  
-                            )  
-                        `),
-              'distance'
-            ],
-          ],
-        },
-        include: [
-          {
-            model: Location,
-            required: true,
-            as: 'location',
-            attributes: ['latitude', 'longitude'],
-          },
-        ],
-        where: sequelize.where(
-          sequelize.literal(`  
-                    (  
-                        ${earthRadiusInKm} * ACOS(  
-                            COS(RADIANS(:latitude)) * COS(RADIANS(location.latitude)) *  
-                            COS(RADIANS(location.longitude) - RADIANS(:longitude)) +  
-                            SIN(RADIANS(:latitude)) * SIN(RADIANS(location.latitude))  
-                        )  
-                    )   
-                `),
-          { [Op.lte]: radius }
-        ),
-        replacements: { latitude, longitude },
+      const earthRadiusInKm = 6371; // Earth radius in kilometers
+
+      // Haversine formula to calculate distance
+      const query = `
+      SELECT 
+        listings.id, listings.title, listings.description, listings.costPerNight, listings.hostId, listings.locationId,
+        listings.numOfBeds, listings.pictures, listings.isFeatured, listings.saleAmount,
+        (
+          ${earthRadiusInKm} * ACOS(
+            COS(RADIANS(:latitude)) * COS(RADIANS(locations.latitude)) * 
+            COS(RADIANS(locations.longitude) - RADIANS(:longitude)) + 
+            SIN(RADIANS(:latitude)) * SIN(RADIANS(locations.latitude))
+          )
+        ) AS distance
+      FROM listings
+      JOIN locations ON listings.locationId = locations.id
+      HAVING distance < :radius
+    `;
+
+      const nearbyListings = await this.sequelize.query(query, {
+        replacements: { latitude, longitude, radius },
+        type: this.sequelize.QueryTypes.SELECT,
       });
-      console.log("Raw nearby listings before filtering:", nearbyListings);
-      console.log("Listing titles:", nearbyListings.map(listing => listing.dataValues.title));
-      // Ensure it's an array  
-      if (!Array.isArray(nearbyListings)) {
-        console.error("Expected an array but got:", nearbyListings);
-        return [];
+
+      const filteredListings = nearbyListings
+        .filter(listing => listing.title)  // Make sure listings have titles  
+        .map(listing => ({
+          id: listing.id,
+          title: listing.title,
+          description: listing.description,
+          pictures: listing.pictures,
+          numOfBeds: listing.numOfBeds,
+          costPerNight: listing.costPerNight,
+          isFeatured: listing.isFeatured !== null ? listing.isFeatured : false,
+          saleAmount: listing.saleAmount,
+          // Make sure all other required fields according to your schema are included  
+          checkInDate: listing.checkInDate || "default_check_in_date",
+          checkOutDate: listing.checkOutDate || "default_check_out_date",
+        }));
+
+      // Log the final output for GraphQL response  
+      console.log('Final output for GraphQL:', JSON.stringify(filteredListings, null, 2));
+
+      // Ensure we're returning valid listings with all required fields  
+      if (filteredListings.length === 0) {
+        throw new Error('No valid listings found with required fields.');
       }
 
-      // Logging to debug  
-      console.log("Nearby Listings Before Mapping:", nearbyListings);
-
-      // Sample output from your logging (simulating the provided data)  
-
-
-      // Filtering process  
-      const processedListings = nearbyListings
-        .filter(listing => {
-          const values = listing.dataValues;
-          return values && values.title && values.title.trim() !== '' && values.listingStatus !== 'DELETED';
-        })
-        .map(listing => {
-          const values = listing.dataValues;
-          // Additional processing logic  
-          return {
-            id: values.id,
-            title: values.title || "Untitled", // Provide a fallback  
-            costPerNight: values.costPerNight,
-            numOfBeds: values.numOfBeds,
-            pictures: values.pictures || [], // Handle if pictures is not set  
-            distance: distance <= radius ? {
-              id: listing.id,
-              name: listing.title,
-              pricePerNight: listing.costPerNight,
-              numOfBeds: listing.numOfBeds,
-              distance, // Include distance in the response
-            } : null
-          };
-        });
-
-      // Check the processed listings  
-      if (processedListings.length === 0) {
-        console.error("No valid listings found after filtering.");
-      } else {
-        console.log("Filtered listings:", processedListings);
+      return filteredListings; // This is what gets returned to GraphQL  
+      if (filteredListings.length === 0) {
+        throw new Error('No valid listings found with required fields.');
       }
+      // Debugging: log the filtered array to verify it’s a true array of objects
+      console.log('Filtered nearbyListings:', JSON.stringify(filteredListings, null, 2));
 
-      // Return processed listings  
-      return processedListings;
+      console.log('Type of filteredListings:', Array.isArray(filteredListings) ? 'Array' : typeof filteredListings);
+
+
+      return filteredListings; // Return the filtered listings
     } catch (error) {
-      console.error("Error fetching nearby listings:", error);
-      throw new Error('Failed to fetch nearby listings');
+      console.error('Error fetching nearby listings:', error);
+      throw new Error('Error fetching nearby listings');
     }
   }
+
+
 
   async hotListingsByMoneyBookingTop5() {
     const query = `
@@ -534,6 +501,37 @@ class ListingService {
     }
   }
 
+  async deleteListing(id) {
+    const pool = await dbConfig.mysql(); // Get the MySQL connection pool
+
+    try {
+      const [result] = await pool.query('DELETE FROM listings WHERE id = ?', [id]);
+
+      console.log('Delete results:', result);
+
+      if (result.affectedRows === 0) {
+        throw new Error('No listing found with the given id');
+      }
+
+      console.log('Deleted listing with ID successfully:', id);
+
+      // Double-check if the listing still exists
+      const [checkResult] = await pool.query('SELECT * FROM listings WHERE id = ?', [id]);
+      if (checkResult.length > 0) {
+        throw new Error(`Failed to delete listing with ID: ${id}`);
+      }
+
+      console.log(`Verified deletion of listing with ID: ${id}`);
+
+    } catch (error) {
+      console.error('Error deleting listing:', error);
+      throw new Error('Error deleting listing');
+    } finally {
+      pool.end(); // Close the pool to release the connection
+    }
+  }
+
+
   async updateListingStatus(id, listingStatus) {
     try {
       const query = `
@@ -573,24 +571,6 @@ class ListingService {
   }
 
 
-  async deleteListing(id) {
-    const pool = await dbConfig.mysql(); // Get the MySQL connection pool
-
-    try {
-      const [result] = await pool.query('DELETE FROM listings WHERE id = ?', [id]);
-
-      console.log('Delete results:', result);
-
-      if (result.affectedRows === 0) {
-        throw new Error('No listing found with the given id');
-      }
-
-      console.log('Deleted listing with ID successfully:', id);
-    } catch (error) {
-      console.error('Error deleting listing:', error);
-      throw new Error('Error deleting listing');
-    }
-  }
 
   async getTop5Listings() {
     const pool = await dbConfig.mysql(); // Get the MySQL connection pool

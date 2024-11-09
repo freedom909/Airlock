@@ -142,13 +142,13 @@ input CreateListingInput {
   "The type of location"
   locationType: LocationType!
   "The amenities of the listing"
-  amenities: [AmenityInput!]!
+  amenities: [AmenityInput!]! 
   listingStatus: ListingStatus 
 }
 
 input AmenityInput {
-  type: String! 
-  description: String 
+  category: AmenityCategory! 
+  name: String 
 }
 
 type Amenity @key(fields: "id") {
@@ -226,12 +226,12 @@ type Listing @key(fields: "id") {
   numOfBeds: Int! @shareable
   costPerNight: Float! @shareable
   locationType: LocationType! @shareable
-  host: Host! @shareable
+  host: User! @shareable 
   amenities: [Amenity!]! @shareable
   numberOfUpcomingBookings: Int! @shareable
   currentlyBookedDates: [ReservedDate]! @shareable
   totalCost(checkInDate: String!, checkOutDate: String!): Float @shareable
-  isFeatured: Boolean! @shareable
+  isFeatured: Boolean @shareable
   location: Location @shareable
   saleAmount: Float @shareable
   bookingNumber: Int @shareable
