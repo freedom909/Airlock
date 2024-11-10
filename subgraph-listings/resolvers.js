@@ -18,7 +18,7 @@ const resolvers = {
       if (typeof latitude !== 'number' || typeof longitude !== 'number' || typeof radius !== 'number' || radius <= 0) {
         throw new UserInputError('Invalid Input: Latitude, longitude, and radius must be valid numbers, with radius greater than 0.');
       }
-      const { listingService } = dataSources;
+      const { listingService, locationService } = dataSources;
 
       try {
         const nearbyListings = await listingService.getNearbyListings({ latitude, longitude, radius: 5 });
@@ -33,43 +33,51 @@ const resolvers = {
         console.log('Nearby Listings fetch result:', JSON.stringify(nearbyListings, null, 2));
 
         // Map the output to ensure it contains every required field
-        const mappedListings = nearbyListings.map(listing => ({
-          id: listing.id || 'default_id',
-          title: listing.title || 'Untitled Listing', // Provide default if title is missing  
-          description: listing.description || 'No description available',
-          pictures: listing.pictures || [],
-          numOfBeds: listing.numOfBeds || 0,
-          costPerNight: listing.costPerNight || 0,
-          isFeatured: listing.isFeatured || false,
-          saleAmount: listing.saleAmount || 0,
-          checkInDate: listing.checkInDate || 'default_check_in_date',
-          checkOutDate: listing.checkOutDate || 'default_check_out_date',
-          distance: listing.distance || 0,
-          location: {
-            id: listing.location?.id || 'default_location_id',
-            latitude: listing.location?.latitude || 0,
-            longitude: listing.location?.longitude || 0,
-            radius: listing.location?.radius || 0,
-            units: listing.location?.units || 'km',
-            city: listing.location?.city || 'unknown'
-          },
-          locationType: listing.locationType || 'ROOM',
-          bookingNumber: listing.bookingNumber || 0,
-          amenities: listing.amenities || [],
-          host: {
-            id: listing.host?.id || 'default_host_id',
-            name: listing.host?.name || 'default_host_name',
-            picture: listing.host?.picture || 'default_host_picture_url'
-          },
-          numberOfUpcomingBookings: listing.numberOfUpcomingBookings || 0,
-          currentlyBookedDates: listing.currentlyBookedDates || [],
-          totalCost: listing.totalCost || 0,
-          bookings: listing.bookings || [],
-          availability: listing.availability || [],
-          priceRange: { min: listing.priceRange?.min || 0, max: listing.priceRange?.max || 0 },
-          totalCostRange: { min: listing.totalCostRange?.min || 0, max: listing.totalCostRange?.max || 0 }
-        }));
+        const mappedListings = nearbyListings.map(async listing => {
+          const location = await locationService.getLocationById(listing.locationId); // Assuming this is async  
 
+          return {
+            id: listing.id || 'default_id',
+            title: listing.title || 'Untitled Listing', // Provide default if title is missing  
+            description: listing.description || 'No description available',
+            pictures: listing.pictures || [],
+            numOfBeds: listing.numOfBeds || 0,
+            costPerNight: listing.costPerNight || 0,
+            isFeatured: listing.isFeatured || false,
+            saleAmount: listing.saleAmount || 0,
+            checkInDate: listing.checkInDate || 'default_check_in_date',
+            checkOutDate: listing.checkOutDate || 'default_check_out_date',
+            distance: listing.distance || 0,
+            location: {
+              id: location?.id || 'default_location_id', // Use fetched location  
+              latitude: location?.latitude || 0,
+              longitude: location?.longitude || 0,
+              radius: location?.radius || 0,
+              units: location?.units || 'km',
+              city: location?.city || 'unknown',
+              listingId: listing.id || 'unknown-listing',
+              name: location?.name || 'UFO',
+              country: location?.country || 'USA',
+              zipCode: location?.zipCode || '1234567', // Fixed typing issue  
+              state: location?.state || 'Washington', // Fixed typing issue  
+            },
+            locationType: listing.locationType || 'ROOM',
+            bookingNumber: listing.bookingNumber || 0,
+            amenities: listing.amenities || [],
+            host: {
+              id: listing.host?.id || 'default_host_id',
+              name: listing.host?.name || 'default_host_name',
+              picture: listing.host?.picture || 'default_host_picture_url'
+            },
+            numberOfUpcomingBookings: listing.numberOfUpcomingBookings || 0,
+            currentlyBookedDates: listing.currentlyBookedDates || [],
+            totalCost: listing.totalCost || 0,
+            bookings: listing.bookings || [],
+            availability: listing.availability || [],
+            priceRange: { min: listing.priceRange?.min || 0, max: listing.priceRange?.max || 0 },
+            totalCostRange: { min: listing.totalCostRange?.min || 0, max: listing.totalCostRange?.max || 0 }
+          };
+        });
 
         console.log("Mapped Listings:", mappedListings);
 

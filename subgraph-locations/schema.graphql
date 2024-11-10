@@ -39,7 +39,7 @@ type Location @key(fields: "id") {
   address: String! @shareable
   latitude: Float! @shareable
   longitude: Float! @shareable
-  radius: Float @shareable
+  radius: Int @shareable
 }
 
 input CreateLocationInput {

@@ -307,10 +307,15 @@ type Location @key(fields: "id") {
   "The location's longitude"
   longitude: Float! @shareable
  "The location's distance from a given point"
-  radius: String! @shareable 
+  radius: Int! @shareable 
   units: String! @shareable
   "The location's city"
-  city: String @shareable
+  city: String @shareable 
+  listingId: String! @shareable
+  name: String! @shareable
+  country: String! @shareable
+  zipCode: String! @shareable  
+  state: String! @shareable
 }
 
 type Availability @key(fields: "id") {
