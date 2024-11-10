@@ -49,9 +49,16 @@ class ListingService {
     }
   }
 
-  async getNearbyListings(latitude, longitude, radius) {
+  async getNearbyListings({ latitude, longitude, radius }) {
+    console.log("Latitude:", latitude);
+    console.log("Longitude:", longitude);
+    console.log("Radius:", radius);
+    if (typeof latitude !== "number" || typeof longitude !== "number" || typeof radius !== "number") {
+      throw new Error("Invalid latitude, longitude, or radius");
+    }
+
     try {
-      const earthRadiusInKm = 6371; // Earth radius in kilometers
+      const earthRadiusInKm = 6371; // Earth's radius in kilometers
 
       // Haversine formula to calculate distance
       const query = `
@@ -68,48 +75,39 @@ class ListingService {
       FROM listings
       JOIN locations ON listings.locationId = locations.id
       HAVING distance < :radius
-    `;
+      `;
 
       const nearbyListings = await this.sequelize.query(query, {
         replacements: { latitude, longitude, radius },
         type: this.sequelize.QueryTypes.SELECT,
       });
 
+      // Map and filter results to ensure complete data structure for GraphQL
       const filteredListings = nearbyListings
-        .filter(listing => listing.title)  // Make sure listings have titles  
+        .filter(listing => listing.title) // Ensure listings have titles
         .map(listing => ({
           id: listing.id,
           title: listing.title,
-          description: listing.description,
-          pictures: listing.pictures,
-          numOfBeds: listing.numOfBeds,
-          costPerNight: listing.costPerNight,
+          description: listing.description || "No description available", // Default description if missing
+          pictures: listing.pictures || [],
+          numOfBeds: listing.numOfBeds || 0,
+          costPerNight: listing.costPerNight || 0,
           isFeatured: listing.isFeatured !== null ? listing.isFeatured : false,
-          saleAmount: listing.saleAmount,
-          // Make sure all other required fields according to your schema are included  
+          saleAmount: listing.saleAmount || 0,
           checkInDate: listing.checkInDate || "default_check_in_date",
           checkOutDate: listing.checkOutDate || "default_check_out_date",
+          distance: listing.distance || 0, // Error fetching nearby listings: Error: Invalid value { latitude: 34.0522, longitude: -118.244, radius: 5000 }?
         }));
 
-      // Log the final output for GraphQL response  
-      console.log('Final output for GraphQL:', JSON.stringify(filteredListings, null, 2));
-
-      // Ensure we're returning valid listings with all required fields  
-      if (filteredListings.length === 0) {
-        throw new Error('No valid listings found with required fields.');
-      }
-
-      return filteredListings; // This is what gets returned to GraphQL  
-      if (filteredListings.length === 0) {
-        throw new Error('No valid listings found with required fields.');
-      }
-      // Debugging: log the filtered array to verify it’s a true array of objects
+      // Debugging logs
       console.log('Filtered nearbyListings:', JSON.stringify(filteredListings, null, 2));
-
       console.log('Type of filteredListings:', Array.isArray(filteredListings) ? 'Array' : typeof filteredListings);
 
+      if (filteredListings.length === 0) {
+        throw new Error('No valid listings found with required fields.');
+      }
 
-      return filteredListings; // Return the filtered listings
+      return filteredListings; // Final return for GraphQL response
     } catch (error) {
       console.error('Error fetching nearby listings:', error);
       throw new Error('Error fetching nearby listings');

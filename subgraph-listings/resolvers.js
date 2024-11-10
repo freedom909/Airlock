@@ -10,72 +10,76 @@ import { Op } from '@sequelize/core'
 import calculateDistance from './calculateDistance.js';
 const { listingWithPermissions, isHostOfListing, isAdmin } = permissions;
 
-
-// import { searchListings } from '../infrastructure/search/searchData.js';
-
-// import { searchListings } from '../infrastructure/search/searchData.js';
-
-// const client = new Client({ host: 'http://localhost:9200' })
-
 const resolvers = {
 
   Query: {
     getNearbyListings: async (_, { latitude, longitude, radius }, { dataSources }) => {
-      if (!latitude || !longitude) throw new Error('You must provide a latitude and longitude');
+
+      if (typeof latitude !== 'number' || typeof longitude !== 'number' || typeof radius !== 'number' || radius <= 0) {
+        throw new UserInputError('Invalid Input: Latitude, longitude, and radius must be valid numbers, with radius greater than 0.');
+      }
       const { listingService } = dataSources;
 
       try {
-        const nearbyListings = await listingService.getNearbyListings(latitude, longitude, radius);
+        const nearbyListings = await listingService.getNearbyListings({ latitude, longitude, radius: 5 });
+        nearbyListings.forEach(listing => {
+          if (!listing.title) {
+            console.warn(`Listing with ID ${listing.id} is missing a title.`);
+          }
+          if (!listing.id) {
+            console.warn(`Listing is missing an ID:`, JSON.stringify(listing, null, 2));
+          }
+        });
         console.log('Nearby Listings fetch result:', JSON.stringify(nearbyListings, null, 2));
 
-        // Map the output to ensure it contains every required field  
+        // Map the output to ensure it contains every required field
         const mappedListings = nearbyListings.map(listing => ({
-          id: listing.id,
-          title: listing.title,
-          description: listing.description,
-          pictures: listing.pictures,
-          numOfBeds: listing.numOfBeds,
-          costPerNight: listing.costPerNight,
-          isFeatured: listing.isFeatured !== null ? listing.isFeatured : false,
-          saleAmount: listing.saleAmount,
-          checkInDate: listing.checkInDate || "default_check_in_date", // Ensure a valid default  
-          checkOutDate: listing.checkOutDate || "default_check_out_date", // Ensure a valid default  
-          // Add remaining fields required by your schema  
-          location: null, // Default or fetch the location object as needed  
-          host: null, // Default or fetch the host object as needed  
-          amenities: [], // Default or fetch the amenities array as needed  
-          numberOfUpcomingBookings: 0, // Default, if not present  
-          currentlyBookedDates: [], // Default, if not present  
-          listingStatus: null, // Define the value based on your needs  
-          bookings: [], // Default or fetched bookings array  
-          availability: [], // Default or fetched availability  
-          priceRange: null, // Must conform to your schema requirements  
-          totalCostRange: null, // Must conform to your schema requirements  
-          locationFilter: null, // Must conform to your schema requirements  
+          id: listing.id || 'default_id',
+          title: listing.title || 'Untitled Listing', // Provide default if title is missing  
+          description: listing.description || 'No description available',
+          pictures: listing.pictures || [],
+          numOfBeds: listing.numOfBeds || 0,
+          costPerNight: listing.costPerNight || 0,
+          isFeatured: listing.isFeatured || false,
+          saleAmount: listing.saleAmount || 0,
+          checkInDate: listing.checkInDate || 'default_check_in_date',
+          checkOutDate: listing.checkOutDate || 'default_check_out_date',
+          distance: listing.distance || 0,
+          location: {
+            id: listing.location?.id || 'default_location_id',
+            latitude: listing.location?.latitude || 0,
+            longitude: listing.location?.longitude || 0,
+            radius: listing.location?.radius || 0,
+            units: listing.location?.units || 'km',
+            city: listing.location?.city || 'unknown'
+          },
+          locationType: listing.locationType || 'ROOM',
+          bookingNumber: listing.bookingNumber || 0,
+          amenities: listing.amenities || [],
+          host: {
+            id: listing.host?.id || 'default_host_id',
+            name: listing.host?.name || 'default_host_name',
+            picture: listing.host?.picture || 'default_host_picture_url'
+          },
+          numberOfUpcomingBookings: listing.numberOfUpcomingBookings || 0,
+          currentlyBookedDates: listing.currentlyBookedDates || [],
+          totalCost: listing.totalCost || 0,
+          bookings: listing.bookings || [],
+          availability: listing.availability || [],
+          priceRange: { min: listing.priceRange?.min || 0, max: listing.priceRange?.max || 0 },
+          totalCostRange: { min: listing.totalCostRange?.min || 0, max: listing.totalCostRange?.max || 0 }
         }));
-        const refinedListings = mappedListings
-          .filter(listing => listing.title && listing.id) // Ensuring essential fields are present  
-          .map(listing => ({
-            id: listing.id,
-            title: listing.title,
-            description: listing.description ?? "No description available", // Default placeholder  
-            pictures: listing.pictures ?? [],
-            numOfBeds: listing.numOfBeds ?? 0,
-            costPerNight: listing.costPerNight ?? 0,
-            isFeatured: listing.isFeatured ?? false,
-            saleAmount: listing.saleAmount ?? 0,
-            checkInDate: listing.checkInDate ?? "default_check_in_date",
-            checkOutDate: listing.checkOutDate ?? "default_check_out_date",
-            // Optionally include location, host, etc. based on your needs  
-          }));
-        // Log the mapped output for verification  
-        console.log('Mapped Listings for GraphQL response:', JSON.stringify(mappedListings, null, 2));
-        return refinedListings;
+
+
+        console.log("Mapped Listings:", mappedListings);
+
+        return mappedListings;
       } catch (error) {
         console.error('Error fetching nearby listings:', error);
         throw new Error('Error fetching nearby listings');
       }
     },
+
 
     fullTextSearchListings: async (_, { input }, { dataSources }) => {
       const { listingService } = dataSources
@@ -670,36 +674,26 @@ const resolvers = {
       }
     },
 
+    Location: {
+      locations: async ({ parent }, _, { dataSources }) => {
 
-    locations: async ({ parent }, _, { dataSources }) => {
+        try {
+          const locations = await models.Listing.findByPk({
+            where: { id: parent.id },
+            include: [{ model: Location, as: 'location' }],
+          });
+          if (!locations) {
+            throw new Error('Listing not found');
+          }
 
-      try {
-        const locations = await models.Listing.findByPk({
-          where: { id: parent.id },
-          include: [{ model: Location, as: 'location' }],
-        });
-        if (!locations) {
-          throw new Error('Listing not found');
+          return locations[0]; // Return the associated locations
+        } catch (error) {
+          console.error('Error fetching locations:', error);
+          throw new Error('Failed to fetch locations');
         }
-
-        return locations[0]; // Return the associated locations
-      } catch (error) {
-        console.error('Error fetching locations:', error);
-        throw new Error('Failed to fetch locations');
-      }
-    },
-    coordinates: async (parent, _, { dataSources }) => {
-      // Use eager loading to fetch coordinates when fetching listings
-      const listingWithCoordinates = await Listing.findOne({
-        where: { id: parent.id },
-        include: [{ model: Coordinate, as: 'coordinate' }],
-      });
-
-      // Return the associated coordinates
-      return listingWithCoordinates?.coordinates || null;
+      },
     },
   },
-
   AmenityCategory: {
     ACCOMMODATION_DETAILS: 'ACCOMMODATION_DETAILS',
     SPACE_SURVIVAL: 'SPACE_SURVIVAL',

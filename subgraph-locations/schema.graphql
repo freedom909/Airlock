@@ -1,0 +1,120 @@
+extend schema
+  @link(url: "https://specs.apollo.dev/federation/v2.7", import: ["@key", "@shareable"])
+
+scalar DateTime
+
+type Query {
+  "Get a location by its ID"
+  location(id: ID!): Location @shareable
+  "Search for locations by their name, country, city, or state"
+  searchLocations(
+    name: String
+    country: String
+    city: String
+    state: String
+    first: Int = 10
+    after: String
+  ): SearchResult! @shareable
+}
+
+extend type Mutation {
+  "Creates a new Location for the currently authenticated host"
+  createLocation(location: CreateLocationInput!): Location!
+  # Updates an existing Location
+  updateLocation(
+    locationId: ID!
+    location: UpdateLocationInput
+  ): UpdateLocationResponse!
+  deleteLocation(locationId: ID!): Boolean!
+}
+
+type Location @key(fields: "id") {
+  id: ID!
+  listingId: String! @shareable
+  name: String! @shareable
+  country: String! @shareable
+  zipCode: String! @shareable  
+  city: String @shareable
+  state: String! @shareable
+  address: String! @shareable
+  latitude: Float! @shareable
+  longitude: Float! @shareable
+  radius: Float @shareable
+}
+
+input CreateLocationInput {
+  "The name of the location"
+  name: String!
+  "The latitude of the location"
+  latitude: Float!
+  "The radius around the location"
+  radius: Float
+  "The longitude of the location"
+  longitude: Float!
+  "The street address of the location"
+  address: String!
+  "The city where the location is situated"
+  city: String!
+  "The state or province of the location"
+  state: String!
+  "The country of the location"
+  country: String!
+  "The postal code of the location"
+  zipCode: String!
+}
+
+input UpdateLocationInput {
+  id: ID!
+  "The name of the location"
+  name: String
+  "The latitude of the location"
+  latitude: Float
+  "The radius around the location"
+  radius: Float
+  "The longitude of the location"
+  longitude: Float
+  "The street address of the location"
+  address: String
+  "The city where the location is situated"
+  city: String
+  "The state or province of the location"
+  state: String
+  "The country of the location"
+  country: String
+  "The postal code of the location"
+  zipCode: String
+}
+
+
+# Common interface for response types
+interface Response {
+  "Similar to HTTP status code, represents the status of the mutation"
+  code: Int!
+  "Indicates whether the mutation was successful"
+  success: Boolean!
+  "Human-readable message for the UI"
+  message: String!
+}
+
+# Response type for creating a Location
+type CreateLocationResponse implements Response {
+  code: Int!
+  success: Boolean!
+  message: String!
+  location: Location!@shareable
+}
+
+# Response type for updating a Location
+type UpdateLocationResponse implements Response {
+  code: Int!
+  success: Boolean!
+  message: String!
+  location: Location @shareable
+}
+
+# Pagination result type for searchLocations
+type SearchResult {
+  locations: [Location!]!
+  totalCount: Int!
+  hasNextPage: Boolean!
+}

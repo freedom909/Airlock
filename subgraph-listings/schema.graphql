@@ -19,7 +19,7 @@ extend type Query {
   homepageListings: [Listing!]! @shareable
 
   "Returns a list of nearby listings"
-  getNearbyListings(latitude: Float!, longitude: Float!,radius: Float!): Listing
+  getNearbyListings(latitude: Float!, longitude: Float!, radius: Float!): [Listing] 
   
   "A curated array of listings to feature on the homepage"
   featuredListings: [Listing!]! @shareable
@@ -47,18 +47,8 @@ extend type Query {
   
   "Full-text search for listings"
   fullTextSearchListings(input: FullTextSearchInput!): SearchResult! @shareable
-  
-  "Search listings with advanced filters"
-  searchListings(
-    location: LocationInput
-    priceRange: PriceRangeInput
-    totalCostRange: TotalCostRangeInput
-    limit: Int
-    offset: Int
-  ): [Listing] @shareable
 
 }
-
 
 input UpdateListingStatusInput {
   id: ID!
@@ -218,32 +208,32 @@ enum SortByCriteria {
 }
 
 # Type representing a listing
-type Listing @key(fields: "id") {
-  id: ID!
-  title: String! @shareable
-  description: String! @shareable
-  pictures: [String!]! @shareable
-  numOfBeds: Int! @shareable
-  costPerNight: Float! @shareable
-  locationType: LocationType! @shareable
-  host: User! @shareable 
-  amenities: [Amenity!]! @shareable
-  numberOfUpcomingBookings: Int! @shareable
-  currentlyBookedDates: [ReservedDate]! @shareable
-  totalCost(checkInDate: String!, checkOutDate: String!): Float @shareable
-  isFeatured: Boolean @shareable
-  location: Location @shareable
-  saleAmount: Float @shareable
-  bookingNumber: Int @shareable
-  checkInDate: String! @shareable
-  checkOutDate: String! @shareable
-  listingStatus: ListingStatus @shareable
-  bookings: [Booking!]! @shareable
-  availability: [Availability]! @shareable
-  priceRange: PriceRange! @shareable  # Changed to output type
-  totalCostRange: TotalCostRange! @shareable  # Changed to output type
-  locationFilter: Location! @shareable  # Changed to output type
-}
+type Listing {  
+    id: ID!  
+    title: String 
+    description: String  
+    pictures: [String]  
+    numOfBeds: Int  
+    costPerNight: Float  
+    isFeatured: Boolean  
+    saleAmount: Float  
+    checkInDate: String  
+    checkOutDate: String  
+    distance: Float  
+    location: Location  
+    locationType: String  
+    bookingNumber: Int  
+    amenities: [String]  
+    host: Host  
+    numberOfUpcomingBookings: Int  
+    currentlyBookedDates: [String]  
+    totalCost: Float  
+    bookings: [String]  
+    availability: [String]  
+    priceRange: PriceRange  
+    totalCostRange: TotalCostRange  
+}  
+
 
 type PriceRange @key(fields: "id") {
   id: ID!  # Add an id field to use as the key
@@ -251,14 +241,17 @@ type PriceRange @key(fields: "id") {
   max: Float @shareable
 }
 
-
 type TotalCostRange @key(fields: "id") {
   id: ID!  # Add an id field to use as the key
   min: Float @shareable
   max: Float @shareable
 }
 
-
+input LocationInput {
+  latitude: Float!
+  longitude: Float!
+  radius:Int!
+}
 input PriceRangeInput {
   min: Float
   max: Float
@@ -267,12 +260,6 @@ input PriceRangeInput {
 input TotalCostRangeInput {
   min: Float
   max: Float
-}
-
-input LocationInput {
-  radius: Float
-  latitude: Float
-  longitude: Float
 }
 
 # Type representing a review
@@ -316,24 +303,14 @@ enum SearchResultType {
 
 type Location @key(fields: "id") {
   id: ID!
-  "The location's name"
-  name: String! @shareable
-  "the country's name"
-  country: String! @shareable
-  "The location's postal code"
-  postalCode: String! @shareable
-  "The location's city"
-  city: String! @shareable
-  "The location's state"
-  state: String! @shareable
-  "The location's address"
-  address: String! @shareable
-  "The location's latitude"
   latitude: Float! @shareable
   "The location's longitude"
   longitude: Float! @shareable
  "The location's distance from a given point"
   radius: String! @shareable 
+  units: String! @shareable
+  "The location's city"
+  city: String @shareable
 }
 
 type Availability @key(fields: "id") {
