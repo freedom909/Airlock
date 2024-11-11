@@ -1,3 +1,6 @@
+import connectToMongoDB from "../DB/connectMongoDB.js";
+import Review from "../models/review.js";
+import mongoose from "mongoose";
 const mockData = [
     {
         title: "Amazing Stay!",
@@ -90,9 +93,6 @@ const mockData = [
         round: 1,
     }
 ];
-import connectToMongoDB from "../DB/connectMongoDB.js";
-import Review from "../models/review.js";
-import mongoose from "mongoose";
 
 // Example of how to insert mock data into MongoDB  
 const insertMockData = async () => {
@@ -103,10 +103,11 @@ const insertMockData = async () => {
 
         // Clear existing collections
         await Review.deleteMany({});
+
         console.log('Existing data cleared!');
 
         for (const review of mockData) {
-            // Create new review object
+            // Create user
             const newReview = new Review({
                 _id: new mongoose.Types.ObjectId(), // Generate a new ObjectId
                 title: review.title,
@@ -128,9 +129,8 @@ const insertMockData = async () => {
                 updatedAt: new Date(),
                 hostId: review.hostId,
             });
-            await newReview.save();
+            await review.save();
         }
-        console.log('Mock data inserted successfully!');
     } catch (err) {
         console.error("Error inserting mock data:", err);
     }

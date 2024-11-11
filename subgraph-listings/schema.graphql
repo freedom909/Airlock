@@ -134,6 +134,8 @@ input CreateListingInput {
   "The amenities of the listing"
   amenities: [AmenityInput!]! 
   listingStatus: ListingStatus 
+  checkInDate:String
+  checkOutDate: String 
 }
 
 input AmenityInput {
@@ -208,30 +210,30 @@ enum SortByCriteria {
 }
 
 # Type representing a listing
-type Listing {  
+type Listing @key(fields: "id") {
     id: ID!  
-    title: String 
-    description: String  
-    pictures: [String]  
-    numOfBeds: Int  
-    costPerNight: Float  
-    isFeatured: Boolean  
-    saleAmount: Float  
-    checkInDate: String  
-    checkOutDate: String  
+    title: String @shareable
+    description: String  @shareable
+    pictures: [String]  @shareable
+    numOfBeds: Int  @shareable
+    costPerNight: Float  @shareable
+    isFeatured: Boolean  @shareable
+    saleAmount: Float  @shareable
+    checkInDate: String  @shareable
+    checkOutDate: String  @shareable
     distance: Float  
-    location: Location  
-    locationType: String  
-    bookingNumber: Int  
-    amenities: [String]  
-    host: Host  
-    numberOfUpcomingBookings: Int  
+    location: Location  @shareable
+    locationType: LocationType @shareable
+    bookingNumber: Int  @shareable
+    amenities: [String]  @shareable
+    host: User @shareable
+    numberOfUpcomingBookings: Int  @shareable
     currentlyBookedDates: [String]  
-    totalCost: Float  
-    bookings: [String]  
-    availability: [String]  
-    priceRange: PriceRange  
-    totalCostRange: TotalCostRange  
+    totalCost: Float  @shareable
+    bookings: [String]  @shareable
+    availability: [String]  @shareable
+    priceRange: PriceRange  @shareable
+    totalCostRange: TotalCostRange  @shareable
 }  
 
 

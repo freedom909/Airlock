@@ -1,14 +1,14 @@
 // initializeAmenityContainer.js
 import { createContainer, asValue, asClass } from 'awilix';
 import dbconfig from './dbconfig.js';
-import ListingService from '../services/listingService.js';
+import ListingService from '../listingService.js';
 import ListingRepository from '../repositories/listingRepository.js';
-import UserService from '../services/userService.js';
+import UserService from '../userService.js';
 import UserRepository from '../repositories/userRepository.js';
-import AmenityService from '../services/amenityService.js';
-import ReviewService from '../services/reviewService.js';
+import AmenityService from '../amenityService.js';
+import ReviewService from '../reviewService.js';
 import ReviewRepository from '../repositories/reviewRepository.js';
-import BookingService from '../services/bookingService.js';
+import BookingService from '../bookingService.js';
 import BookingRepository from '../repositories/bookingRepository.js';
 
 

@@ -7,8 +7,8 @@
     "id": "listing-1",
     "numOfBeds": 2,
     "pictures": [
-      "https://res.cloudinary.com/listings-01.png",
-      "https://res.cloudinary.com/listings-02.png"
+      "https://res.cloudinary.com/istings-01.png",
+      "https://res.cloudinary.com/istings-02.png"
     ],
     "hostId": "user-1",
     "isFeatured": true,
@@ -16,9 +16,11 @@
     "bookingNumber": 109,
     "checkInDate": "2021-02-08 04:00:00",
     "checkOutDate": "2021-03-17 04:00:00",
-    "listingStatus": "EXPIRED",
+    "listingStatus": "REJECT",
     "locationId": "location-1",
-    "coordinateId": "coordinate-1"
+    "coordinateId": "coordinate-1",
+    "createdAt": "2021-02-08 04:00:00",
+    "updatedAt": "2021-02-08 04:00:00"
   },
   {
     "costPerNight": 592.0,
@@ -28,8 +30,8 @@
     "id": "listing-2",
     "numOfBeds": 1,
     "pictures": [
-      "https://res.cloudinary.com/listings-03.png",
-      "https://res.cloudinary.com/listings-04.png"
+      "https://res.cloudinary.com/istings-01.png",
+      "https://res.cloudinary.com/istings-02.png"
     ],
     "hostId": "user-1",
     "isFeatured": true,
@@ -37,9 +39,11 @@
     "bookingNumber": 108,
     "checkInDate": "2021-02-08 04:00:00",
     "checkOutDate": "2024-03-17 04:00:00",
-    "listingStatus": "PENDING",
+    "listingStatus": "REJECT",
     "locationId": "location-2",
-    "coordinateId": "coordinate-2"
+    "coordinateId": "coordinate-2",
+    "createdAt": "2021-02-08 04:00:00",
+    "updatedAt": "2021-02-08 04:00:00"
   },
   {
     "costPerNight": 313.0,
@@ -49,17 +53,19 @@
     "id": "listing-3",
     "numOfBeds": 5,
     "pictures": [
-      "https://res.cloudinary.com/listings-015.png",
-      "https://res.cloudinary.com/listings-026.png"
+      "https://res.cloudinary.com/istings-01.png",
+      "https://res.cloudinary.com/istings-02.png"
     ],
     "hostId": "user-1",
     "saleAmount": 0.91,
     "bookingNumber": 107,
     "checkInDate": "2021-02-08 04:00:00",
     "checkOutDate": "2022-03-17 04:00:00",
-    "listingStatus": "SOLD",
+    "listingStatus": "REJECT",
     "locationId": "location-3",
-    "coordinateId": "coordinate-3"
+    "coordinateId": "coordinate-3",
+    "createdAt": "2021-02-08 04:00:00",
+    "updatedAt": "2021-02-08 04:00:00"
   },
   {
     "costPerNight": 520.0,
@@ -69,8 +75,8 @@
     "id": "listing-4",
     "numOfBeds": 3,
     "pictures": [
-      "https://res.cloudinary.com/listings-017.png",
-      "https://res.cloudinary.com/listings-028.png"
+      "https://res.cloudinary.com/istings-01.png",
+      "https://res.cloudinary.com/istings-02.png"
     ],
     "hostId": "user-1",
     "isFeatured": true,
@@ -78,9 +84,11 @@
     "bookingNumber": 106,
     "checkInDate": "2021-02-08 04:00:00",
     "checkOutDate": "2021-09-17 04:00:00",
-    "listingStatus": "ACTIVE",
+    "listingStatus": "REJECT",
     "locationId": "location-4",
-    "coordinateId": "coordinate-4"
+    "coordinateId": "coordinate-4",
+    "createdAt": "2021-02-08 04:00:00",
+    "updatedAt": "2021-02-08 04:00:00"
   },
   {
     "costPerNight": 580.0,
@@ -90,17 +98,19 @@
     "id": "listing-5",
     "numOfBeds": 1,
     "pictures": [
-      "https://res.cloudinary.com/listings-019.png",
-      "https://res.cloudinary.com/listings-020.png"
+      "https://res.cloudinary.com/istings-01.png",
+      "https://res.cloudinary.com/istings-02.png"
     ],
     "hostId": "user-1",
     "saleAmount": 0.71,
     "bookingNumber": 105,
     "checkInDate": "2021-01-08 04:00:00",
     "checkOutDate": "2021-03-17 04:00:00",
-    "listingStatus": "ACTIVE",
+    "listingStatus": "REJECT",
     "locationId": "location-5",
-    "coordinateId": "coordinate-5"
+    "coordinateId": "coordinate-5",
+    "createdAt": "2021-02-08 04:00:00",
+    "updatedAt": "2021-02-08 04:00:00"
   },
   {
     "costPerNight": 330.0,
@@ -110,17 +120,19 @@
     "id": "listing-6",
     "numOfBeds": 1,
     "pictures": [
-      "https://res.cloudinary.com/listings-011.png",
-      "https://res.cloudinary.com/listings-022.png"
+      "https://res.cloudinary.com/listings-06.png",
+      "https://res.cloudinary.com/listings-05.png"
     ],
     "hostId": "user-4",
     "saleAmount": 0.61,
     "bookingNumber": 104,
     "checkInDate": "2021-01-08 04:00:00",
     "checkOutDate": "2021-03-17 04:00:00",
-    "listingStatus": "ACTIVE",
+    "listingStatus": "REJECT",
     "locationId": "location-6",
-    "coordinateId": "coordinate-6"
+    "coordinateId": "coordinate-6",
+    "createdAt": "2021-02-08 04:00:00",
+    "updatedAt": "2021-02-08 04:00:00"
   },
   {
     "costPerNight": 430.0,
@@ -130,17 +142,19 @@
     "id": "listing-7",
     "numOfBeds": 2,
     "pictures": [
-      "https://res.cloudinary.com/listings-013.png",
-      "https://res.cloudinary.com/listings-024.png"
+      "https://res.cloudinary.com/istings-01.png",
+      "https://res.cloudinary.com/istings-02.png"
     ],
     "hostId": "user-4",
     "saleAmount": 0.51,
     "bookingNumber": 103,
     "checkInDate": "2021-02-08 04:00:00",
     "checkOutDate": "2021-05-17 04:00:00",
-    "listingStatus": "DELETED",
+    "listingStatus": "REJECT",
     "locationId": "location-7",
-    "coordinateId": "coordinate-7"
+    "coordinateId": "coordinate-7",
+    "createdAt": "2021-02-08 04:00:00",
+    "updatedAt": "2021-02-08 04:00:00"
   },
   {
     "costPerNight": 688.0,
@@ -150,17 +164,19 @@
     "id": "listing-8",
     "numOfBeds": 3,
     "pictures": [
-      "https://res.cloudinary.com/listings-011.png",
-      "https://res.cloudinary.com/listings-012.png"
+      "https://res.cloudinary.com/istings-01.png",
+      "https://res.cloudinary.com/istings-02.png"
     ],
     "hostId": "user-5",
     "saleAmount": 0.41,
     "bookingNumber": 102,
     "checkInDate": "2021-02-01 04:00:00",
     "checkOutDate": "2021-03-17 04:00:00",
-    "listingStatus": "DELETED",
+    "listingStatus": "REJECT",
     "locationId": "location-8",
-    "coordinateId": "coordinate-8"
+    "coordinateId": "coordinate-8",
+    "createdAt": "2021-02-08 04:00:00",
+    "updatedAt": "2021-02-08 04:00:00"
   },
   {
     "costPerNight": 474.0,
@@ -170,8 +186,8 @@
     "id": "listing-9",
     "numOfBeds": 4,
     "pictures": [
-      "https://res.cloudinary.com/listings-031.png",
-      "https://res.cloudinary.com/listings-032.png"
+      "https://res.cloudinary.com/istings-01.png",
+      "https://res.cloudinary.com/istings-02.png"
     ],
     "hostId": "user-6",
     "isFeatured": true,
@@ -179,9 +195,11 @@
     "bookingNumber": 101,
     "checkInDate": "2021-02-08 04:00:00",
     "checkOutDate": "2021-03-18 04:00:00",
-    "listingStatus": "CANCELLED",
+    "listingStatus": "REJECT",
     "locationId": "location-9",
-    "coordinateId": "coordinate-9"
+    "coordinateId": "coordinate-9",
+    "createdAt": "2021-02-08 04:00:00",
+    "updatedAt": "2021-02-08 04:00:00"
   },
   {
     "costPerNight": 687.0,
@@ -191,16 +209,18 @@
     "id": "listing-10",
     "numOfBeds": 4,
     "pictures": [
-      "https://res.cloudinary.com/listings-041.png",
-      "https://res.cloudinary.com/listings-042.png"
+      "https://res.cloudinary.com/istings-01.png",
+      "https://res.cloudinary.com/istings-02.png"
     ],
     "hostId": "user-6",
     "saleAmount": 0.21,
     "bookingNumber": 100,
     "checkInDate": "2021-02-08 04:00:00",
     "checkOutDate": "2021-03-13 04:00:00",
-    "listingStatus": "CANCELLED",
+    "listingStatus": "REJECT",
     "locationId": "location-10",
-    "coordinateId": "coordinate-10"
+    "coordinateId": "coordinate-10",
+    "createdAt": "2021-02-08 04:00:00",
+    "updatedAt": "2021-02-08 04:00:00"
   }
 ]

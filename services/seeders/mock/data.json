@@ -1,0 +1,842 @@
+{
+  "listings": [
+    {
+      "id": "listing-1",
+      "title": "Listing 1",
+      "locationId": "location-1",
+      "amenityids": [
+        "am-1",
+        "am-2",
+        "am-3"
+      ],
+      "costPerNight": 100,
+      "bookings": [],
+      "reviews": [],
+      "description": "Listing 1 description",
+      "createdAt": "2024-10-10T04:30:11.294Z",
+      "updatedAt": "2024-10-10T04:30:11.294Z",
+      "hostId": "host-1",
+      "pictures": [
+        "1.jpg",
+        "2.jpg"
+      ],
+      "checkInDate": "2024-10-10T04:30:11.294Z",
+      "checkOutDate": "2024-10-10T04:30:11.294Z",
+      "isFeatured": false,
+      "saleAmount": 0,
+      "bookingNumber": 0,
+      "listingStatus": "AVAILABLE",
+      "numOfBeds": 5
+    },
+    {
+      "id": "listing-2",
+      "title": "Listing 2",
+      "locationId": "location-2",
+      "amenityids": [
+        "am-2",
+        "am-3",
+        "am-4"
+      ],
+      "costPerNight": 110,
+      "bookings": [],
+      "reviews": [],
+      "description": "Listing 2 description",
+      "createdAt": "2024-10-10T04:30:11.294Z",
+      "updatedAt": "2024-10-10T04:30:11.294Z",
+      "hostId": "host-2",
+      "pictures": [
+        "2.jpg",
+        "3.jpg"
+      ],
+      "checkInDate": "2024-10-10T04:30:11.294Z",
+      "checkOutDate": "2024-10-10T04:30:11.294Z",
+      "isFeatured": false,
+      "saleAmount": 0,
+      "bookingNumber": 0,
+      "listingStatus": "AVAILABLE",
+      "numOfBeds": 5
+    },
+    {
+      "id": "listing-3",
+      "title": "Listing 3",
+      "locationId": "location-3",
+      "amenityids": [
+        "am-3",
+        "am-4",
+        "am-5"
+      ],
+      "costPerNight": 120,
+      "bookings": [],
+      "reviews": [],
+      "description": "Listing 3 description",
+      "createdAt": "2024-10-10T04:30:11.294Z",
+      "updatedAt": "2024-10-10T04:30:11.294Z",
+      "hostId": "host-3",
+      "pictures": [
+        "3.jpg",
+        "4.jpg"
+      ],
+      "checkInDate": "2024-10-10T04:30:11.294Z",
+      "checkOutDate": "2024-10-10T04:30:11.294Z",
+      "isFeatured": false,
+      "saleAmount": 0,
+      "bookingNumber": 0,
+      "listingStatus": "AVAILABLE",
+      "numOfBeds": 3
+    },
+    {
+      "id": "listing-4",
+      "title": "Listing 4",
+      "locationId": "location-4",
+      "amenityids": [
+        "am-4",
+        "am-5",
+        "am-6"
+      ],
+      "costPerNight": 130,
+      "bookings": [],
+      "reviews": [],
+      "description": "Listing 4 description",
+      "createdAt": "2024-10-10T04:30:11.294Z",
+      "updatedAt": "2024-10-10T04:30:11.294Z",
+      "hostId": "host-4",
+      "pictures": [
+        "4.jpg",
+        "5.jpg"
+      ],
+      "checkInDate": "2024-10-10T04:30:11.294Z",
+      "checkOutDate": "2024-10-10T04:30:11.294Z",
+      "isFeatured": false,
+      "saleAmount": 0,
+      "bookingNumber": 0,
+      "listingStatus": "AVAILABLE",
+      "numOfBeds": 1
+    },
+    {
+      "id": "listing-5",
+      "title": "Listing 5",
+      "locationId": "location-5",
+      "amenityids": [
+        "am-5",
+        "am-6",
+        "am-7"
+      ],
+      "costPerNight": 140,
+      "bookings": [],
+      "reviews": [],
+      "description": "Listing 5 description",
+      "createdAt": "2024-10-10T04:30:11.294Z",
+      "updatedAt": "2024-10-10T04:30:11.294Z",
+      "hostId": "host-5",
+      "pictures": [
+        "5.jpg",
+        "6.jpg"
+      ],
+      "checkInDate": "2024-10-10T04:30:11.294Z",
+      "checkOutDate": "2024-10-10T04:30:11.294Z",
+      "isFeatured": false,
+      "saleAmount": 0,
+      "bookingNumber": 0,
+      "listingStatus": "AVAILABLE",
+      "numOfBeds": 1
+    },
+    {
+      "id": "listing-6",
+      "title": "Listing 6",
+      "locationId": "location-6",
+      "amenityids": [
+        "am-6",
+        "am-7",
+        "am-8"
+      ],
+      "costPerNight": 150,
+      "bookings": [],
+      "reviews": [],
+      "description": "Listing 6 description",
+      "createdAt": "2024-10-10T04:30:11.294Z",
+      "updatedAt": "2024-10-10T04:30:11.294Z",
+      "hostId": "host-6",
+      "pictures": [
+        "6.jpg",
+        "7.jpg"
+      ],
+      "checkInDate": "2024-10-10T04:30:11.294Z",
+      "checkOutDate": "2024-10-10T04:30:11.294Z",
+      "isFeatured": false,
+      "saleAmount": 0,
+      "bookingNumber": 0,
+      "listingStatus": "AVAILABLE",
+      "numOfBeds": 5
+    },
+    {
+      "id": "listing-7",
+      "title": "Listing 7",
+      "locationId": "location-7",
+      "amenityids": [
+        "am-7",
+        "am-8",
+        "am-9"
+      ],
+      "costPerNight": 160,
+      "bookings": [],
+      "reviews": [],
+      "description": "Listing 7 description",
+      "createdAt": "2024-10-10T04:30:11.294Z",
+      "updatedAt": "2024-10-10T04:30:11.294Z",
+      "hostId": "host-7",
+      "pictures": [
+        "7.jpg",
+        "8.jpg"
+      ],
+      "checkInDate": "2024-10-10T04:30:11.294Z",
+      "checkOutDate": "2024-10-10T04:30:11.294Z",
+      "isFeatured": false,
+      "saleAmount": 0,
+      "bookingNumber": 0,
+      "listingStatus": "AVAILABLE",
+      "numOfBeds": 4
+    },
+    {
+      "id": "listing-8",
+      "title": "Listing 8",
+      "locationId": "location-8",
+      "amenityids": [
+        "am-8",
+        "am-9",
+        "am-10"
+      ],
+      "costPerNight": 170,
+      "bookings": [],
+      "reviews": [],
+      "description": "Listing 8 description",
+      "createdAt": "2024-10-10T04:30:11.294Z",
+      "updatedAt": "2024-10-10T04:30:11.294Z",
+      "hostId": "host-8",
+      "pictures": [
+        "8.jpg",
+        "9.jpg"
+      ],
+      "checkInDate": "2024-10-10T04:30:11.294Z",
+      "checkOutDate": "2024-10-10T04:30:11.294Z",
+      "isFeatured": false,
+      "saleAmount": 0,
+      "bookingNumber": 0,
+      "listingStatus": "AVAILABLE",
+      "numOfBeds": 4
+    },
+    {
+      "id": "listing-9",
+      "title": "Listing 9",
+      "locationId": "location-9",
+      "amenityids": [
+        "am-9",
+        "am-10",
+        "am-11"
+      ],
+      "costPerNight": 180,
+      "bookings": [],
+      "reviews": [],
+      "description": "Listing 9 description",
+      "createdAt": "2024-10-10T04:30:11.294Z",
+      "updatedAt": "2024-10-10T04:30:11.294Z",
+      "hostId": "host-9",
+      "pictures": [
+        "9.jpg",
+        "10.jpg"
+      ],
+      "checkInDate": "2024-10-10T04:30:11.294Z",
+      "checkOutDate": "2024-10-10T04:30:11.294Z",
+      "isFeatured": false,
+      "saleAmount": 0,
+      "bookingNumber": 0,
+      "listingStatus": "AVAILABLE",
+      "numOfBeds": 3
+    },
+    {
+      "id": "listing-10",
+      "title": "Listing 10",
+      "locationId": "location-10",
+      "amenityids": [
+        "am-10",
+        "am-11",
+        "am-12"
+      ],
+      "costPerNight": 190,
+      "bookings": [],
+      "reviews": [],
+      "description": "Listing 10 description",
+      "createdAt": "2024-10-10T04:30:11.294Z",
+      "updatedAt": "2024-10-10T04:30:11.294Z",
+      "hostId": "host-10",
+      "pictures": [
+        "10.jpg",
+        "11.jpg"
+      ],
+      "checkInDate": "2024-10-10T04:30:11.294Z",
+      "checkOutDate": "2024-10-10T04:30:11.294Z",
+      "isFeatured": false,
+      "saleAmount": 0,
+      "bookingNumber": 0,
+      "listingStatus": "AVAILABLE",
+      "numOfBeds": 3
+    }
+  ],
+  "amenities": [
+    {
+      "id": "am-1",
+      "name": "Amenity 1",
+      "category": "outdoors-1",
+      "description": "Amenity 1 description"
+    },
+    {
+      "id": "am-2",
+      "name": "Amenity 2",
+      "category": "outdoors-2",
+      "description": "Amenity 2 description"
+    },
+    {
+      "id": "am-3",
+      "name": "Amenity 3",
+      "category": "outdoors-3",
+      "description": "Amenity 3 description"
+    },
+    {
+      "id": "am-4",
+      "name": "Amenity 4",
+      "category": "outdoors-4",
+      "description": "Amenity 4 description"
+    },
+    {
+      "id": "am-5",
+      "name": "Amenity 5",
+      "category": "outdoors-5",
+      "description": "Amenity 5 description"
+    },
+    {
+      "id": "am-6",
+      "name": "Amenity 6",
+      "category": "outdoors-6",
+      "description": "Amenity 6 description"
+    },
+    {
+      "id": "am-7",
+      "name": "Amenity 7",
+      "category": "outdoors-7",
+      "description": "Amenity 7 description"
+    },
+    {
+      "id": "am-8",
+      "name": "Amenity 8",
+      "category": "outdoors-8",
+      "description": "Amenity 8 description"
+    },
+    {
+      "id": "am-9",
+      "name": "Amenity 9",
+      "category": "outdoors-9",
+      "description": "Amenity 9 description"
+    },
+    {
+      "id": "am-10",
+      "name": "Amenity 10",
+      "category": "outdoors-10",
+      "description": "Amenity 10 description"
+    },
+    {
+      "id": "am-11",
+      "name": "Amenity 11",
+      "category": "outdoors-11",
+      "description": "Amenity 11 description"
+    },
+    {
+      "id": "am-12",
+      "name": "Amenity 12",
+      "category": "outdoors-12",
+      "description": "Amenity 12 description"
+    },
+    {
+      "id": "am-13",
+      "name": "Amenity 13",
+      "category": "outdoors-13",
+      "description": "Amenity 13 description"
+    },
+    {
+      "id": "am-14",
+      "name": "Amenity 14",
+      "category": "outdoors-14",
+      "description": "Amenity 14 description"
+    },
+    {
+      "id": "am-15",
+      "name": "Amenity 15",
+      "category": "outdoors-15",
+      "description": "Amenity 15 description"
+    },
+    {
+      "id": "am-16",
+      "name": "Amenity 16",
+      "category": "outdoors-16",
+      "description": "Amenity 16 description"
+    },
+    {
+      "id": "am-17",
+      "name": "Amenity 17",
+      "category": "outdoors-17",
+      "description": "Amenity 17 description"
+    },
+    {
+      "id": "am-18",
+      "name": "Amenity 18",
+      "category": "outdoors-18",
+      "description": "Amenity 18 description"
+    },
+    {
+      "id": "am-19",
+      "name": "Amenity 19",
+      "category": "outdoors-19",
+      "description": "Amenity 19 description"
+    },
+    {
+      "id": "am-20",
+      "name": "Amenity 20",
+      "category": "outdoors-20",
+      "description": "Amenity 20 description"
+    },
+    {
+      "id": "am-21",
+      "name": "Amenity 21",
+      "category": "outdoors-21",
+      "description": "Amenity 21 description"
+    },
+    {
+      "id": "am-22",
+      "name": "Amenity 22",
+      "category": "outdoors-22",
+      "description": "Amenity 22 description"
+    },
+    {
+      "id": "am-23",
+      "name": "Amenity 23",
+      "category": "outdoors-23",
+      "description": "Amenity 23 description"
+    },
+    {
+      "id": "am-24",
+      "name": "Amenity 24",
+      "category": "outdoors-24",
+      "description": "Amenity 24 description"
+    },
+    {
+      "id": "am-25",
+      "name": "Amenity 25",
+      "category": "outdoors-25",
+      "description": "Amenity 25 description"
+    },
+    {
+      "id": "am-26",
+      "name": "Amenity 26",
+      "category": "outdoors-26",
+      "description": "Amenity 26 description"
+    },
+    {
+      "id": "am-27",
+      "name": "Amenity 27",
+      "category": "outdoors-27",
+      "description": "Amenity 27 description"
+    },
+    {
+      "id": "am-28",
+      "name": "Amenity 28",
+      "category": "outdoors-28",
+      "description": "Amenity 28 description"
+    },
+    {
+      "id": "am-29",
+      "name": "Amenity 29",
+      "category": "outdoors-29",
+      "description": "Amenity 29 description"
+    },
+    {
+      "id": "am-30",
+      "name": "Amenity 30",
+      "category": "outdoors-30",
+      "description": "Amenity 30 description"
+    }
+  ],
+  "listingAmenities": [
+    {
+      "amenityId": "am-23",
+      "listingId": "listing-1"
+    },
+    {
+      "amenityId": "am-16",
+      "listingId": "listing-1"
+    },
+    {
+      "amenityId": "am-20",
+      "listingId": "listing-1"
+    },
+    {
+      "amenityId": "am-7",
+      "listingId": "listing-1"
+    },
+    {
+      "amenityId": "am-26",
+      "listingId": "listing-1"
+    },
+    {
+      "amenityId": "am-11",
+      "listingId": "listing-1"
+    },
+    {
+      "amenityId": "am-2",
+      "listingId": "listing-1"
+    },
+    {
+      "amenityId": "am-21",
+      "listingId": "listing-1"
+    },
+    {
+      "amenityId": "am-16",
+      "listingId": "listing-2"
+    },
+    {
+      "amenityId": "am-12",
+      "listingId": "listing-2"
+    },
+    {
+      "amenityId": "am-30",
+      "listingId": "listing-2"
+    },
+    {
+      "amenityId": "am-27",
+      "listingId": "listing-2"
+    },
+    {
+      "amenityId": "am-10",
+      "listingId": "listing-2"
+    },
+    {
+      "amenityId": "am-19",
+      "listingId": "listing-2"
+    },
+    {
+      "amenityId": "am-15",
+      "listingId": "listing-2"
+    },
+    {
+      "amenityId": "am-29",
+      "listingId": "listing-2"
+    },
+    {
+      "amenityId": "am-20",
+      "listingId": "listing-3"
+    },
+    {
+      "amenityId": "am-18",
+      "listingId": "listing-3"
+    },
+    {
+      "amenityId": "am-1",
+      "listingId": "listing-3"
+    },
+    {
+      "amenityId": "am-24",
+      "listingId": "listing-3"
+    },
+    {
+      "amenityId": "am-28",
+      "listingId": "listing-3"
+    },
+    {
+      "amenityId": "am-4",
+      "listingId": "listing-3"
+    },
+    {
+      "amenityId": "am-11",
+      "listingId": "listing-3"
+    },
+    {
+      "amenityId": "am-5",
+      "listingId": "listing-4"
+    },
+    {
+      "amenityId": "am-27",
+      "listingId": "listing-4"
+    },
+    {
+      "amenityId": "am-24",
+      "listingId": "listing-4"
+    },
+    {
+      "amenityId": "am-23",
+      "listingId": "listing-5"
+    },
+    {
+      "amenityId": "am-2",
+      "listingId": "listing-5"
+    },
+    {
+      "amenityId": "am-17",
+      "listingId": "listing-5"
+    },
+    {
+      "amenityId": "am-27",
+      "listingId": "listing-5"
+    },
+    {
+      "amenityId": "am-15",
+      "listingId": "listing-5"
+    },
+    {
+      "amenityId": "am-8",
+      "listingId": "listing-5"
+    },
+    {
+      "amenityId": "am-11",
+      "listingId": "listing-6"
+    },
+    {
+      "amenityId": "am-14",
+      "listingId": "listing-6"
+    },
+    {
+      "amenityId": "am-24",
+      "listingId": "listing-6"
+    },
+    {
+      "amenityId": "am-27",
+      "listingId": "listing-6"
+    },
+    {
+      "amenityId": "am-30",
+      "listingId": "listing-6"
+    },
+    {
+      "amenityId": "am-18",
+      "listingId": "listing-6"
+    },
+    {
+      "amenityId": "am-16",
+      "listingId": "listing-7"
+    },
+    {
+      "amenityId": "am-24",
+      "listingId": "listing-8"
+    },
+    {
+      "amenityId": "am-18",
+      "listingId": "listing-8"
+    },
+    {
+      "amenityId": "am-19",
+      "listingId": "listing-9"
+    },
+    {
+      "amenityId": "am-9",
+      "listingId": "listing-9"
+    },
+    {
+      "amenityId": "am-11",
+      "listingId": "listing-9"
+    },
+    {
+      "amenityId": "am-26",
+      "listingId": "listing-9"
+    },
+    {
+      "amenityId": "am-8",
+      "listingId": "listing-9"
+    },
+    {
+      "amenityId": "am-27",
+      "listingId": "listing-9"
+    },
+    {
+      "amenityId": "am-10",
+      "listingId": "listing-9"
+    },
+    {
+      "amenityId": "am-1",
+      "listingId": "listing-9"
+    },
+    {
+      "amenityId": "am-4",
+      "listingId": "listing-10"
+    },
+    {
+      "amenityId": "am-24",
+      "listingId": "listing-10"
+    },
+    {
+      "amenityId": "am-21",
+      "listingId": "listing-10"
+    },
+    {
+      "amenityId": "am-11",
+      "listingId": "listing-10"
+    },
+    {
+      "amenityId": "am-9",
+      "listingId": "listing-10"
+    },
+    {
+      "amenityId": "am-13",
+      "listingId": "listing-10"
+    },
+    {
+      "amenityId": "am-29",
+      "listingId": "listing-10"
+    },
+    {
+      "amenityId": "am-16",
+      "listingId": "listing-10"
+    },
+    {
+      "amenityId": "am-17",
+      "listingId": "listing-10"
+    }
+  ],
+  "locations": [
+    {
+      "id": "location-1",
+      "listingId": "listing-1",
+      "name": "Central Park",
+      "radius": 5,
+      "latitude": 40.785091,
+      "longitude": -73.968285,
+      "address": "New York, NY 10024",
+      "city": "New York",
+      "state": "NY",
+      "country": "USA",
+      "zipCode": "10024",
+      "type": "primary"
+    },
+    {
+      "id": "location-2",
+      "listingId": "listing-7",
+      "name": "Central Park",
+      "radius": 5,
+      "latitude": 40.785091,
+      "longitude": -73.968285,
+      "address": "New York, NY 10024",
+      "city": "New York",
+      "state": "NY",
+      "country": "USA",
+      "zipCode": "10024",
+      "type": "primary"
+    },
+    {
+      "id": "location-3",
+      "listingId": "listing-1",
+      "name": "Central Park",
+      "radius": 5,
+      "latitude": 40.785091,
+      "longitude": -73.968285,
+      "address": "New York, NY 10024",
+      "city": "New York",
+      "state": "NY",
+      "country": "USA",
+      "zipCode": "10024",
+      "type": "primary"
+    },
+    {
+      "id": "location-4",
+      "listingId": "listing-9",
+      "name": "Central Park",
+      "radius": 5,
+      "latitude": 40.785091,
+      "longitude": -73.968285,
+      "address": "New York, NY 10024",
+      "city": "New York",
+      "state": "NY",
+      "country": "USA",
+      "zipCode": "10024",
+      "type": "primary"
+    },
+    {
+      "id": "location-5",
+      "listingId": "listing-9",
+      "name": "Central Park",
+      "radius": 5,
+      "latitude": 40.785091,
+      "longitude": -73.968285,
+      "address": "New York, NY 10024",
+      "city": "New York",
+      "state": "NY",
+      "country": "USA",
+      "zipCode": "10024",
+      "type": "primary"
+    },
+    {
+      "id": "location-6",
+      "listingId": "listing-6",
+      "name": "Central Park",
+      "radius": 5,
+      "latitude": 40.785091,
+      "longitude": -73.968285,
+      "address": "New York, NY 10024",
+      "city": "New York",
+      "state": "NY",
+      "country": "USA",
+      "zipCode": "10024",
+      "type": "primary"
+    },
+    {
+      "id": "location-7",
+      "listingId": "listing-3",
+      "name": "Central Park",
+      "radius": 5,
+      "latitude": 40.785091,
+      "longitude": -73.968285,
+      "address": "New York, NY 10024",
+      "city": "New York",
+      "state": "NY",
+      "country": "USA",
+      "zipCode": "10024",
+      "type": "primary"
+    },
+    {
+      "id": "location-8",
+      "listingId": "listing-5",
+      "name": "Central Park",
+      "radius": 5,
+      "latitude": 40.785091,
+      "longitude": -73.968285,
+      "address": "New York, NY 10024",
+      "city": "New York",
+      "state": "NY",
+      "country": "USA",
+      "zipCode": "10024",
+      "type": "primary"
+    },
+    {
+      "id": "location-9",
+      "listingId": "listing-3",
+      "name": "Central Park",
+      "radius": 5,
+      "latitude": 40.785091,
+      "longitude": -73.968285,
+      "address": "New York, NY 10024",
+      "city": "New York",
+      "state": "NY",
+      "country": "USA",
+      "zipCode": "10024",
+      "type": "primary"
+    },
+    {
+      "id": "location-10",
+      "listingId": "listing-8",
+      "name": "Central Park",
+      "radius": 5,
+      "latitude": 40.785091,
+      "longitude": -73.968285,
+      "address": "New York, NY 10024",
+      "city": "New York",
+      "state": "NY",
+      "country": "USA",
+      "zipCode": "10024",
+      "type": "primary"
+    }
+  ]
+}

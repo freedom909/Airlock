@@ -5,7 +5,7 @@ import Location from '../models/location.js'; // Your Sequelize Location model
 
 dotenv.config();
 
-const locations = JSON.parse(readFileSync('../infrastructure/seeders/locations.json', 'utf-8'));
+const locations = JSON.parse(readFileSync('../seeders/locations.json', 'utf-8'));
 
 async function seedLocations() {
     try {

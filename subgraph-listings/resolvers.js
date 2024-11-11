@@ -356,25 +356,53 @@ const resolvers = {
         };
       }
     },
+
     createListing: async (_, { input }, { dataSources, userId }) => {
+      // Uncomment authentication checks if needed
       // if (!userId) throw new AuthenticationError('User not authenticated');
       // if (!listingWithPermissions) {
       //   throw new AuthenticationError('User does not have permissions to create a listing');
       // }
 
-      const { listingService, amenityService } = dataSources;
-      const { status = "PENDING", ...listingInput } = input;
-      const { amenities } = listingInput;
-      if (!amenities || !amenities.length) {
-        throw new Error('Listing must have at least one amenity');
-      }
-      const amenityIds = await amenityService.getAmenityIds(amenities);
-      // Prepare the listing object to be created
-      const listing = { ...listingInput, status, amenities: amenityIds, hostId: userId };
-
+      console.log("Received listing data:", input); // Check if input is logged correctly
       try {
-        const newListing = await listingService.createListing(listing);
-        await amenityService.linkAmenitiesToListing(newListing.id, amenityIds);
+        if (!input) {
+          throw new Error("Listing data is required");
+        }
+
+        const { listingService, amenityService, locationService } = dataSources;
+        const { title, price, numOfBeds, locationId, checkInDate, checkOutDate, amenities = [], ...rest } = input;
+
+        // Ensure required fields are present
+        if (!title || !price || !numOfBeds || !amenities.length) {
+          throw new Error('Title, price, number of beds, and at least one amenity are required');
+        }
+
+        let resolvedLocationId = locationId;
+        if (!locationId) {
+          const location = await locationService.createLocation({ ...rest });
+          resolvedLocationId = location.id;
+        }
+
+        // Validate date format
+        const checkIn = new Date(checkInDate);
+        const checkOut = new Date(checkOutDate);
+        if (isNaN(checkIn.getTime()) || isNaN(checkOut.getTime()) || checkIn.getTime() >= checkOut.getTime()) {
+          throw new Error('Invalid check-in or check-out date format');
+        }
+
+        // Prepare the listing object to be created
+        const listingData = {
+          ...input,
+          hostId: currentUserId,
+          listingStatus: input.listingStatus === 'PUBLISHED' ? 'PUBLISHED' : 'PENDING',
+        };
+        const newListing = await listingService.createListing(listingData);
+
+        // Link amenities to the listing
+
+        await amenityService.linkAmenitiesToListing(newListing.id, input.amenities);
+
         return {
           code: 200,
           success: true,
@@ -390,6 +418,7 @@ const resolvers = {
         };
       }
     },
+
 
     updateListingStatus: async (_, { input }, { dataSources }) => {
       // if (!userId) throw new AuthenticationError('User not authenticated');
@@ -433,57 +462,52 @@ const resolvers = {
     },
 
     createListing: async (_, { input }, { dataSources, userId }) => {
+      // Uncomment authentication checks if needed
       // if (!userId) throw new AuthenticationError('User not authenticated');
       // if (!listingWithPermissions) {
       //   throw new AuthenticationError('User does not have permissions to create a listing');
       // }
-      console.log("Received listing data:", input); // Received listing data: undefined
-      if (!input || !input.listing) {
-        throw new Error("Listing data is required");
-      }
-      const { listing } = input; // Destructure listing from input
-      if (!listing.title || !listing.price || !listing.numOfBedrooms || !listing.location) {
-        throw new Error('Title, price, number of bedrooms, and city are required');
-      }
-      const { checkInDate, checkOutDate } = listing; // Destructure check-in and check-out dates from listing
-      const checkIn = new Date(checkInDate);
-      const checkOut = new Date(checkOutDate);
-      if (isNaN(checkIn.getTime()) || isNaN(checkOut.getTime()) || checkIn.getTime() < checkOut.getTime()) {
-        throw new Error('Invalid check-in or check-out date format');
-      }
 
-
-      const { listingService, amenityService } = dataSources;
-      const { amenities = [] } = listing;
-      // Prepare the listing object to be created
-      const listingData = { ...listing, hostId: userId };
-      // Prepare the listing object to be created
-      const newListing = await listingService.createListing(listingData);
-      // Link amenities to the listing
-
-      //const amenityIds = await amenityService.getAmenityIds(amenities);
-      //await amenityService.linkAmenitiesToListing(newListing.id, amenityIds);
-
-      //const amenityIds = await amenityService.getAmenityIds(amenities);
-      // Prepare the listing object to be created
-      //const listing = {...listing, hostId: userId, amenities: amenityIds };
-
-      //const { amenities = [] } = listing;  // Destructure amenities from listing
-
-      //if (!amenities ||!amenities.length) {
-      //throw new Error('Listing must have at least one amenity');
-      //}
-      //const amenityIds = await amenityService.getAmenityIds(amenities);
-      // Prepare the listing object to be created
-      //const listing = {...listing, hostId: userId, amenities: amenityIds };
-      //if (!amenities || !amenities.length) {
-      //throw new Error('Listing must have at least one amenity');
-      //}
-      const amenityIds = await amenityService.getAmenityIds(amenities);
-      listing.amenities = amenityIds;
+      console.log("Received listing data:", input); // Check if input is logged correctly
       try {
-        const newListing = await listingService.createListing({ ...listing, hostId: userId });
+        if (!input) {
+          throw new Error("Listing data is required");
+        }
+
+        const { listingService, amenityService, locationService } = dataSources;
+        const { title, price, numOfBeds, locationId, checkInDate, checkOutDate, amenities = [], ...rest } = input;
+
+        // Ensure required fields are present
+        if (!title || !price || !numOfBeds || !amenities.length) {
+          throw new Error('Title, price, number of beds, and at least one amenity are required');
+        }
+
+        let resolvedLocationId = locationId;
+        if (!locationId) {
+          const location = await locationService.createLocation({ ...rest });
+          resolvedLocationId = location.id;
+        }
+
+        // Validate date format
+        const checkIn = new Date(checkInDate);
+        const checkOut = new Date(checkOutDate);
+        // Log the dates for debugging purposes
+        console.log("Check-in Date:", checkInDate, "| Parsed Check-in:", checkIn);
+        console.log("Check-out Date:", checkOutDate, "| Parsed Check-out:", checkOut);
+
+        // Validate that the dates are valid and in the correct order
+        if (isNaN(checkIn.getTime()) || isNaN(checkOut.getTime()) || checkIn.getTime() >= checkOut.getTime()) {
+          throw new Error('Invalid check-in or check-out date format'); //Error: Invalid check-in or check-out date format
+        }
+
+        // Prepare the listing object to be created
+        const listingData = { title, price, numOfBeds, locationId: resolvedLocationId, checkInDate, checkOutDate, ...rest, hostId: userId };
+        const newListing = await listingService.createListing(listingData); // Error creating listing: ValidationError [SequelizeValidationError]: notNull Violation: Listing.id cannot be null
+
+        // Link amenities to the listing
+        const amenityIds = await amenityService.getAmenityIds(amenities);
         await amenityService.linkAmenitiesToListing(newListing.id, amenityIds);
+
         return {
           code: 200,
           success: true,

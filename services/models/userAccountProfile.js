@@ -31,14 +31,14 @@ const findProfileWithAccount = async (accountId) => {
   try {
     // Find Account by accountId in MySQL
     const account = await Account.findByPk(accountId);
-    
+
     if (!account) {
       throw new Error('Account not found');
     }
 
     // Find Profile by profileId in MongoDB
     const profile = await Profile.findOne({ _id: account.profileId });
-    
+
     if (!profile) {
       throw new Error('Profile not found');
     }
@@ -61,4 +61,4 @@ const findProfileWithAccount = async (accountId) => {
     console.error('Error syncing database:', error);
   }
 })();
-export { findAccountWithUser,findProfileWithAccount  };
+export { findAccountWithUser, findProfileWithAccount };

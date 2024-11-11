@@ -20,14 +20,14 @@ const resolvers = {
                 console.log('Input received:', input);
 
                 // Destructure fields from input
-                const { name, latitude, longitude, address, city, state, country, zipCode, radius } = input;
+                const { name, latitude, longitude, address, city, state, country, zipCode, radius, units } = input;
 
                 // Validate input fields
-                if (!name || !latitude || !longitude || !address || !city || !state || !country || !zipCode || !radius) {
+                if (!name || !latitude || !longitude || !address || !city || !state || !country || !zipCode || !radius || !units) {
                     throw new Error('All fields are required for creating a location.');
                 }
 
-                const newLocation = await locationService.createLocation(name, latitude, longitude, address, city, state, country, zipCode, radius);
+                const newLocation = await locationService.createLocation(name, latitude, longitude, address, city, state, country, zipCode, radius, units);
                 return newLocation; // Return the newly created location
 
             } catch (error) {

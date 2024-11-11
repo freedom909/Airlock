@@ -29,15 +29,28 @@ Booking.init({
     type: DataTypes.STRING,
     allowNull: false,
   },
+  totalCost: {
+    type: DataTypes.FLOAT,  // Use FLOAT for decimal values
+    allowNull: false,
+    defaultValue: 0,  // Ensure default value is properly set
+  },
+  bookingNumber: {  // Count of how many bookings the guest has made
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 1,  // Initialize to 1 for the first booking
+  },
 }, {
   sequelize,
   modelName: 'Booking',
   timestamps: true,
 });
 
-Booking.associate = (models) => {
-  Booking.belongsTo(models.User, { foreignKey: 'guestId', as: 'guest' });
-  Booking.belongsTo(models.Listing, { foreignKey: 'listingId', as: 'listing' });
-};
+// Hook to automatically increment bookingNumber per guest
+Booking.beforeCreate(async (booking, options) => {
+  const count = await Booking.count({
+    where: { guestId: booking.guestId }
+  });
+  booking.bookingNumber = count + 1;  // Increment the booking number based on previous bookings
+});
 
 export default Booking;

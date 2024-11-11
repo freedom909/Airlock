@@ -2,11 +2,11 @@ import { createContainer, asValue, asClass } from 'awilix';
 import connectMysql from './connectMysqlDB.js';
 import connectToMongoDB from './connectMongoDB.js';
 import cacheClient from '../../cache/cacheClient.js'; // Import your cache client
-import ListingService from '../services/listingService.js';
+import ListingService from '../listingService.js';
 import ListingRepository from '../repositories/listingRepository.js';
-import UserService from '../services/userService.js';
+import UserService from '../userService.js';
 import UserRepository from '../repositories/userRepository.js';
-import BookingService from '../services/bookingService.js';
+import BookingService from '../bookingService.js';
 import BookingRepository from '../repositories/bookingRepository.js';
 
 
@@ -39,8 +39,8 @@ const initializeBookingContainer = async ({ services = [] } = {}) => {
     userService: asClass(UserService).singleton(),
     listingRepository: asClass(ListingRepository).singleton(),
     listingService: asClass(ListingService).singleton(),
-    bookingRepository: asValue(BookingRepository).singleton(),  // Register the Listing model here
-    bookingService: asValue(BookingService).singleton(),     // Reusing Listing model for the service
+    bookingRepository: asValue(BookingRepository),  // Register the Listing model here
+    bookingService: asValue(BookingService),     // Reusing Listing model for the service
   });
 
   services.forEach(service => {

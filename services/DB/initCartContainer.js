@@ -1,15 +1,15 @@
 import { createContainer, asValue, asClass } from 'awilix';
 import connectMysql from './connectMysqlDB.js';
 import connectToMongoDB from './connectMongoDB.js';
-import ListingService from '../services/listingService.js';
+import ListingService from '../listingService.js';
 import ListingRepository from '../repositories/listingRepository.js';
-import UserService from '../services/userService.js';
+import UserService from '../userService.js';
 import UserRepository from '../repositories/userRepository.js';
-import BookingService from '../services/bookingService.js';
+import BookingService from '../bookingService.js';
 import BookingRepository from '../repositories/bookingRepository.js';
-import CartService from '../services/cartService.js';
+import CartService from '../cartService.js';
 import CartRepository from '../repositories/cartRepository.js';
-import PaymentService from '../services/paymentService.js';
+import PaymentService from '../paymentService.js';
 import PaymentRepository from '../repositories/paymentRepository.js';
 
 const initializeCartContainer = async ({ services = [] } = {}) => {
@@ -46,7 +46,7 @@ const initializeCartContainer = async ({ services = [] } = {}) => {
     listingRepository: asClass(ListingRepository).singleton(),
     listingService: asClass(ListingService).singleton(),
   });
-  
+
   const cartContainer = baseContainer.createScope();
   cartContainer.register({
     cartRepository: asClass(CartRepository).singleton(),
@@ -54,7 +54,7 @@ const initializeCartContainer = async ({ services = [] } = {}) => {
     paymentRepository: asClass(PaymentRepository).singleton(),
     paymentService: asClass(PaymentService).singleton(),
   });
-  
+
 
   // Register services dynamically
   services.forEach(service => {

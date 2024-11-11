@@ -2,156 +2,187 @@
   {
     "id": "am-1",
     "category": "Accommodation Details",
-    "name": "Interdimensional wifi harmony"
+    "name": "Interdimensional wifi harmony",
+    "description": "a physical wifi connection"
   },
   {
     "id": "am-2",
     "category": "Accommodation Details",
-    "name": "Towel"
+    "name": "Towel",
+    "description": "a long-lasting towel"
   },
   {
     "id": "am-3",
     "category": "Accommodation Details",
-    "name": "Universal remote"
+    "name": "Universal remote",
+    "description": "a universal remote control"
   },
   {
     "id": "am-4",
     "category": "Accommodation Details",
-    "name": "Adjustable gravity"
+    "name": "Adjustable gravity",
+    "description": "a device that can change gravity"
   },
   {
     "id": "am-5",
     "category": "Accommodation Details",
-    "name": "Quantum microwave"
+    "name": "Quantum microwave",
+    "description": "a device that can generate and receive microwaves"
   },
   {
     "id": "am-6",
     "category": "Accommodation Details",
-    "name": "Retractable moonroof"
+    "name": "Retractable moonroof",
+    "description": "a device that can retract into a moon-sized shape"
   },
   {
     "id": "am-7",
     "category": "Accommodation Details",
-    "name": "Wormhole trash chute"
+    "name": "Wormhole trash chute",
+    "description": "a physical wifi connection"
   },
   {
     "id": "am-8",
     "category": "Accommodation Details",
-    "name": "DroneDash food delivery"
+    "name": "DroneDash food delivery",
+    "description": "a physical wifi connection"
   },
   {
     "id": "am-9",
     "category": "Accommodation Details",
-    "name": "Cosmic jacuzzi"
+    "name": "Cosmic jacuzzi",
+    "description": "a physical wifi connection"
   },
   {
     "id": "am-28",
     "category": "Accommodation Details",
-    "name": "Multi-planetary cable TV"
+    "name": "Multi-planetary cable TV",
+    "description": "a physical wifi connection"
   },
   {
     "id": "am-29",
     "category": "Accommodation Details",
-    "name": "Cryochamber"
+    "name": "Cryochamber",
+    "description": "a physical wifi connection"
   },
   {
     "id": "am-30",
     "category": "Accommodation Details",
-    "name": "Heated sleeping pods"
+    "name": "Heated sleeping pods",
+    "description": "a physical wifi connection"
   },
   {
     "id": "am-10",
     "category": "Space Survival",
-    "name": "Oxygen"
+    "name": "Oxygen",
+    "description": "a physical wifi connection"
   },
   {
     "id": "am-11",
     "category": "Space Survival",
-    "name": "Prepackaged meals"
+    "name": "Prepackaged meals",
+    "description": "a physical wifi connection"
   },
   {
     "id": "am-12",
     "category": "Space Survival",
-    "name": "SOS button"
+    "name": "SOS button",
+    "description": "a physical wifi connection"
   },
   {
     "id": "am-13",
     "category": "Space Survival",
-    "name": "Meteor shower shield"
+    "name": "Meteor shower shield",
+    "description": "a physical wifi connection"
   },
   {
     "id": "am-14",
     "category": "Space Survival",
-    "name": "First-aamenityId kit"
+    "name": "First-aamenityId kit",
+    "description": "a physical wifi connection"
   },
   {
     "id": "am-15",
     "category": "Space Survival",
-    "name": "Water recycler"
+    "name": "Water recycler",
+    "description": "a physical wifi connection"
   },
   {
     "id": "am-16",
     "category": "Space Survival",
-    "name": "Panic button"
+    "name": "Panic button",
+    "description": "a physical wifi connection"
   },
   {
     "id": "am-17",
     "category": "Space Survival",
-    "name": "Emergency life support systems"
+    "name": "Emergency life support systems",
+    "description": "a physical wifi connection"
   },
   {
     "id": "am-18",
     "category": "Space Survival",
-    "name": "Universal translator"
+    "name": "Universal translator",
+    "description": "a physical wifi connection"
   },
   {
     "id": "am-31",
     "category": "Space Survival",
-    "name": "Aquatic breathing aamenityId"
+    "name": "Aquatic breathing aamenityId",
+    "description": "a physical wifi connection"
   },
   {
     "id": "am-19",
     "category": "Outdoors",
-    "name": "Fire pit"
+    "name": "Fire pit",
+    "description": "a physical wifi connection"
   },
   {
     "id": "am-20",
     "category": "Outdoors",
-    "name": "AcamenityId lake access"
+    "name": "AcamenityId lake access",
+    "description": "a physical wifi connection"
   },
   {
     "id": "am-21",
     "category": "Outdoors",
-    "name": "Waterfront"
+    "name": "Waterfront",
+    "description": "a physical wifi connection"
   },
   {
     "id": "am-22",
     "category": "Outdoors",
-    "name": "Hydroponic garden"
+    "name": "Hydroponic garden",
+    "description": "a physical wifi connection"
   },
   {
     "id": "am-23",
     "category": "Outdoors",
-    "name": "Space view"
+    "name": "Space view",
+    "description": "a physical wifi connection"
   },
   {
     "id": "am-24",
     "category": "Outdoors",
-    "name": "Time travel paradoxes"
+    "name": "Time travel paradoxes",
+    "description": "a physical wifi connection"
   },
   {
     "id": "am-25",
     "category": "Outdoors",
-    "name": "Tourist attraction"
+    "name": "Tourist attraction",
+    "description": "a physical wifi connection"
   },
   {
     "id": "am-26",
     "category": "Outdoors",
-    "name": "Meteor showers"
+    "name": "Meteor showers",
+    "description": "a physical wifi connection"
   },
   {
     "id": "am-27",
     "category": "Outdoors",
-    "name": "Wildlife"
+    "name": "Wildlife",
+    "description": "a physical wifi connection"
   }
 ]

@@ -40,6 +40,7 @@ type Location @key(fields: "id") {
   latitude: Float! @shareable
   longitude: Float! @shareable
   radius: Int @shareable
+  units: String! @shareable
 }
 
 input CreateLocationInput {
@@ -61,6 +62,7 @@ input CreateLocationInput {
   country: String!
   "The postal code of the location"
   zipCode: String!
+   units: String! 
 }
 
 input UpdateLocationInput {

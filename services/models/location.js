@@ -1,27 +1,23 @@
-import { Model, DataTypes, ENUM } from 'sequelize';
-import sequelize from './seq.js'; // Adjust the path as necessary
+import { Model, DataTypes } from 'sequelize';
+import sequelize from './seq.js';
+import Listing from './listing.js';
 
 class Location extends Model { }
 
 Location.init({
   id: {
-    type: DataTypes.STRING,
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
   },
-  listingId: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    references: {
-      model: 'Listings',
-      key: 'id',
-    },
-  },
+
   name: {
     type: DataTypes.STRING,
     allowNull: false,
   },
   radius: {
-    type: DataTypes.FLOAT,
+    type: DataTypes.FLOAT, // Replacing NUMBER with FLOAT
+    allowNull: true,
   },
   latitude: {
     type: DataTypes.FLOAT,
@@ -51,16 +47,14 @@ Location.init({
     type: DataTypes.STRING,
     allowNull: false,
   },
-  type: {
-    type: DataTypes.ENUM('primary', 'secondary', 'tertiary'),
-    allowNull: false,
-    defaultValue: 'primary', // Add a default value
+  units: {
+    type: DataTypes.ENUM('kilometers', 'miles'),
+    defaultValue: 'kilometers',
   },
 }, {
   sequelize,
   modelName: 'Location',
-  tableName: 'locations',
   timestamps: false,
-
 });
-export default Location
+
+export default Location;
