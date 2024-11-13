@@ -3,6 +3,11 @@ import { Server } from 'socket.io';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import express from 'express';
+import bodyParser from 'body-parser';
+
+const app = express();
+const PORT = process.env.PORT || 4000
 
 // Define __dirname in ES module
 const __filename = fileURLToPath(import.meta.url);
@@ -54,3 +59,18 @@ io.on('connection', (socket) => {
         console.log('Client disconnected');
     });
 });
+
+app.post('/subgraph-listing', (req, res) => {
+    // Here you can control what response you send based on the input  
+    res.json({ success: true, data: req.body });
+});
+
+// Mock endpoint for subgraph-location  
+app.post('/subgraph-location', (req, res) => {
+    res.json({ success: true, locationId: 1 }); // example response  
+});
+
+// Start the server  
+app.listen(PORT, () => {
+    console.log(`Mock server running at http://localhost:${PORT}`);
+});  

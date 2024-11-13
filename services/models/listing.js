@@ -14,6 +14,12 @@ Listing.init({
     defaultValue: DataTypes.UUIDV4,      // Automatically generate UUID for new records
     primaryKey: true,
   },
+
+  locationId: {
+    type: DataTypes.UUID,         // Use UUID as the ID type
+    allowNull: false,
+    unique: true,
+  },
   title: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -30,11 +36,7 @@ Listing.init({
     type: DataTypes.STRING,
     allowNull: false,
   },
-  locationId: {
-    type: DataTypes.UUID,         // Use UUID as the ID type
-    allowNull: false,
-    unique: true,
-  },
+
   numOfBeds: {
     type: DataTypes.INTEGER,
     allowNull: true,

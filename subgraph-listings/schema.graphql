@@ -19,7 +19,7 @@ extend type Query {
   homepageListings: [Listing!]! @shareable
 
   "Returns a list of nearby listings"
-  getNearbyListings(latitude: Float!, longitude: Float!, radius: Float!): [Listing] 
+  getNearbyListings(latitude: Float!, longitude: Float!, radius: Int!): [Listing] 
   
   "A curated array of listings to feature on the homepage"
   featuredListings: [Listing!]! @shareable
@@ -134,8 +134,10 @@ input CreateListingInput {
   "The amenities of the listing"
   amenities: [AmenityInput!]! 
   listingStatus: ListingStatus 
-  checkInDate:String
-  checkOutDate: String 
+  checkInDate:String!
+  checkOutDate: String!
+  isFeatured: Boolean
+  locationInput: CreateLocationInput!
 }
 
 input AmenityInput {
@@ -143,6 +145,29 @@ input AmenityInput {
   name: String 
 }
 
+input CreateLocationInput {
+  "The name of the location"
+  name: String!
+  "The latitude of the location"
+  latitude: Float!
+  "The radius around the location"
+  radius: Int!
+  "The longitude of the location"
+  longitude: Float!
+  "The street address of the location"
+  address: String!
+  "The city where the location is situated"
+  city: String!
+  "The state or province of the location"
+  state: String!
+  "The country of the location"
+  country: String!
+  "The postal code of the location"
+  zipCode: String!
+  units: String! 
+}
+
+# Listing type with location information
 type Amenity @key(fields: "id") {
   id: ID!
   category: AmenityCategory! @shareable

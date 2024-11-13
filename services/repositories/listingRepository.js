@@ -4,14 +4,11 @@ import connectMysql from '../DB/connectMysqlDB.js'
 import Listing from '../models/listing.js';
 import Location from '../models/location.js';
 class ListingRepository {
-    constructor(httpClient) {
-        this.initPromise = this.init();
+    constructor(httpClient, database) {
         this.httpClient = httpClient;
+        this.db = database;
     }
 
-    async init() {
-        this.db = await connectMysql()
-    }
 
 
     async findAll() {
@@ -74,15 +71,6 @@ class ListingRepository {
         }
     }
 
-    async getListingCoordinates(id) {
-        try {
-            const response = await this.httpClient.get(`listings/${id}/coordinates`);
-            return response.data;
-        } catch (error) {
-            console.error('Error fetching listing coordinates:', error);
-            throw error;
-        }
-    }
 
     async getFeaturedListings(limit) {
         try {
@@ -146,24 +134,44 @@ class ListingRepository {
         }
     }
 
-    async createListing({ title, description, photoThumbnail, numOfBeds, costPerNight, locationType, amenities, hostId }) {
-        // Implementation of the database interaction to create a listing
-        const newListing = await this.database.Listing.create({
+    async create(listingInfo, transaction) {
+        const {
             title,
+            locationId: resolvedLocationId,
+            checkInDate,
+            checkOutDate,
+            isFeatured,
+            hostId,
             description,
-            photoThumbnail,
+            pictures,
             numOfBeds,
             costPerNight,
             locationType,
-            amenities,
+            listingStatus,
+            amenities = []
+
+        } = listingInfo;
+        // Implementation of the database interaction to create a listing
+        const newListing = await Listing.create({ // Error creating listing: TypeError: Cannot read properties of undefined (reading 'uuid')
+            title,
+            locationId: resolvedLocationId,
+            checkInDate,
+            checkOutDate,
+            isFeatured,
             hostId,
-        });
+            description,
+            pictures,
+            numOfBeds,
+            costPerNight,
+            locationType,
+            listingStatus,
+        }, { transaction });
 
         // Assuming amenities is an array of IDs, you might need to handle its association separately.
-        if (amenities && amenities.length > 0) {
-            // Handle association logic here
-            await this.database.ListingAmenities.bulkCreate(
-                amenities.map(amenityId => ({ listingId: newListing.id, amenityId }))
+        if (amenities.length > 0) {
+            await this.db.ListingAmenities.bulkCreate(
+                amenities.map(amenityId => ({ listingId: newListing.id, amenityId })),
+                { transaction }
             );
         }
 

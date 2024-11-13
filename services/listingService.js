@@ -1,5 +1,7 @@
 
+
 import { QueryTypes, UUIDV4, literal, Op } from 'sequelize'; // Ensure this is imported
+import { v4 as uuidv4, validate as uuidValidate } from 'uuid'
 import { GraphQLError } from 'graphql';
 import { GraphQLClient } from 'graphql-request';
 //import { shield, allow } from 'graphql-shield';
@@ -21,16 +23,6 @@ import { query } from 'express';
 
 dotenv.config();
 
-// Applying the permissions middleware
-// const permissionsMiddleware = shield({
-//   Query: {
-//     "*": allow,  // Allow all queries by default, customize as needed
-//   },
-//   Mutation: {
-//     "*": allow,  // Allow all mutations by default, customize as needed
-//   },
-// });
-// // or wherever your GraphQL endpoint is
 
 class ListingService {
   constructor({ listingRepository, sequelize }) {
@@ -96,7 +88,7 @@ class ListingService {
           saleAmount: listing.saleAmount || 0,
           checkInDate: listing.checkInDate || "default_check_in_date",
           checkOutDate: listing.checkOutDate || "default_check_out_date",
-          distance: listing.distance || 0, // Error fetching nearby listings: Error: Invalid value { latitude: 34.0522, longitude: -118.244, radius: 5000 }?
+          distance: listing.distance || 0,
         }));
 
       // Debugging logs
@@ -584,55 +576,64 @@ class ListingService {
     }
   }
 
-  async createListing(_, { title, description, location, hostId, pictures, numOfBeds, costPerNight, locationType, amenities, listingStatus }, { dataSource, user }) {
-    const { listingService, amenityService } = dataSource;
-    const currentUserId = user?.id ? user.id : null;
-    const { locationId } = location;
+  async createListing(listingData, transaction) {
 
     try {
-      // Generate a UUID for the listing
-      const listingId = UUIDV4();
-      const currentListingStatus = (listingStatus === "PUBLISHED") ? listingStatus : "PENDING";
-
-      // Create the new listing using Sequelize's ORM
-      const newListing = await Listing.create({
-        id: listingId,
+      const {
         title,
-        description,
-        locationId,
+        locationId: resolvedLocationId,
+        checkInDate,
+        checkOutDate,
+        isFeatured,
         hostId,
+        description,
         pictures,
         numOfBeds,
         costPerNight,
-        locationType,
-        listingStatus: currentListingStatus,
-      });
+        locationType, // Make sure locationType is provided in listingInfo  
+        listingStatus,
+        amenities = []
 
-      // Insert the amenities and associate them with the listing
-      const amenityPromises = amenities.map(async (amenity) => {
-        const amenityId = UUIDV4(); // Generate UUID for each amenity
-        const createdAt = new Date();
-        const updatedAt = createdAt;
+      } = listingData;
+      console.log("Resolved Location ID:", resolvedLocationId);
 
-        // Create the amenity
-        const newAmenity = await Amenity.create({
-          id: amenityId,
-          category: amenity.category,
-          name: amenity.name,
-          description: amenity.description,
-          createdAt,
-          updatedAt
-        });
+      if (!uuidValidate(resolvedLocationId)) {
+        throw new Error('Invalid locationId provided'); //Error creating listing: Error: Invalid locationId provided
+      }
+      console.log('Creating new listing with Data:', listingData);
+      if (!uuidValidate(resolvedLocationId)) {
+        throw new Error('Invalid locationId provided');
+      }
 
-        // Create the association between the listing and the amenity
-        await ListingAmenities.create({
-          listingId: newListing.id,  // Use the newly created listing ID
-          amenityId: newAmenity.id,  // Use the newly created amenity ID
-        });
-      });
+      // Validate the locationId for UUID format  
+      if (!resolvedLocationId || !uuidValidate(resolvedLocationId)) {
+        throw new Error('Invalid locationId supplied. Expected a valid UUID.');
+      }
+      console.log("Resolved Location ID:", resolvedLocationId);
+      console.log("Listing data to create:", listingData);
+      const newListing = await Listing.create({
+        title,
+        locationId: resolvedLocationId,
+        checkInDate,
+        checkOutDate,
+        isFeatured,
+        hostId,
+        description,
+        pictures,
+        numOfBeds,
+        costPerNight,
+        locationType, // Ensure locationType is passed in listingInfo  
+        listingStatus,
+      }, { transaction });
+      // Handle amenities association if amenities array is provided
+      if (amenities.length > 0) {
+        await this.database.ListingAmenities.bulkCreate(
+          amenities.map(amenityId => ({ listingId: newListing.id, amenityId })),
+          { transaction }
+        );
+      }
 
-      // Wait for all amenities to be processed
-      await Promise.all(amenityPromises);
+      return newListing;
 
     } catch (error) {
       console.error('Error creating listing:', error);
@@ -641,7 +642,6 @@ class ListingService {
       });
     }
   }
-
   async getLocations() {
     try {
       const query = `SELECT * FROM locations`
@@ -663,6 +663,7 @@ class ListingService {
       throw new GraphQLError('Error fetching number of upcoming bookings', { extensions: { code: 'INTERNAL_SERVER_ERROR' } });
     }
   }
+
   async getBookingsByListing(listingId) {
     try {
       const query = `

@@ -3,7 +3,7 @@
 import Listing from '../services/models/listing.js';
 import dbConfig from '../services/DB/dbconfig.js';
 import Location from '../services/models/location.js';
-import { FLOAT } from 'sequelize';
+
 
 const resolvers = {
     Mutation: {
@@ -16,9 +16,13 @@ const resolvers = {
                 throw new AuthenticationError(`you don't have right to update this listing's location`)
 
             try {
+                console.log('Arguments received:', input); // Check if input is defined
+                console.log('Context:', context); // Check the context for necessary flags
                 const { locationService } = dataSources;
-                console.log('Input received:', input);
-
+                console.log('Input received:', input); // TypeError: Cannot destructure property 'name' of 'input' as it is undefined.
+                if (!input || !input.name) {
+                    throw new Error('Input and input.name are required');
+                }
                 // Destructure fields from input
                 const { name, latitude, longitude, address, city, state, country, zipCode, radius, units } = input;
 
@@ -50,7 +54,6 @@ const resolvers = {
             } catch (error) {
                 console.error('Error in deleteLocation resolver:', error);
             }
-
         },
         // updateLocation: (_, { id, input }, { dataSources }) => {
         updateLocation: (_, { input }, { dataSources }) => {

@@ -59,11 +59,11 @@ const startApolloServer = async () => {
             locationService: mysqlContainer.resolve('locationService')
           }
         })
-      })
-    );
+      }
+      ));
 
-    httpServer.listen({ port: 4100 }, () =>
-      console.log('Server is running on http://localhost:4100/graphql')
+    httpServer.listen({ port: 4140 }, () =>
+      console.log('Server is running on http://localhost:4140/graphql')
     );
   } catch (error) {
     console.error('Error starting Apollo Server:', error);

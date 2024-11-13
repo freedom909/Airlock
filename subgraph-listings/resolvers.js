@@ -6,8 +6,9 @@ import dbConfig from '../services/DB/dbconfig.js';
 import Location from '../services/models/location.js';
 import { GraphQLError } from 'graphql';
 import Amenity from '../services/models/amenity.js';
-import { Op } from '@sequelize/core'
+import transaction, { Op } from '@sequelize/core'
 import calculateDistance from './calculateDistance.js';
+import { resolve } from 'path';
 const { listingWithPermissions, isHostOfListing, isAdmin } = permissions;
 
 const resolvers = {
@@ -19,7 +20,7 @@ const resolvers = {
         throw new UserInputError('Invalid Input: Latitude, longitude, and radius must be valid numbers, with radius greater than 0.');
       }
       const { listingService, locationService } = dataSources;
-
+      let transaction;
       try {
         const nearbyListings = await listingService.getNearbyListings({ latitude, longitude, radius: 5 });
         nearbyListings.forEach(listing => {
@@ -461,68 +462,100 @@ const resolvers = {
       }
     },
 
-    createListing: async (_, { input }, { dataSources, userId }) => {
-      // Uncomment authentication checks if needed
-      // if (!userId) throw new AuthenticationError('User not authenticated');
-      // if (!listingWithPermissions) {
-      //   throw new AuthenticationError('User does not have permissions to create a listing');
-      // }
+    createListing: async (_, { input }, { dataSources, userId, context }) => {
+      console.log("Received listing data:", input); // Check if input is logged correctly  
 
-      console.log("Received listing data:", input); // Check if input is logged correctly
+      const { listingService, locationService } = dataSources;
+      // Declare transaction in scope for use in catch block
+      const transaction = await dataSources.listingService.sequelize.transaction();
       try {
         if (!input) {
           throw new Error("Listing data is required");
         }
 
-        const { listingService, amenityService, locationService } = dataSources;
-        const { title, price, numOfBeds, locationId, checkInDate, checkOutDate, amenities = [], ...rest } = input;
+        const { title, price, numOfBeds, locationId, checkInDate, checkOutDate, amenities = [], hostId, locationInput, ...rest } = input;
 
-        // Ensure required fields are present
+        // Ensure required fields are present  
         if (!title || !price || !numOfBeds || !amenities.length) {
           throw new Error('Title, price, number of beds, and at least one amenity are required');
         }
 
-        let resolvedLocationId = locationId;
-        if (!locationId) {
-          const location = await locationService.createLocation({ ...rest });
-          resolvedLocationId = location.id;
-        }
-
-        // Validate date format
+        // Validate date format  
         const checkIn = new Date(checkInDate);
         const checkOut = new Date(checkOutDate);
-        // Log the dates for debugging purposes
         console.log("Check-in Date:", checkInDate, "| Parsed Check-in:", checkIn);
         console.log("Check-out Date:", checkOutDate, "| Parsed Check-out:", checkOut);
 
-        // Validate that the dates are valid and in the correct order
+        // Validate that the dates are valid and in the correct order  
         if (isNaN(checkIn.getTime()) || isNaN(checkOut.getTime()) || checkIn.getTime() >= checkOut.getTime()) {
-          throw new Error('Invalid check-in or check-out date format'); //Error: Invalid check-in or check-out date format
+          throw new Error('Invalid check-in or check-out date format');
         }
 
-        // Prepare the listing object to be created
-        const listingData = { title, price, numOfBeds, locationId: resolvedLocationId, checkInDate, checkOutDate, ...rest, hostId: userId };
-        const newListing = await listingService.createListing(listingData); // Error creating listing: ValidationError [SequelizeValidationError]: notNull Violation: Listing.id cannot be null
+        // Handle location creation or retrieval  
+        let resolvedLocationId = locationId;
+        if (!locationId) {
+          const locationData = { ...locationInput, context: context.isListingCreation };
+          const location = await locationService.createLocation(locationData);
+          console.log("Location created:", location);
+          resolvedLocationId = location.id;
+          if (!uuidValidate(resolvedLocationId)) {
+            throw new Error('Invalid locationId provided');
+          }
+          console.log("Resolved Location ID:", resolvedLocationId);
+        }
 
-        // Link amenities to the listing
-        const amenityIds = await amenityService.getAmenityIds(amenities);
-        await amenityService.linkAmenitiesToListing(newListing.id, amenityIds);
+        // Check for existing listing with the same locationId
+        const existingListing = await listingService.sequelize.models.Listing.findOne({
+          where: { locationId: resolvedLocationId }
+        });
 
-        return {
-          code: 200,
-          success: true,
-          message: 'Listing successfully created!',
-          listing: newListing
+        if (existingListing) {
+          throw new Error('A listing with this locationId already exists.');
+        }
+
+        // Prepare data for new listing creation
+        const listingData = {
+          title,
+          price,
+          numOfBeds,
+          locationId: resolvedLocationId,
+          checkInDate,
+          checkOutDate,
+          hostId,
+          ...rest
         };
-      } catch (err) {
-        console.error(err);
-        return {
-          code: 400,
-          success: false,
-          message: err.message
-        };
+        console.log("Listing data to create:", listingData);
+
+        // Start a transaction
+        transaction = await listingService.database.sequelize.transaction();
+
+        // Create the listing
+        const newListing = await listingService.sequelize.models.Listing.create(listingData, { transaction });
+        console.log("New Listing:", newListing);
+
+        // Handle amenities association if amenities array is provided  
+        if (amenities.length > 0) {
+          await listingService.sequelize.models.ListingAmenities.bulkCreate(
+            amenities.map(amenityId => ({ listingId: newListing.id, amenityId })),
+            { transaction }
+          );
+        }
+
+        // Commit transaction if everything went well
+        await transaction.commit();
+
+        return newListing;
+      } catch (error) {
+        if (transaction) await transaction.rollback();
+        if (error.name === 'SequelizeUniqueConstraintError') {
+          throw new Error(`Duplicate entry for locationId: ${resolvedLocationId}`);
+        }
+        throw new Error(error.message); //  "message": "Cannot read properties of undefined (reading 'Listing')",
       }
     },
+
+
+
 
     updateListing: async (_, { listingId, listing }, { dataSources, userId }) => {
       // if (!userId) throw new AuthenticationError('User not authenticated');

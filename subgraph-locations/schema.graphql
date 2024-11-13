@@ -1,25 +1,16 @@
 extend schema
-  @link(url: "https://specs.apollo.dev/federation/v2.7", import: ["@key", "@shareable"])
+  @link(url: "https://specs.apollo.dev/federation/v2.8", import: ["@key", "@shareable"])
 
 scalar DateTime
 
 type Query {
   "Get a location by its ID"
   location(id: ID!): Location @shareable
-  "Search for locations by their name, country, city, or state"
-  searchLocations(
-    name: String
-    country: String
-    city: String
-    state: String
-    first: Int = 10
-    after: String
-  ): SearchResult! @shareable
 }
 
 extend type Mutation {
   "Creates a new Location for the currently authenticated host"
-  createLocation(location: CreateLocationInput!): Location!
+  createLocation(input: CreateLocationInput!): Location!
   # Updates an existing Location
   updateLocation(
     locationId: ID!
@@ -39,7 +30,7 @@ type Location @key(fields: "id") {
   address: String! @shareable
   latitude: Float! @shareable
   longitude: Float! @shareable
-  radius: Int @shareable
+  radius: Int ! @shareable
   units: String! @shareable
 }
 
@@ -49,7 +40,7 @@ input CreateLocationInput {
   "The latitude of the location"
   latitude: Float!
   "The radius around the location"
-  radius: Float
+  radius: Int! 
   "The longitude of the location"
   longitude: Float!
   "The street address of the location"
@@ -62,7 +53,7 @@ input CreateLocationInput {
   country: String!
   "The postal code of the location"
   zipCode: String!
-   units: String! 
+  units: String! 
 }
 
 input UpdateLocationInput {
@@ -72,7 +63,7 @@ input UpdateLocationInput {
   "The latitude of the location"
   latitude: Float
   "The radius around the location"
-  radius: Float
+  radius: Int
   "The longitude of the location"
   longitude: Float
   "The street address of the location"
@@ -85,6 +76,7 @@ input UpdateLocationInput {
   country: String
   "The postal code of the location"
   zipCode: String
+  units: String 
 }
 
 
@@ -114,9 +106,5 @@ type UpdateLocationResponse implements Response {
   location: Location @shareable
 }
 
-# Pagination result type for searchLocations
-type SearchResult {
-  locations: [Location!]!
-  totalCount: Int!
-  hasNextPage: Boolean!
-}
+
+

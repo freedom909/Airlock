@@ -14,10 +14,7 @@ async function connectToMongoDB() {
     if (!isConnected) {
         try {
             // Correctly setting the URI to include the database name  
-            await mongoose.connect(mongoUri + '/' + dbName, {
-                useNewUrlParser: true, // Optional, but recommended  
-                useUnifiedTopology: true, // Optional, but recommended  
-            });
+            await mongoose.connect(mongoUri + '/' + dbName);
             isConnected = true;
             console.log('Connected to MongoDB with Mongoose');
         } catch (error) {

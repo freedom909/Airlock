@@ -10,13 +10,13 @@ import LocationRepository from '../repositories/locationRepository.js';
 import LocationService from '../locationService.js';
 
 const initializeLocationContainer = async ({ services = [] } = {}) => {
-    // Establishing connection to MySQL database
-    const mysqldb = await connectMysql();
+    // Initialize database connections
+    const [mysqldb, mongodb] = await Promise.all([
+        connectMysql(),
+        connectToMongoDB()
+    ]);
 
-    // Establishing connection to MongoDB database
-    const mongodb = await connectToMongoDB();
-
-    // Initializing the container and registering dependencies and services
+    // Create the container and register core dependencies and services
     const container = createContainer();
     container.register({
         mysqldb: asValue(mysqldb),
@@ -25,22 +25,21 @@ const initializeLocationContainer = async ({ services = [] } = {}) => {
         userRepository: asClass(UserRepository).singleton(),
         userService: asClass(UserService).singleton(),
         listingService: asClass(ListingService).singleton(),
-        locationRepository: asClass(LocationRepository).singleton(),  // Lowercased for consistency
-        locationService: asClass(LocationService).singleton(),  // Fixed singleton method call
+        locationRepository: asClass(LocationRepository).singleton(),
+        locationService: asClass(LocationService).singleton(),
     });
 
-    // Register services dynamically, check if it's a class or value
-    services.forEach(service => {
-        const serviceType = typeof service === 'function' && /^\s*class\s+/.test(service.toString())
-            ? asClass(service).singleton()
-            : asValue(service);  // Use asValue if it's not a class
+    // Dynamically register additional services
+    services.forEach((service) => {
+        const isClass = typeof service === 'function' && /^\s*class\s+/.test(service.toString());
         container.register({
-            [service.name]: serviceType,
+            [service.name]: isClass ? asClass(service).singleton() : asValue(service),
         });
     });
 
-    console.log('Database connected');
+    console.log('Databases connected and services initialized');
     return container;
 };
+
 
 export default initializeLocationContainer;

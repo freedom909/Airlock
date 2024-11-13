@@ -30,6 +30,8 @@ const initializeListingContainer = async ({ services = [] } = {}) => {
     userService: asClass(UserService).singleton(),
     listingRepository: asClass(ListingRepository).singleton(),
     listingService: asClass(ListingService).singleton(),
+    locationRepository: asClass(LocationRepository).singleton(),
+    locationService: asClass(LocationService).singleton(),
   });
 
   // Register services dynamically

@@ -34,11 +34,5 @@ ListingAmenities.init({
   timestamps: true,
 });
 
-// Define the many-to-many relationship between Listing and Amenity
-
-
-
-// Define the many-to-many relationship between Listing and Amenity
-
 
 export default ListingAmenities;

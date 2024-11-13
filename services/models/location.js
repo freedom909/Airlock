@@ -1,14 +1,14 @@
 import { Model, DataTypes } from 'sequelize';
 import sequelize from './seq.js';
-import Listing from './listing.js';
 
 class Location extends Model { }
 
 Location.init({
   id: {
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
-    primaryKey: true,
+    type: DataTypes.UUID,  // UUID type
+    defaultValue: DataTypes.UUIDV4,  // Auto-generate UUID
+    allowNull: false,
+    primaryKey: true
   },
 
   name: {
@@ -54,6 +54,7 @@ Location.init({
 }, {
   sequelize,
   modelName: 'Location',
+  tableName: 'Locations',
   timestamps: false,
 });
 

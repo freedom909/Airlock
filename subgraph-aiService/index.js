@@ -103,7 +103,7 @@ const startApolloServer = async () => {
             })
         );
 
-        const port = 4140;
+        const port = 4100;
         console.log(`Starting server on port ${port}...`); // Additional debug information
         httpServer.listen({ port }, () => {
             console.log(`🚀 Server ready at http://localhost:${port}/graphql`);
