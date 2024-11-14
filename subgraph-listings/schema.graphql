@@ -119,11 +119,11 @@ input CreateListingInput {
   description: String!
   "The price of the listing"
   price: Float!
-  "The ID of the location"
-  locationId: String!
+  "The ID of an existing location if available"
+  locationId: String
   "The ID of the host"
   hostId: String!
-  "The photo thumbnail of the listing"
+  "The photo thumbnails of the listing"
   pictures: [String!]!
   "The number of beds in the listing"
   numOfBeds: Int!
@@ -131,16 +131,21 @@ input CreateListingInput {
   costPerNight: Float!
   "The type of location"
   locationType: LocationType!
-  "The amenityIds of the listing"
-  amenityIds: [String!]! 
-  listingStatus: ListingStatus 
-  checkInDate:String!
+  "The amenity IDs for the listing"
+  amenityIds: [String!]!
+  "Status of the listing"
+  listingStatus: ListingStatus
+  "Check-in date for the listing availability"
+  checkInDate: String!
+  "Check-out date for the listing availability"
   checkOutDate: String!
+  "Indicates if the listing is featured"
   isFeatured: Boolean
-  locationInput: CreateLocationInput!
+  "New location details for the listing if creating a new location"
+  locationInput: LocationInput 
 }
 
-input CreateLocationInput {
+input LocationInput {
   "The name of the location"
   name: String!
   "The latitude of the location"
@@ -159,6 +164,7 @@ input CreateLocationInput {
   country: String!
   "The postal code of the location"
   zipCode: String!
+  "Units for the radius (e.g., kilometers, miles)"
   units: String! 
 }
 
@@ -270,11 +276,7 @@ type TotalCostRange @key(fields: "id") {
   max: Float @shareable
 }
 
-input LocationInput {
-  latitude: Float!
-  longitude: Float!
-  radius:Int!
-}
+
 input PriceRangeInput {
   min: Float
   max: Float

@@ -7,13 +7,17 @@ import Location from '../services/models/location.js';
 
 const resolvers = {
     Mutation: {
-        createLocation: async (_, { input }, { dataSources, userId, context }) => {
+        createLocation: async (_, { input }, { dataSources, userId }) => {
             // if (!userId) throw new AuthenticationError('User not authenticated');
             // if (!isHostOfListing ||!isAdmin) {
             //   throw new AuthenticationError(`you don't have right to update this list`)
             // }
             const { locationService } = dataSources;
-            const { locationInput } = input;
+            // Default empty object to prevent destructuring error
+            const { locationInput = {} } = input || {};
+            // Destructure the context from locationInput
+            const { context: locationContext } = locationInput;
+            console.log("Location Input:", locationInput);// {}, it is empty object
             if (!locationInput) {
                 throw new Error('Location input is required');
             }

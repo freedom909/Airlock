@@ -355,52 +355,63 @@ const resolvers = {
       // if (!listingWithPermissions) {
       //   throw new AuthenticationError('User does not have permissions to create a listing');
       // }
+
       try {
         const { listingService, amenityService, locationService } = dataSources;
         const { locationInput } = input;
+
         console.log("Location Input before sending to location service:", locationInput); // Check this log
 
+        let resolvedLocationId;
+
         if (!input.locationId && input.locationInput) {
-          // Make sure to add the context properly here
-          const locationData = {
-            ...input.locationInput,
-            context: { isListingCreation: true }
+          // Prepare context for location service
+          const locationContext = {
+            isListingCreation: true,
+            userRole: 'host',
+            listingId: input.listingId
           };
-          console.log("Location Data before sending:", locationData); // Check this log
-          // Ensure required fields are present
-          const { name, latitude, longitude, address, city, state, country, zipCode, radius, units } = locationInput;
-          for (const prop of Object.keys(locationInput)) {
-            if (!locationInput[prop]) {
-              throw new Error(`Location data must include ${prop}.`);
-            }
-          }
-          const location = await locationService.createLocation(locationData);
+
+          console.log("Location Context before sending:", locationContext);
+
+          // Call to location service with location input and context
+          const location = await locationService.createLocation({
+            locationInput: input.locationInput,
+            context: locationContext,
+          });
           resolvedLocationId = location.id;
         }
 
+        // Extract other properties from input
+        const { title, price, numOfBeds, checkInDate, checkOutDate, amenities = [], ...rest } = input;
 
-        const { title, price, numOfBeds, locationId, checkInDate, checkOutDate, amenities = [], ...rest } = input;
+        // Validate required properties
+        for (const prop of Object.keys(input)) {
+          if (!input[prop]) {
+            console.log(`Warning: Property '${prop}' is not provided in input.`);
+          }
+        }
 
-
-
-        // Validate date format
+        // Date format validation
         const checkIn = new Date(checkInDate);
         const checkOut = new Date(checkOutDate);
-        if (isNaN(checkIn.getTime()) || isNaN(checkOut.getTime()) || checkIn.getTime() >= checkOut.getTime()) {
+        if (isNaN(checkIn.getTime()) || isNaN(checkOut.getTime()) || checkIn >= checkOut) {
           throw new Error('Invalid check-in or check-out date format');
         }
 
-        // Prepare the listing object to be created
+        // Prepare listing data
         const listingData = {
           ...input,
-          hostId: currentUserId,
+          locationId: resolvedLocationId,
+          hostId: userId,
           listingStatus: input.listingStatus === 'PUBLISHED' ? 'PUBLISHED' : 'PENDING',
         };
+
+        // Create the listing
         const newListing = await listingService.createListing(listingData);
 
-        // Link amenities to the listing
-
-        await amenityService.linkAmenitiesToListing(newListing.id, input.amenities);
+        // Link amenities
+        await amenityService.linkAmenitiesToListing(newListing.id, amenities);
 
         return {
           code: 200,
@@ -408,6 +419,7 @@ const resolvers = {
           message: 'Listing successfully created!',
           listing: newListing
         };
+
       } catch (err) {
         console.error(err);
         return {
@@ -417,6 +429,7 @@ const resolvers = {
         };
       }
     },
+
 
 
     updateListingStatus: async (_, { input }, { dataSources }) => {
