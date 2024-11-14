@@ -131,18 +131,13 @@ input CreateListingInput {
   costPerNight: Float!
   "The type of location"
   locationType: LocationType!
-  "The amenities of the listing"
-  amenities: [AmenityInput!]! 
+  "The amenityIds of the listing"
+  amenityIds: [String!]! 
   listingStatus: ListingStatus 
   checkInDate:String!
   checkOutDate: String!
   isFeatured: Boolean
   locationInput: CreateLocationInput!
-}
-
-input AmenityInput {
-  category: AmenityCategory! 
-  name: String 
 }
 
 input CreateLocationInput {
@@ -172,6 +167,7 @@ type Amenity @key(fields: "id") {
   id: ID!
   category: AmenityCategory! @shareable
   name: String! @shareable
+  description: String! @shareable
 }
 
 enum AmenityCategory {
@@ -250,7 +246,7 @@ type Listing @key(fields: "id") {
     location: Location  @shareable
     locationType: LocationType @shareable
     bookingNumber: Int  @shareable
-    amenities: [String]  @shareable
+    amenityIds: [ID!] !
     host: User @shareable
     numberOfUpcomingBookings: Int  @shareable
     currentlyBookedDates: [String]  

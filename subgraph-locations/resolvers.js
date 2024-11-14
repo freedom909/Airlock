@@ -12,35 +12,45 @@ const resolvers = {
             // if (!isHostOfListing ||!isAdmin) {
             //   throw new AuthenticationError(`you don't have right to update this list`)
             // }
-            if (context.isListingCreation === false)
-                throw new AuthenticationError(`you don't have right to update this listing's location`)
-
-            try {
-                console.log('Arguments received:', input); // Check if input is defined
-                console.log('Context:', context); // Check the context for necessary flags
-                const { locationService } = dataSources;
-                console.log('Input received:', input); // TypeError: Cannot destructure property 'name' of 'input' as it is undefined.
-                if (!input || !input.name) {
-                    throw new Error('Input and input.name are required');
-                }
-                // Destructure fields from input
-                const { name, latitude, longitude, address, city, state, country, zipCode, radius, units } = input;
-
-                // Validate input fields
-                if (!name || !latitude || !longitude || !address || !city || !state || !country || !zipCode || !radius || !units) {
-                    throw new Error('All fields are required for creating a location.');
-                }
-
-                const newLocation = await locationService.createLocation(name, latitude, longitude, address, city, state, country, zipCode, radius, units);
-                return newLocation; // Return the newly created location
-
-            } catch (error) {
-                console.error('Error creating location:', error);
-                throw new Error('Failed to create location');
+            const { locationService } = dataSources;
+            const { locationInput } = input;
+            if (!locationInput) {
+                throw new Error('Location input is required');
             }
+
+            if (context.isListingCreation) {
+                throw new AuthenticationError(`you don't have right to create a new location`)
+            }
+            const requireFields = ['name', 'latitude', 'longitude', 'address', 'city', 'state', 'country', 'zipCode', 'radius', 'units'];
+            for (let prop of requireFields) {
+                if (!locationInput[prop]) {
+                    throw new Error(`Location data must include ${prop}.`);
+                }
+                console.log('Input received:', input); // TypeError: Cannot destructure property 'name' of 'input' as it is undefined.
+
+
+                try {
+                    console.log('Arguments received:', input); // Check if input is defined
+                    console.log('Context:', context); // Check the context for necessary flags
+
+                    // Destructure fields from input
+                    const { name, latitude, longitude, address, city, state, country, zipCode, radius, units } = input;
+
+                    // Validate input fields
+                    if (!name || !latitude || !longitude || !address || !city || !state || !country || !zipCode || !radius || !units) {
+                        throw new Error('All fields are required for creating a location.');
+                    }
+
+                    const newLocation = await locationService.createLocation(name, latitude, longitude, address, city, state, country, zipCode, radius, units);
+                    return newLocation; // Return the newly created location
+
+                } catch (error) {
+                    console.error('Error creating location:', error);
+                    throw new Error('Failed to create location');
+                }
+            }
+
         },
-
-
         deleteLocation: (_, { id }, { dataSources, user }) => {
             // if (!userId) throw new AuthenticationError('User not authenticated');
             // if (!isHostOfListing || !isAdmin) {

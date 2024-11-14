@@ -38,7 +38,6 @@ const startApolloServer = async () => {
       ],
       context: async ({ req }) => ({
         token: req.headers.authorization || '',
-        isListingCreation: false, // Initialize the flag to false by default
         dataSources: {
           locationService: mysqlContainer.resolve('locationService')
         }
@@ -54,7 +53,6 @@ const startApolloServer = async () => {
       expressMiddleware(server, {
         context: async ({ req }) => ({
           token: req.headers.authorization || '',
-          isListingCreation: false, // Initialize the flag to false by default
           dataSources: {
             locationService: mysqlContainer.resolve('locationService')
           }

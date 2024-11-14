@@ -21,8 +21,6 @@ Amenity.init({
   description: {
     type: DataTypes.TEXT,
     allowNull: false, // Description should not be null
-
-    allowNull: false,
   },
   name: {
     type: DataTypes.STRING,
