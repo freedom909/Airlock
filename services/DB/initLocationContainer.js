@@ -24,6 +24,7 @@ const initializeLocationContainer = async ({ services = [] } = {}) => {
         sequelize: asValue(sequelize),
         userRepository: asClass(UserRepository).singleton(),
         userService: asClass(UserService).singleton(),
+        listingRepository: asClass(ListingRepository).singleton(),
         listingService: asClass(ListingService).singleton(),
         locationRepository: asClass(LocationRepository).singleton(),
         locationService: asClass(LocationService).singleton(),

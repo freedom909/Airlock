@@ -48,8 +48,8 @@ Location.init({
     allowNull: false,
   },
   units: {
-    type: DataTypes.ENUM('kilometers', 'miles'),
-    defaultValue: 'kilometers',
+    type: DataTypes.ENUM('km', 'miles'),
+    defaultValue: 'km',
   },
 }, {
   sequelize,

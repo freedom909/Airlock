@@ -10,7 +10,7 @@ type Query {
 
 extend type Mutation {
   "Creates a new Location for the currently authenticated host"
-  createLocation(input: CreateLocationInput!): Location!
+  createLocation(input: CreateLocationInput!): CreateLocationResponse!
   # Updates an existing Location
   updateLocation(
     locationId: ID!
@@ -92,17 +92,17 @@ interface Response {
 
 # Response type for creating a Location
 type CreateLocationResponse implements Response {
-  code: Int!
-  success: Boolean!
-  message: String!
+  code: Int! @shareable
+  success: Boolean!@shareable
+  message: String!@shareable
   location: Location!@shareable
 }
 
 # Response type for updating a Location
 type UpdateLocationResponse implements Response {
-  code: Int!
-  success: Boolean!
-  message: String!
+  code: Int! @shareable
+  success: Boolean! @shareable
+  message: String! @shareable
   location: Location @shareable
 }
 

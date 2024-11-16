@@ -1,9 +1,44 @@
 import Location from "./models/location.js";
+import { Sequelize, Op } from "sequelize";
 class LocationService {
     constructor({ locationRepository, sequelize }) {
         this.locationRepository = locationRepository;
         this.sequelize = sequelize;
+        this.Location = this.sequelize.models.Location;
     }
+
+    async getUnMatchLocation(filter = {}) {
+        try {
+            const locations = await this.Location.findAll({
+                where: {
+                    match: false,
+                    listingId: {
+                        [Op.or]: [null, ''], // Matches null or empty string
+                    },
+                },
+                ...filter, // Allows additional filtering criteria
+            });
+            return locations || [];
+        } catch (error) {
+            console.error('Error fetching locations:', error);
+            throw new Error('Failed to fetch locations');
+        }
+    }
+
+    async getMatchLocation() {
+        try {
+            const locations = await this.Location.findAll({
+                where: {
+                    match: true,
+                },
+            });
+            return locations;
+        } catch (error) {
+            console.error('Error fetching locations:', error);
+            throw new Error('Failed to fetch locations');
+        }
+    }
+
 
     async getAllLocations() {
         try {
@@ -19,55 +54,32 @@ class LocationService {
         return location;
     }
 
-    async createLocation(listingInput, { transaction } = {},) {
+    async createLocation(locationInput, { context }) {
+        console.log("Context in createLocation:", context);
+        if (!locationInput) {
+            throw new Error('Location input is required but was not provided.');
+        }
+
+        console.log('Location Input received in createLocation:', locationInput);
+        console.log('Context in createLocation:', context);
+
         try {
-            const { location, locationId } = listingInput;
-            console.log('Received listingInput:', listingInput);
-            // if (!listingInput.context?.isListingCreation) {
-            // throw new Error('Cannot create location without listing context');
-            //}
+            // Combine locationInput with any additional context
+            const location = await this.locationRepository.create({// Error creating location: Error: Failed to create location.
+                ...locationInput,
+                listingId: context.listingId || null
 
-            // Validate that location data is provided  
-            //if (!location || typeof location !== 'object' || !location.name) {
-            // throw new Error('Location data must be provided with at least a name.');
-            //}
-
-            // Additional property checks  
-            const requiredProps = ['latitude', 'longitude', 'address', 'city', 'state', 'country', 'zipCode'];
-            for (const prop of requiredProps) {
-                if (!location[prop]) {
-                    throw new Error(`Location data must include ${prop}.`);
-                }
-            }
-
-            let existingLocation = locationId
-                ? await this.locationRepository.findByPk(locationId, { transaction })
-                : null;
-
-            if (!existingLocation) {
-                // Create new location if it doesn't exist  
-                existingLocation = await this.locationRepository.create({
-                    name: location.name,
-                    latitude: location.latitude,
-                    longitude: location.longitude,
-                    address: location.address,
-                    city: location.city,
-                    state: location.state,
-                    country: location.country,
-                    zipCode: location.zipCode,
-                    radius: location.radius,
-                    units: location.units,
-                }, { transaction });
-            }
-
-            return existingLocation; // Return the location (existing or newly created)  
-
+            });
+            console.log("Created location:", location);
+            return location;
         } catch (error) {
             console.error('Error creating location:', error);
-            if (transaction) await transaction.rollback(); // Rollback transaction  
-            throw error; // Re-throw the error for further handling  
+            throw new Error('Failed to create location.');
         }
     }
+
 }
+
+
 
 export default LocationService;

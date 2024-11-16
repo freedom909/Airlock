@@ -1,60 +1,49 @@
 
-
+import { AuthenticationError } from '../infrastructure/utils/errors.js';
 import Listing from '../services/models/listing.js';
 import dbConfig from '../services/DB/dbconfig.js';
 import Location from '../services/models/location.js';
 
 
+
 const resolvers = {
     Mutation: {
-        createLocation: async (_, { input }, { dataSources, userId }) => {
-            // if (!userId) throw new AuthenticationError('User not authenticated');
-            // if (!isHostOfListing ||!isAdmin) {
-            //   throw new AuthenticationError(`you don't have right to update this list`)
-            // }
+        createLocation: async (_, { locationInput }, { context, dataSources }) => {
+            console.log("Location Input received in createLocation:", locationInput); // Log locationInput
+            // Log context to make sure it is correctly passed
+            console.log('Context in createLocation:', context);
+            if (!locationInput) {  //"Location input is required but was not provided.",
+                throw new Error("Location input is required but was not provided.");
+            }
+            const { isListingCreation } = context || {};  // Get the context property
+
+            // If context is undefined or doesn't have `isListingCreation`, throw an error
+            if (!isListingCreation) {
+                throw new AuthenticationError("Cannot create location without proper listing context.");
+            }
+
+            console.log("Context received for location creation:", context);
+
+            // Proceed with the rest of the logic to create the location
             const { locationService } = dataSources;
-            // Default empty object to prevent destructuring error
-            const { locationInput = {} } = input || {};
-            // Destructure the context from locationInput
-            const { context: locationContext } = locationInput;
-            console.log("Location Input:", locationInput);// {}, it is empty object
-            if (!locationInput) {
-                throw new Error('Location input is required');
-            }
-
-            if (context.isListingCreation) {
-                throw new AuthenticationError(`you don't have right to create a new location`)
-            }
-            const requireFields = ['name', 'latitude', 'longitude', 'address', 'city', 'state', 'country', 'zipCode', 'radius', 'units'];
-            for (let prop of requireFields) {
-                if (!locationInput[prop]) {
-                    throw new Error(`Location data must include ${prop}.`);
-                }
-                console.log('Input received:', input); // TypeError: Cannot destructure property 'name' of 'input' as it is undefined.
-
-
-                try {
-                    console.log('Arguments received:', input); // Check if input is defined
-                    console.log('Context:', context); // Check the context for necessary flags
-
-                    // Destructure fields from input
-                    const { name, latitude, longitude, address, city, state, country, zipCode, radius, units } = input;
-
-                    // Validate input fields
-                    if (!name || !latitude || !longitude || !address || !city || !state || !country || !zipCode || !radius || !units) {
-                        throw new Error('All fields are required for creating a location.');
-                    }
-
-                    const newLocation = await locationService.createLocation(name, latitude, longitude, address, city, state, country, zipCode, radius, units);
-                    return newLocation; // Return the newly created location
-
-                } catch (error) {
-                    console.error('Error creating location:', error);
-                    throw new Error('Failed to create location');
+            const requiredFields = ['name', 'latitude', 'longitude', 'address', 'city', 'state', 'country', 'zipCode', 'radius', 'units'];
+            for (const field of requiredFields) {
+                if (!locationInput[field]) {
+                    throw new Error(`Location data must include ${field}.`);
                 }
             }
 
+            try {
+                const newLocation = await locationService.createLocation(locationInput);
+                return newLocation; // Return the newly created location
+            } catch (error) {
+                console.error("Error creating location:", error);
+                throw new Error("Failed to create location");
+            }
         },
+
+
+
         deleteLocation: (_, { id }, { dataSources, user }) => {
             // if (!userId) throw new AuthenticationError('User not authenticated');
             // if (!isHostOfListing || !isAdmin) {

@@ -7,7 +7,7 @@ class Amenity extends Model { }
 
 Amenity.init({
   id: {
-    type: DataTypes.STRING,
+    type: DataTypes.UUID, // Change to UUID if you want to keep them consistent  
     primaryKey: true,
   },
   category: {

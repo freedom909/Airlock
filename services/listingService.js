@@ -577,7 +577,6 @@ class ListingService {
   }
 
   async createListing(listingData, transaction) {
-
     try {
       const {
         title,
@@ -590,27 +589,20 @@ class ListingService {
         pictures,
         numOfBeds,
         costPerNight,
-        locationType, // Make sure locationType is provided in listingInfo  
+        locationType,
         listingStatus,
         amenities = []
-
       } = listingData;
-      console.log("Resolved Location ID:", resolvedLocationId);
 
-      if (!uuidValidate(resolvedLocationId)) {
-        throw new Error('Invalid locationId provided'); //Error creating listing: Error: Invalid locationId provided
-      }
-      console.log('Creating new listing with Data:', listingData);
-      if (!uuidValidate(resolvedLocationId)) {
-        throw new Error('Invalid locationId provided');
-      }
+      console.log("Resolved Location ID:", resolvedLocationId);
 
       // Validate the locationId for UUID format  
       if (!resolvedLocationId || !uuidValidate(resolvedLocationId)) {
         throw new Error('Invalid locationId supplied. Expected a valid UUID.');
       }
-      console.log("Resolved Location ID:", resolvedLocationId);
-      console.log("Listing data to create:", listingData);
+
+      console.log("Listing data before to create:", listingData);
+
       const newListing = await Listing.create({
         title,
         locationId: resolvedLocationId,
@@ -622,13 +614,19 @@ class ListingService {
         pictures,
         numOfBeds,
         costPerNight,
-        locationType, // Ensure locationType is passed in listingInfo  
+        locationType,
         listingStatus,
       }, { transaction });
-      // Handle amenities association if amenities array is provided
+
+      console.log("New Listing created:", newListing);
+
+      // Handle amenities association if amenities array is provided  
       if (amenities.length > 0) {
         await this.database.ListingAmenities.bulkCreate(
-          amenities.map(amenityId => ({ listingId: newListing.id, amenityId })),
+          amenities.map(amenityId => ({
+            listingId: newListing.id,  // Ensure newListing exists and is valid  
+            amenityId
+          })),
           { transaction }
         );
       }
@@ -636,12 +634,13 @@ class ListingService {
       return newListing;
 
     } catch (error) {
-      console.error('Error creating listing:', error);
+      console.error('Error creating listing:', error.message || error);
       throw new GraphQLError('Error creating listing', {
         extensions: { code: 'INTERNAL_SERVER_ERROR' }
       });
     }
   }
+
   async getLocations() {
     try {
       const query = `SELECT * FROM locations`

@@ -10,14 +10,15 @@ import initializeLocationContainer from '../services/DB/initLocationContainer.js
 import cors from 'cors';
 // import dotenv from 'dotenv';
 import resolvers from './resolvers.js';
+import ListingService from '../services/listingService.js';
 
 // dotenv.config();
 
 const typeDefs = gql(readFileSync('./schema.graphql', { encoding: 'utf-8' }));
+
 const startApolloServer = async () => {
   try {
     const mysqlContainer = await initializeLocationContainer({ services: [] });
-
     const app = express();
     const httpServer = http.createServer(app);
 
@@ -36,12 +37,24 @@ const startApolloServer = async () => {
           }
         }
       ],
-      context: async ({ req }) => ({
-        token: req.headers.authorization || '',
-        dataSources: {
-          locationService: mysqlContainer.resolve('locationService')
-        }
-      })
+      context: async ({ req }) => {
+        // Extract user ID or listing ID based on request details
+        const userId = req.userId;
+        const listingId = req.body?.variables?.input?.listingId; // Access listingId from request input if provided
+
+        return {
+          userId,
+          context: {
+            isListingCreation: true,
+            userRole: 'host',
+            listingId: listingId || null // Include listingId if it exists, or null if not provided
+          },
+          dataSources: {
+            listingService: mysqlContainer.resolve('listingService'),
+            locationService: mysqlContainer.resolve('locationService')
+          }
+        };
+      }
     });
 
     await server.start();
@@ -51,20 +64,31 @@ const startApolloServer = async () => {
       cors(),
       express.json(),
       expressMiddleware(server, {
-        context: async ({ req }) => ({
-          token: req.headers.authorization || '',
-          dataSources: {
-            locationService: mysqlContainer.resolve('locationService')
-          }
-        })
-      }
-      ));
+        context: async ({ req }) => {
+          const userId = req.userId;
+          const listingId = req.body?.variables?.input?.listingId;
 
-    httpServer.listen({ port: 4140 }, () =>
-      console.log('Server is running on http://localhost:4140/graphql')
+          return {
+            userId,
+            context: {
+              isListingCreation: true,
+              userRole: 'host',
+              listingId: listingId || null
+            },
+            dataSources: {
+              listingService: mysqlContainer.resolve('listingService'),
+              locationService: mysqlContainer.resolve('locationService')
+            }
+          };
+        }
+      })
     );
+
+    await new Promise((resolve) => httpServer.listen({ port: 4140 }, resolve));
+    console.log(`Server is running on http://localhost:4140/graphql`);
   } catch (error) {
-    console.error('Error starting Apollo Server:', error);
+    console.error('Failed to start Apollo Server:', error);
   }
 };
+
 startApolloServer();

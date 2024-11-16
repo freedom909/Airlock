@@ -17,7 +17,7 @@ ListingAmenities.init({
     allowNull: false,
   },
   amenityId: {
-    type: DataTypes.STRING,
+    type: DataTypes.UUID,
     allowNull: false,
   },
   createdAt: {

@@ -40,13 +40,23 @@ const startApolloServer = async () => {
           }
         }
       ],
-      context: async ({ req }) => ({
-        token: req.headers.authorization || '',
-        dataSources: {
-          listingService: mysqlContainer.resolve('listingService'),
-          locationService: mysqlContainer.resolve('locationService')
-        },
-      })
+      context: async ({ req, res }) => {
+        const userId = req.userId
+        // Implement logic to extract user ID from the incoming request token
+        // and populate the userId and context with relevant information
+        return {
+          userId,
+          context: {
+            isListingCreation: true, // Set this flag so it's sent to the location subgraph
+            userRole: 'host',
+          },
+          dataSources: {
+            listingService: mysqlContainer.resolve('listingService'),
+            locationService: mysqlContainer.resolve('locationService')
+
+          }
+        }
+      }
     });
 
     await server.start();
@@ -56,13 +66,23 @@ const startApolloServer = async () => {
       cors(),
       express.json(),
       expressMiddleware(server, {
-        context: async ({ req }) => ({
-          token: req.headers.authorization || '',
-          dataSources: {
-            listingService: mysqlContainer.resolve('listingService'),
-            locationService: mysqlContainer.resolve('locationService')
-          },
-        })
+        context: async ({ req, res }) => {
+          const userId = req.userId
+          // Implement logic to extract user ID from the incoming request token
+          // and populate the userId and context with relevant information
+          return {
+            userId,
+            context: {
+              isListingCreation: true, // Set this flag so it's sent to the location subgraph
+              userRole: 'host',
+            },
+            dataSources: {
+              listingService: mysqlContainer.resolve('listingService'),
+              locationService: mysqlContainer.resolve('locationService')
+
+            }
+          }
+        }
       })
     );
 

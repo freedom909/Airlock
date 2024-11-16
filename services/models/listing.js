@@ -9,7 +9,6 @@ class Listing extends Model { }
 
 Listing.init({
   id: {
-
     type: DataTypes.UUID,         // Use UUID as the ID type
     defaultValue: DataTypes.UUIDV4,      // Automatically generate UUID for new records
     primaryKey: true,
