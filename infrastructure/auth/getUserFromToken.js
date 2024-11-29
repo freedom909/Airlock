@@ -1,6 +1,6 @@
-import pkg from 'jsonwebtoken';
-const { verify } = pkg;
-
+//import pkg from 'jsonwebtoken';
+//const { verify } = pkg;
+import jwt from 'jsonwebtoken'
 // Secret key for verifying tokens (replace this with your actual secret)
 const JWT_SECRET = process.env.JWT_SECRET || 'good';
 
@@ -8,8 +8,9 @@ const JWT_SECRET = process.env.JWT_SECRET || 'good';
 const getUserFromToken = (token) => {
   try {
     if (token) {
-      return verify(token, JWT_SECRET); // Verify the token using the secret key
-      console.log('user: ' + JSON.stringify(token)); // Return the user object
+      const user = jwt.verify(token, JWT_SECRET); // Verify the token using the secret key
+      console.log('User extracted from token:', user); // Optional: Log user info for debugging
+      return user; // Return the user object
     }
     return null;
   } catch (error) {

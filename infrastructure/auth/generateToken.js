@@ -5,7 +5,7 @@ const { sign } = pkg;
 const JWT_SECRET = process.env.JWT_SECRET || 'good';
 
 // Function to generate JWT token
-function generateToken(user) {
+async function generateToken(user) {
   const payload = {
     userId: user._id.toString(), // Assuming user has an _id field
     email: user.email,
@@ -17,4 +17,4 @@ function generateToken(user) {
   return token;
 }
 
-export default  generateToken ;
+export default generateToken;

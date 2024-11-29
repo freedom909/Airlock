@@ -349,7 +349,17 @@ const resolvers = {
       }
     },
 
-    createListing: async (_, { input }, { dataSources }) => {
+    createListing: async (_, { input }, { dataSources, context, userId }) => {
+      //if (!userId) throw new AuthenticationError('User not authenticated');
+      //if (!isHostOfListing || !isAdmin) {
+      //throw new AuthenticationError(`you don't have right to delete this list`)
+      //}
+      console.log("Context received in createListing:", context);
+
+      if (!context || !context.dataSources) {
+        throw new Error("Invalid context or dataSources missing.");
+      }
+
       const { locationService, listingService } = dataSources;
       let locationId;
 
@@ -371,7 +381,7 @@ const resolvers = {
           throw new Error("Invalid locationId.");
         }
       }
-      const mockUser = "66dc30358791fb6291ca94d1"
+
       // Logging parameters before listing creation  
       console.log("Listing data to create:", {
         description: input.description,
@@ -384,17 +394,20 @@ const resolvers = {
         numOfBeds: input.numOfBeds,
         checkInDate: input.checkInDate,
         checkOutDate: input.checkOutDate,
-        hostId: mockUser,
+        hostId: input.hostId,
         locationId: locationId,
       });
 
       // Transaction for listing creation  
       const transaction = await listingService.sequelize.transaction();
       try {
+        if (!input.hostId || !uuidValidate(input.hostId)) {
+          throw new Error("Invalid hostId.");
+        }
         const listingInput = {
           ...input,
           locationId,
-          hostId: mockUser,
+          hostId: input.hostId,
         };
         console.log("Listing input before creation:", listingInput);
 
@@ -434,7 +447,7 @@ const resolvers = {
       // }
       const { id, listingStatus } = input;
       console.log('Input received:', input);
-
+      const { listingService } = dataSources;
       try {
         const listing = await Listing.findByPk(id);
         console.log('Listing', listing);
@@ -467,13 +480,6 @@ const resolvers = {
         };
       }
     },
-
-
-
-
-
-
-
 
     updateListing: async (_, { listingId, listing }, { dataSources, userId }) => {
       // if (!userId) throw new AuthenticationError('User not authenticated');

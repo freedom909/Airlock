@@ -1,5 +1,6 @@
 
 import UserRepository from '../repositories/userRepository.js';
+import { RESTDataSource } from "@apollo/datasource-rest";
 import { hashPassword, checkPassword } from '../../infrastructure/helpers/passwords.js'; // Adjust the path accordingly
 import { GraphQLError } from 'graphql';
 import bcrypt from 'bcrypt';
@@ -7,12 +8,20 @@ import jwt from 'jsonwebtoken';
 import { loginValidate } from '../../infrastructure/helpers/loginValidator.js';
 import dotenv from 'dotenv';
 import tokenService from './tokenService.js';
+import OAuthService from './oAuthService.js';
+
 dotenv.config();
 
 
-class LocalAuthService {
-  constructor({ mongodb }) {
-    this.userRepository = new UserRepository({ mongodb });
+class LocalAuthService extends RESTDataSource {
+  constructor({ userRepository }) {
+    super();
+    this.baseURL = "http://localhost:4000/";
+    if (!userRepository) {
+      throw new Error("UserRepository not provided to UserService");
+    }
+    this.userRepository = userRepository;
+
   }
 
   async authenticateUser(email, password) {
@@ -23,40 +32,56 @@ class LocalAuthService {
     return user; // Return user object for further processing
   }
 
-  async registerUser(userData) {
+  async register(userData) {
     // Similar to previous example
     const hashedPassword = await this.userRepository.hashPassword(userData.password);
     const user = await this.userRepository.insertUser({ ...userData, password: hashedPassword });
 
-    const token = await this.userRepository.generateToken(user);
+
+    const token = await this.userRepository.generateToken({ _id: user.insertedId }); // Pass the correct _id
     await this.userRepository.sendVerificationEmail(userData.email, token);
 
     return user;
   }
 
-  async login({ email, password }) {
-    // Validate email and password
-    await loginValidate(email, password);
-
+  async login(email, password) {
     // Find the user by email
-    const user = await this.userRepository.getUserByEmailFromDb(email);
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      throw new GraphQLError("Invalid email or password", { extensions: { code: "UNAUTHORIZED" } });
-    }
+    const user = await this.authenticateUser(email, password);
 
-    // Check if the password matches
-    const passwordMatch = await checkPassword(password, user.password);
-    if (!passwordMatch) {
-      throw new GraphQLError("Incorrect password", { extensions: { code: "BAD_USER_INPUT" } });
+    if (!user) {
+      throw new GraphQLError("Incorrect password or email", {
+        extensions: { code: "BAD_USER_INPUT" },
+      });
     }
 
     try {
       // Generate JWT token
-      const token = tokenService.generateToken({ userId: user._id.toString() });
-      return { token, user };
+      const payload = { id: user._id.toString() };
+      const role = user.role;
+      const token = jwt.sign(payload, "good", { expiresIn: '1h' });
+      // Return the token and user info
+      return {
+        code: 200,
+        success: true,
+        message: "Login successful",
+        token: token,
+        userId: user._id.toString(),
+        role: role,
+      };
     } catch (e) {
       console.error("Error during login:", e);
-      throw new GraphQLError("Login failed", { extensions: { code: "INTERNAL_SERVER_ERROR" } });
+
+      // Handle specific error codes
+      if (e.code === 11000) {
+        throw new GraphQLError("Email can't be found", {
+          extensions: { code: "BAD_USER_INPUT" },
+        });
+      }
+
+      // Re-throw the error if it's not specifically handled
+      throw new GraphQLError("Login failed", {
+        extensions: { code: "INTERNAL_SERVER_ERROR" },
+      });
     }
   }
 
@@ -180,6 +205,9 @@ class LocalAuthService {
       console.error("Error deactivating user account:", error);
       throw new GraphQLError("Error deactivating user account", { extensions: { code: "INTERNAL_SERVER_ERROR" } });
     }
+  }
+  async getUserByEmailFromDb(email) {
+    return this.userRepository.findOne({ email });
   }
 
   async updateUserRole(userId, role) {

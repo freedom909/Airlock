@@ -576,68 +576,76 @@ class ListingService {
     }
   }
 
-  async createListing(listingData, transaction) {
+  async createListing(_, { input }, context) {
+    const { dataSources } = context;
+    console.log(`Creating new listing:`, dataSources)
+    const { locationService, listingService } = dataSources;
+    let locationId;
+
+    if (input.locationInput) {
+      // Handle new location  
+      console.log("New location input received", input.locationInput);
+      const context = { isListingCreation: true, userRole: 'host', listingId: null };
+      const newLocation = await locationService.createLocation(input.locationInput, { context });
+
+      if (!newLocation || !newLocation.id) {
+        throw new Error("Failed to create location.");
+      }
+
+      locationId = newLocation.id;
+      console.log("New location created with ID:", locationId);
+    } else {
+      locationId = input.locationId;
+      if (!locationId || !uuidValidate(locationId)) {
+        throw new Error("Invalid locationId.");
+      }
+    }
+
+    // Logging parameters before listing creation  
+    console.log("Listing data to create:", {
+      description: input.description,
+      pictures: input.pictures,
+      costPerNight: input.costPerNight,
+      locationType: input.locationType,
+      listingStatus: input.listingStatus,
+      title: input.title,
+      price: input.price,
+      numOfBeds: input.numOfBeds,
+      checkInDate: input.checkInDate,
+      checkOutDate: input.checkOutDate,
+      hostId: input.hostId,
+      locationId: locationId,
+    });
+
+    // Transaction for listing creation  
+    const transaction = await listingService.sequelize.transaction();
     try {
-      const {
-        title,
-        locationId: resolvedLocationId,
-        checkInDate,
-        checkOutDate,
-        isFeatured,
-        hostId,
-        description,
-        pictures,
-        numOfBeds,
-        costPerNight,
-        locationType,
-        listingStatus,
-        amenities = []
-      } = listingData;
-
-      console.log("Resolved Location ID:", resolvedLocationId);
-
-      // Validate the locationId for UUID format  
-      if (!resolvedLocationId || !uuidValidate(resolvedLocationId)) {
-        throw new Error('Invalid locationId supplied. Expected a valid UUID.');
+      // Additional input validation  
+      if (!input.hostId || !uuidValidate(input.hostId)) {
+        throw new Error("Invalid hostId.");
       }
 
-      console.log("Listing data before to create:", listingData);
+      const listingInput = {
+        ...input,
+        locationId,
+        hostId: input.hostId,
+      };
 
-      const newListing = await Listing.create({
-        title,
-        locationId: resolvedLocationId,
-        checkInDate,
-        checkOutDate,
-        isFeatured,
-        hostId,
-        description,
-        pictures,
-        numOfBeds,
-        costPerNight,
-        locationType,
-        listingStatus,
-      }, { transaction });
+      const newListing = await listingService.createListing(listingInput, { transaction });
+      // Assign details to the new listing's location and commit...  
 
-      console.log("New Listing created:", newListing);
-
-      // Handle amenities association if amenities array is provided  
-      if (amenities.length > 0) {
-        await this.database.ListingAmenities.bulkCreate(
-          amenities.map(amenityId => ({
-            listingId: newListing.id,  // Ensure newListing exists and is valid  
-            amenityId
-          })),
-          { transaction }
-        );
-      }
-
-      return newListing;
-
+      // Commit transaction  
+      await transaction.commit();
+      return {
+        code: 200,
+        success: true,
+        message: 'Listing successfully created!',
+        listing: newListing,
+      };
     } catch (error) {
-      console.error('Error creating listing:', error.message || error);
-      throw new GraphQLError('Error creating listing', {
-        extensions: { code: 'INTERNAL_SERVER_ERROR' }
-      });
+      await transaction.rollback();
+      console.error("Error creating listing:", error);
+      throw new GraphQLError("Listing creation failed.");
     }
   }
 

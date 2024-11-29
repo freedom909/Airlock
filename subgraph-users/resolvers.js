@@ -6,108 +6,99 @@ import { loginValidate, passwordValidate } from '../infrastructure/helpers/login
 import runValidations from '../infrastructure/helpers/runValidations.js';
 import validateInviteCode from '../infrastructure/helpers/validateInvitecode.js';
 import generateToken from '../infrastructure/auth/generateToken.js';
+import LocalAuthService from '../services/userService/localAuthService.js';
 
 // Config and external dependencies
 dotenv.config();
 
 // Utility function for error handling
-const createGraphQLError = (message, code) => new GraphQLError(message, { extensions: { code } });
-
-// Utility function for checking user existence
-const checkUserExistence = async (userService, userId) => {
-  const user = await userService.getUserFromDb(userId);
-  if (!user) {
-    throw createGraphQLError('User not found', 'NO_USER_FOUND');
-  }
-  return user;
-};
-
-// Utility function for caching data
-const getCachedData = async (context, cacheKey, fetchFunction, cacheDuration = 1000 * 60 * 60) => {
-  const cachedData = await context.cache.get(cacheKey);
-  if (cachedData) {
-    return cachedData;
-  }
-  const data = await fetchFunction();
-  await context.cache.set(cacheKey, data, cacheDuration);
-  return data;
-};
-// Config and external dependencies
-dotenv.config();
 const resolvers = {
-  Query: {
-    user: async (_, { id }, { dataSources }) => {
-      return checkUserExistence(dataSources.userService.localAuthService, id);
-    },
-    getUserByEmail: async (_, { email }, { dataSources }) => {
-      return dataSources.userService.localAuthService.getUserByEmailFromDb(email);
-    },
-    me: async (_, __, { dataSources, userId }) => {
-      if (!userId) {
-        throw new GraphQLError('User not authenticated', {
-          extensions: { code: 'BAD_REQUEST_ERROR' }
-        });
-      }
-      return checkUserExistence(dataSources.userService.localAuthService, userId);
-    },
-    getUsers: async (_, { id }, context) => {
-      const cacheKey = `user_${id}`;
-      return getCachedData(context, cacheKey, () =>
-        context.dataSources.userService.localAuthService.getUserFromDb(id)
-      );
-    },
-  },
-
   Mutation: {
-    signIn: async (_, { input: { email, password } }, { dataSources }) => {
-      const user = await dataSources.userService.localAuthService.getUserByEmailFromDb(email);
+    Query: {
+      user: async (_, { id }, { dataSources }) => {
+        const { localAuthService } = dataSources.userService;
+        const user = await localAuthService.getUserFromDb(id);
+        if (!user) {
+          throw new GraphQLError("No user found", {
+            extensions: { code: "NO_USER_FOUND" },
+          });
+        }
+        return user;
+      },
+      getUserByEmail: async (_, { email }, { dataSources }) => {
+        const { localAuthService } = dataSources.userService;
+        return localAuthService.getUserByEmailFromDb(email);
+      },
+      me: async (_, __, { dataSources, userId }) => {
+        const { localAuthService } = dataSources.userService;
+        if (!userId) {
+          throw new GraphQLError("User not authenticated", {
+            extensions: { code: ApolloServerErrorCode.BAD_REQUEST_ERROR },
+          });
+        }
+        const user = await localAuthService.getUserFromDb(userId);
+        return user;
+      },
+    },
+
+
+    signIn: async (_, { input: { email, password } }, context) => {
+      console.log('Resolver context:', context); // Check the context structure
+      const { dataSources } = context;
+      console.log('dataSources:', dataSources); // Debugging log
+      if (!dataSources || !dataSources.userService) {
+        throw new Error('dataSources.userService is not defined');
+      }
+      const { localAuthService } = dataSources.userService;
+      const user = await localAuthService.getUserByEmailFromDb(email);
       if (!user) {
-        throw new GraphQLError('User not found', {
-          extensions: { code: 'USER_NOT_FOUND' }
+        throw new GraphQLError("User not found", {
+          extensions: { code: "USER_NOT_FOUND" },
         });
       }
+      // Validate email and password
       if (!loginValidate(email, password)) {
-        throw new GraphQLError('Invalid email or password', {
-          extensions: { code: 'INVALID_LOGIN' }
+        throw new GraphQLError("Invalid email or password", {
+          extensions: { code: "INVALID_LOGIN" },
         });
       }
-      return dataSources.userService.localAuthService.login({ email, password });
+      return await localAuthService.login({ email, password });
     },
 
     signUp: async (_, { input }, { dataSources }) => {
+      if (!dataSources || !dataSources.userService) {
+        throw new Error('dataSources.userService is not defined');
+      }
+
+      const { localAuthService } = dataSources.userService;
+
+      // Proceed with the sign-up logic
       const { email, password, name, nickname, role, inviteCode, picture } = input;
-      console.log('Received input:', input);  // Add this line for debugging
+
       // Run validations
       await runValidations(input);
 
       // Additional role validation
-      if (role !== 'GUEST' && role !== 'HOST') {
-        throw new GraphQLError('Invalid role', {
-          extensions: { code: 'BAD_USER_INPUT' },
-        });
-      }
-
       if (role === 'HOST') {
         const isValidInviteCode = await validateInviteCode(inviteCode);
-        console.log('Invite code validation result:', isValidInviteCode);  // Debugging line
         if (!isValidInviteCode) {
           throw new GraphQLError('Invalid invite code', {
-            extensions: { code: 'BAD_USER_INPUT' }
+            extensions: { code: 'BAD_USER_INPUT' },
           });
         }
       }
 
-      // Ensure dataSources.userService is available
-      const { userService } = dataSources;
-      console.log('dataSources');  // Add this line for debugging
-      if (!userService) {
-        throw new GraphQLError('UserService not available', {
-          extensions: { code: 'INTERNAL_SERVER_ERROR' }
-        });
-      }
       try {
-        const user = userService.localAuthService.registerUser({ email, password, name, nickname, role, picture });
-        const token = await dataSources.userService.tokenService.generateToken({ id: user._id, role: user.role });
+        const user = await localAuthService.register({
+          email,
+          password,
+          name,
+          nickname,
+          role,
+          picture,
+        });
+
+        const token = await generateToken({ id: user._id, role: user.role });
 
         return {
           token,
@@ -122,71 +113,171 @@ const resolvers = {
       }
     },
 
-
-    logout: async (_, __, { session }) => {
-      if (session) {
-        return new Promise((resolve, reject) => {
-          session.destroy(err => {
-            if (err) {
-              return reject(new GraphQLError('Failed to terminate the session', {
-                extensions: { code: 'FAILED_TO_TERMINATE_SESSION' }
-              }));
-            }
-            resolve(true);
-          });
+    logout: (_, __, context) => {
+      if (context.session) {
+        context.session.destroy(err => {
+          if (err) {
+            throw new GraphQLError('Failed to terminate the session', { extensions: { code: 'FAILED_TO_TERMINATE_SESSION' } });
+          }
         });
       }
       return true;
     },
 
     forgotPassword: async (_, { email }, { dataSources }) => {
-      if (!email) {
-        throw new GraphQLError('Email is required', {
-          extensions: { code: 'BAD_USER_INPUT' }
+      try {
+        console.log('Received email:', email); // Debugging line
+        //  await loginValidate(email);
+        const { localAuthService } = dataSources.userService;
+        // Validate the email input
+        if (!email) {
+          throw new GraphQLError("Email is required", {
+            extensions: { code: "BAD_USER_INPUT" },
+          });
+        }
+        // Retrieve the user by email from the database
+        const user = await localAuthService.getUserByEmailFromDb(email);
+        if (!user) {
+          throw new GraphQLError("User not found", {
+            extensions: { code: "BAD_USER_INPUT" },
+          });
+        }
+        // Generate a reset password token
+        const token = generateToken(user);
+        console.log('Generated token:', token); // Debugging line
+        await localAuthService.sendLinkToUser(user.email, token);
+        console.log('Email sent to user:', user.email); // Debugging line
+        // Return the token and user info
+        const response = {
+          code: 200,
+          success: true,
+          message: "Password reset link sent successfully",
+          email: user.email,
+        }
+        console.log('Response:', response); // Debugging line
+        return response;
+      } catch (error) {
+        console.error('Error in forgotPassword resolver:', error);
+        throw new GraphQLError('Internal Server Error', {
+          extensions: { code: 'INTERNAL_SERVER_ERROR' },
         });
       }
-
-      const user = await dataSources.userService.localAuthService.getUserByEmailFromDb(email);
-      if (!user) {
-        throw new GraphQLError('User not found', {
-          extensions: { code: 'BAD_USER_INPUT' }
-        });
-      }
-
-      const token = generateToken(user);
-      await dataSources.userService.localAuthService.sendLinkToUser(user.email, token);
-      return { code: 200, success: true, message: 'Password reset link sent successfully', email: user.email };
     },
 
     updatePassword: async (_, { userId, password, newPassword }, { dataSources }) => {
+      //retrieve the user from the db
       if (!userId) {
-        throw new GraphQLError('User ID is required', {
-          extensions: { code: 'USER_ID_REQUIRED' }
+        return new GraphQLError("User ID is required", { extensions: { code: "USER_ID_REQUIRED" } });
+      }
+      const { localAuthService } = dataSources.userService;
+      const user = await userService.findById(userId);// "message": "User not found",
+      console.log('User retrieved from DB:', user);
+      if (!user) {
+        throw new GraphQLError("User not found", {
+          extensions: { code: "USER_NOT_FOUND" },
         });
       }
+      //validate the password
 
-      const user = await checkUserExistence(dataSources.userService.localAuthService, userId);
-
-      await passwordValidate(newPassword);
+      await passwordValidate(newPassword);//"Password must contain at least 8 characters and include a number",
       await passwordValidate(password);
-
-      const passwordMatch = await bcrypt.compare(password, user.password);
+      // validate the is matching
+      const passwordMatch = bcrypt.compareSync(password, user.password);
+      console.log('Password match result:', passwordMatch);
       if (!passwordMatch) {
-        throw new GraphQLError('Invalid password', {
-          extensions: { code: 'INVALID_PASSWORD' }
+        throw new GraphQLError("Invalid password", {
+          extensions: { code: "INVALID_PASSWORD" },
         });
       }
 
       const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-      return dataSources.userService.localAuthService.editPassword(userId, hashedNewPassword);
+      const updatedUser = await localAuthService.editPassword(userId, hashedNewPassword);
+      console.log('User after password update:', updatedUser);
+      return updatedUser;
     },
 
-    loginWithOAuth: async (_, { provider, token }, { dataSources }) => {
-      return dataSources.userService.oauthService.loginWithProvider({ provider, token });
+    generateInviteCode: async (_, { }, { dataSources, user }) => {
+      // Ensure that only hosts can generate invite codes
+      if (user.role !== 'HOST') {
+        throw new GraphQLError("Only hosts can generate invite codes", {
+          extensions: { code: "FORBIDDEN" },
+        });
+      }
+      const { localAuthService } = dataSources.userService;
+      const inviteCode = await localAuthService.generateInviteCode(email, user);
+      return { inviteCode };
+    },
+
+    sendInviteCode: async (_, { email }, { dataSources }) => {
+      if (user.role !== 'HOST') {
+        throw new GraphQLError("Only hosts can send invite codes", {
+          extensions: { code: "FORBIDDEN" },
+        });
+      }
+      const { localAuthService } = dataSources.userService;
+      const inviteCode = await localAuthService.generateInviteCode(email);
+      await localAuthService.sendInviteCode(email, inviteCode)
+      return { success: true };
+
+    },
+
+    requestResetPassword: async (_, { email }, { dataSources }) => {
+      const { localAuthService } = dataSources.userService;
+      // Validate the email input (optional step)
+      if (!email) {
+        throw new GraphQLError("Email is required", {
+          extensions: { code: "BAD_USER_INPUT" },
+        });
+      }
+      // Retrieve the user by email from the database
+      const user = await localAuthService.getUserByEmailFromDb(email);
+      if (!user) {
+        throw new GraphQLError("User not found", {
+          extensions: { code: "BAD_USER_INPUT" },
+        });
+      }
+      const token = await localAuthService.createResetPasswordToken(user.id);
+      await sendResetPasswordEmail(user.email, token);
+      return {
+        code: 200,
+        success: true,
+        message: "Password reset link sent successfully",
+      };
     },
   },
 
-  // ... rest of the resolvers remain unchanged
-};
+  _Entity: {
+    __resolveType(entity) {
+      if (entity.__typename === 'Host') {
+        return 'Host';
+      }
+      if (entity.__typename === 'Guest') {
+        return 'Guest';
+      }
+      return null; // GraphQLError is thrown
+    },
+  },
+
+  User: {
+    __resolveType(user) {
+      if (user.role === "HOST") {
+        return "Host";
+      } else if (user.role === "GUEST") {
+        return "Guest";
+      }
+      return null;
+    },
+  },
+  Host: {
+    __resolveReference: (user, { dataSources }) => {
+      return dataSources.userService.getUserFromDb(user.id);
+    },
+  },
+  Guest: {
+    __resolveReference: (user, { dataSources }) => {
+      return dataSources.userService.getUserFromDb(user.id);
+    },
+  }
+}
 
 export default resolvers;

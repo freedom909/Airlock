@@ -1,6 +1,10 @@
 extend schema
-  @link(url: "https://specs.apollo.dev/federation/v2.7",
-  import: ["@key", "@shareable", "@external", "cacheControl"])
+
+
+  @link(
+    url: "https://specs.apollo.dev/federation/v2.8",
+    import: ["@key", "@shareable", "@external"]
+  )
 
 # Enums
 enum Role {
@@ -41,21 +45,21 @@ interface User @key(fields: "id") {
 }
 
 # User Types
-type Guest implements User @key(fields: "id") @cacheControl(maxAge: 6000) {
+type Guest implements User @key(fields: "id") {
   id: ID!
   name: String!
-  picture: String @cacheControl(maxAge: 300)
-  nickname: String! @cacheControl(maxAge: 300)
-  role: Role! @cacheControl(maxAge: 300)
+  picture: String 
+  nickname: String! 
+  role: Role! 
   provider: String!
 }
 
-type Host implements User @key(fields: "id") @cacheControl(maxAge: 6000) {
+type Host implements User @key(fields: "id") {
   id: ID!
   name: String!
-  picture: String @cacheControl(maxAge: 300)
-  nickname: String! @cacheControl(maxAge: 300)
-  role: Role! @cacheControl(maxAge: 300)
+  picture: String 
+  nickname: String! 
+  role: Role! 
   provider: String!
   description: String @shareable
 }
@@ -89,9 +93,9 @@ input ThirdPartyLoginInput {
 
 # Authentication Responses
 type AuthPayload {
-  token: String! @cacheControl(maxAge: 3600)
-  userId: ID! @cacheControl(maxAge: 3600)
-  role: Role @cacheControl(maxAge: 3600)
+  token: String! 
+  userId: ID!
+  role: Role 
 }
 
 type SignInResponse implements Response {
@@ -149,7 +153,7 @@ type InviteCodeResponse implements Response {
 
 # Queries and Mutations
 type Mutation {
-  signUp(input: SignUpInput!): AuthPayload!
+  signUp(input: SignUpInput!): AuthPayload! 
   signIn(input: SignInInput!): SignInResponse!
   thirdPartyLogin(input: ThirdPartyLoginInput!): ThirdPartyLoginResponse!
   updateProfile(updateProfileInput: UpdateProfileInput): UpdateProfileResponse!
@@ -164,6 +168,7 @@ type Mutation {
 type Query {
   getUser(id: ID!): User @shareable
 }
+
 
 # Federation and Service-Related
 type _Service {
@@ -181,3 +186,10 @@ type Generator {
   createdBy: User! @shareable
   isActive: Boolean! @shareable
 }
+
+type LoginWithOAuth {
+  token: String!
+  userId: ID!
+  role: Role!
+}
+

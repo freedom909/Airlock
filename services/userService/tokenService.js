@@ -2,10 +2,15 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 
 class TokenService {
-    constructor(secretKey, expiresIn = '1h') {
+    constructor({ secretKey, expiresIn }) {
         this.secretKey = secretKey;
-        this.expiresIn = expiresIn;
+        this.expiresIn = expiresIn || '1h';
     }
+
+    generateToken(payload) {
+        return sign(payload, this.secretKey, { expiresIn: this.expiresIn });
+    }
+
 
     // Generate JWT Token
     generateToken(user) {

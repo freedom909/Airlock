@@ -1,28 +1,33 @@
 import mongoose from 'mongoose';
-<<<<<<< HEAD
-import Review from '../models/review.js';
-import User from '../models/user.js';
-
-mongoose.connect('mongodb://localhost:27017/air');
+import UserRepository from '../repositories/userRepository.js';
+import connectToMongoDB from './connectMongoDB.js';
+import User from '../models/user.js'; // Adjust path if needed
 
 (async () => {
     try {
-        const userId = '66dc30358791fb6291ca94d1';
-        const user = await User.findOne({ _id: userId });
-=======
-import User from '../models/user.js';  // Adjust path if needed
+        const mongodb = await connectToMongoDB();
 
-mongoose.connect('mongodb://localhost:27017/food');
+        const userRepo = new UserRepository({ mongodb });
 
-(async () => {
-    try {
-        const userId = 'user-8';
-        const user = await User.findOne({ id: userId }).exec();
->>>>>>> 7208d0b14898127668337df5b09b0b6a24f868f3
-        console.log('Fetched user:', user);
+        // Test `save`
+        const newUser = { nickname: 'testUser', email: 'test@example.com' };
+        const savedUser = await userRepo.save(newUser);
+        console.log('Saved User:', savedUser);
+
+        // Test `findOne`
+        const foundUser = await userRepo.findOne({ nickname: 'testUser' });
+        console.log('Found User:', foundUser);
+
+        // Test `findByIdAndUpdate`
+        const updatedUser = await userRepo.findByIdAndUpdate(savedUser._id, { email: 'updated@example.com' });
+        console.log('Updated User:', updatedUser);
+
+        // Test `findByIdAndDelete`
+        const deletedUser = await userRepo.findByIdAndDelete(savedUser._id);
+        console.log('Deleted User:', deletedUser);
     } catch (error) {
-        console.error('Error fetching user:', error);
+        console.error('Error:', error);
     } finally {
-        mongoose.connection.close();
+        await mongoose.disconnect();
     }
 })();

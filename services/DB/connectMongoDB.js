@@ -1,27 +1,20 @@
-import mongoose from 'mongoose';
+import pkg from 'mongodb';
+const { MongoClient } = pkg;
 import dotenv from 'dotenv';
-
 dotenv.config();
 
-const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017';
-const dbName = process.env.DB_NAME || 'air';
-console.log('MONGODB_URI:', mongoUri);
-console.log('DB_NAME:', dbName);
-
-let isConnected = false;
+const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/';
+const client = new MongoClient(mongoUri);
+const dbName = process.env.MONGO_DB_NAME;
+let mongodb;
 
 async function connectToMongoDB() {
-    if (!isConnected) {
-        try {
-            // Correctly setting the URI to include the database name  
-            await mongoose.connect(mongoUri + '/' + dbName);
-            isConnected = true;
-            console.log('Connected to MongoDB with Mongoose');
-        } catch (error) {
-            console.error('Error connecting to MongoDB:', error);
-            throw error; // Rethrow the error to handle it in the caller function  
-        }
+    if (!mongodb) {
+        await client.connect();
+        console.log('Connected to MongoDB');
+        mongodb = client.db(dbName);
     }
+    return mongodb;
 }
 
 export default connectToMongoDB;

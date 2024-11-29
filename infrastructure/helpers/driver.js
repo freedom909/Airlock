@@ -5,14 +5,10 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // Ensure environment variables are correctly set
-if (!process.env.NEO4J_URI || !process.env.NEO4J_USERNAME || !process.env.NEO4J_PASSWORD) {
-  console.error('Missing Neo4j connection details in environment variables');
-  process.exit(1);
-}
-
 const driver = neo4j.driver(
-  process.env.NEO4J_URI, // Ensure this is set correctly in your .env file
-  neo4j.auth.basic(process.env.NEO4J_USERNAME, process.env.NEO4J_PASSWORD)
+  "neo4j://localhost:7687",
+  neo4j.auth.basic("neo4j", "princess"),
+  //{ encrypted: 'ENCRYPTION_ON' } // Ensure encryption is on for Neo4j Aura
 );
 
 driver.getServerInfo()

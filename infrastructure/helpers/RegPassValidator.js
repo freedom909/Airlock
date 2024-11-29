@@ -30,14 +30,5 @@ const registerValidate = async ({ email, password, name, nickname, role, picture
   }
 };
 
-const passwordValidate = async ( password ) => {
-  const errors = [];
-  if (!password || password.length < 8 || password.length > 88 ||!/\d/.test(password)) {
-    errors.push('Password must contain at least 8 characters and include a number');
-  }
-  if (errors.length > 0) {
-    throw new GraphQLError(errors.join(','), {
-      extensions: { code: 'BAD_USER_INPUT' }
-    });
-  }}
-export  { registerValidate, passwordValidate }
+
+export default registerValidate
