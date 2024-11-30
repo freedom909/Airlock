@@ -7,8 +7,8 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { loginValidate } from '../../infrastructure/helpers/loginValidator.js';
 import dotenv from 'dotenv';
-import tokenService from './tokenService.js';
-import OAuthService from './oAuthService.js';
+import TokenService from './tokenService.js';
+import OAuthService from './oauthService.js';
 
 dotenv.config();
 
@@ -21,7 +21,6 @@ class LocalAuthService extends RESTDataSource {
       throw new Error("UserRepository not provided to UserService");
     }
     this.userRepository = userRepository;
-
   }
 
   async authenticateUser(email, password) {
@@ -39,7 +38,7 @@ class LocalAuthService extends RESTDataSource {
 
 
     const token = await this.userRepository.generateToken({ _id: user.insertedId }); // Pass the correct _id
-    await this.userRepository.sendVerificationEmail(userData.email, token);
+    //await this.userRepository.sendVerificationEmail(userData.email, token);
 
     return user;
   }
@@ -83,6 +82,27 @@ class LocalAuthService extends RESTDataSource {
         extensions: { code: "INTERNAL_SERVER_ERROR" },
       });
     }
+  }
+
+  async sendLinkToUser(email, token) {
+    try {
+      const resetLink = `http://your-app.com/reset-password?token=${token}`;
+      console.log(`Sending reset link to ${email}: ${resetLink}`);
+
+      // Call a method to send the email
+      await this.userRepository.sendResetEmail(email, resetLink);
+
+      return { message: 'Password reset link sent successfully' };
+    } catch (error) {
+      console.error('Error in sendLinkToUser:', error);
+      throw error;
+    }
+  }
+
+  async createResetPasswordToken(id) {
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    return token;
   }
 
   async getUserById(id) {
@@ -227,7 +247,14 @@ class LocalAuthService extends RESTDataSource {
     }
   }
 
-
+  async sendResetPasswordEmail(email, token) {
+    // Implement sending email logic here
+    // Example:
+    const resetLink = `http://your-app.com/reset-password?token=${token}`;
+    await sendEmail(email, "Reset Password", resetLink);
+    console.log(`Password reset email sent to ${email}: ${resetLink}`);
+    return { message: 'Password reset email sent successfully' };
+  }
 }
 
 export default LocalAuthService;

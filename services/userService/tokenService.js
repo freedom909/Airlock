@@ -1,5 +1,13 @@
-import jwt from 'jsonwebtoken';
+import pkg from 'jsonwebtoken';
+const { sign, verify, decode } = pkg;
 import dotenv from 'dotenv';
+
+dotenv.config();
+
+// Secret key for signing tokens (replace this with your actual secret)
+const secretKey = process.env.JWT_SECRET || 'good';
+
+// Function to generate JWT token
 
 class TokenService {
     constructor({ secretKey, expiresIn }) {
@@ -7,18 +15,12 @@ class TokenService {
         this.expiresIn = expiresIn || '1h';
     }
 
-    generateToken(payload) {
+    async generateToken(payload) {
         return sign(payload, this.secretKey, { expiresIn: this.expiresIn });
     }
 
-
-    // Generate JWT Token
-    generateToken(user) {
-        return jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    }
-
     // Verify JWT Token
-    verifyToken(token) {
+    async verifyToken(token) {
         try {
             return verify(token, this.secretKey);
         } catch (error) {
@@ -27,7 +29,7 @@ class TokenService {
     }
 
     // Decode JWT Token without verifying (useful for inspecting the token)
-    decodeToken(token) {
+    async decodeToken(token) {
         return decode(token);
     }
 }

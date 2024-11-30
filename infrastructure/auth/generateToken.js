@@ -1,5 +1,9 @@
 import pkg from 'jsonwebtoken';
 const { sign } = pkg;
+import dotenv from 'dotenv';
+
+dotenv.config();
+
 
 // Secret key for signing tokens (replace this with your actual secret)
 const JWT_SECRET = process.env.JWT_SECRET || 'good';

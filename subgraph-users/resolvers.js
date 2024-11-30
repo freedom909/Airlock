@@ -1,12 +1,14 @@
 import { GraphQLError } from 'graphql';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+
 import dotenv from 'dotenv';
 import { loginValidate, passwordValidate } from '../infrastructure/helpers/loginValidator.js';
 import runValidations from '../infrastructure/helpers/runValidations.js';
 import validateInviteCode from '../infrastructure/helpers/validateInvitecode.js';
-import generateToken from '../infrastructure/auth/generateToken.js';
+import TokenService from '../services/userService/tokenService.js';
 import LocalAuthService from '../services/userService/localAuthService.js';
+import OAuthService from '../services/userService/oauthService.js';
 
 // Config and external dependencies
 dotenv.config();
@@ -42,28 +44,73 @@ const resolvers = {
     },
 
 
-    signIn: async (_, { input: { email, password } }, context) => {
-      console.log('Resolver context:', context); // Check the context structure
-      const { dataSources } = context;
-      console.log('dataSources:', dataSources); // Debugging log
-      if (!dataSources || !dataSources.userService) {
-        throw new Error('dataSources.userService is not defined');
+    signIn: async (_, { input }, context) => {
+      try {
+        console.log('Resolver context:', context); // Debugging context
+        const { dataSources } = context;
+
+        // Validate dataSources and services
+        if (!dataSources || !dataSources.userService) {
+          throw new GraphQLError('UserService is not defined in dataSources', {
+            extensions: { code: 'SERVICE_UNAVAILABLE' },
+          });
+        }
+
+        const { localAuthService, oAuthService } = dataSources.userService;
+        if (!localAuthService || !oAuthService) {
+          throw new GraphQLError('Required authentication services are missing', {
+            extensions: { code: 'SERVICE_UNAVAILABLE' },
+          });
+        }
+
+        const { email, password, provider, providerToken } = input;
+        let user;
+
+        if (provider) {
+          // Third-party login
+          if (!providerToken) {
+            throw new GraphQLError('Provider token is required for third-party login', {
+              extensions: { code: 'PROVIDER_TOKEN_REQUIRED' },
+            });
+          }
+
+          // Validate provider token
+          const isValidToken = await oAuthService.validateProviderToken(provider, providerToken);
+          if (!isValidToken) {
+            throw new GraphQLError('Invalid provider token', {
+              extensions: { code: 'INVALID_PROVIDER_TOKEN' },
+            });
+          }
+
+          // Login with the provider token
+          user = await oAuthService.loginWithProvider(provider, providerToken);
+        } else {
+          // Email/password login
+          if (!loginValidate(email, password)) {
+            throw new GraphQLError('Invalid email or password', {
+              extensions: { code: 'INVALID_LOGIN' },
+            });
+          }
+
+          user = await localAuthService.login({ email, password });
+        }
+
+        if (!user) {
+          throw new AuthenticationError('Invalid credentials');
+        }
+
+        // Return the user or a token as required
+        return {
+          userId: user.id,
+          token: generateToken(user.id),
+          role: user.role,
+        }
+      } catch (error) {
+        console.error('Error in signIn resolver:', error);
+        throw error; // Re-throw the error to be handled by Apollo Server
       }
-      const { localAuthService } = dataSources.userService;
-      const user = await localAuthService.getUserByEmailFromDb(email);
-      if (!user) {
-        throw new GraphQLError("User not found", {
-          extensions: { code: "USER_NOT_FOUND" },
-        });
-      }
-      // Validate email and password
-      if (!loginValidate(email, password)) {
-        throw new GraphQLError("Invalid email or password", {
-          extensions: { code: "INVALID_LOGIN" },
-        });
-      }
-      return await localAuthService.login({ email, password });
     },
+
 
     signUp: async (_, { input }, { dataSources }) => {
       if (!dataSources || !dataSources.userService) {
@@ -189,14 +236,22 @@ const resolvers = {
           extensions: { code: "INVALID_PASSWORD" },
         });
       }
-
       const hashedNewPassword = await bcrypt.hash(newPassword, 10);
       const updatedUser = await localAuthService.editPassword(userId, hashedNewPassword);
       console.log('User after password update:', updatedUser);
       return updatedUser;
     },
 
-    generateInviteCode: async (_, { }, { dataSources, user }) => {
+    generateInviteCode: async (_, { }, { dataSources, userId }) => {
+      if (!userId) {
+        throw new GraphQLError("Please login to send invite code", {
+          extensions: {
+            code:
+              "USER_ID_REQUIRED"
+          }
+        });
+      }
+      const user = await getUserById(id)
       // Ensure that only hosts can generate invite codes
       if (user.role !== 'HOST') {
         throw new GraphQLError("Only hosts can generate invite codes", {
@@ -208,7 +263,16 @@ const resolvers = {
       return { inviteCode };
     },
 
-    sendInviteCode: async (_, { email }, { dataSources }) => {
+    sendInviteCode: async (_, { email }, { dataSources, userId }) => {
+      if (!userId) {
+        throw new GraphQLError("Please login to send invite code", {
+          extensions: {
+            code:
+              "USER_ID_REQUIRED"
+          }
+        });
+      }
+      const user = await getUserById(id)
       if (user.role !== 'HOST') {
         throw new GraphQLError("Only hosts can send invite codes", {
           extensions: { code: "FORBIDDEN" },
@@ -218,7 +282,6 @@ const resolvers = {
       const inviteCode = await localAuthService.generateInviteCode(email);
       await localAuthService.sendInviteCode(email, inviteCode)
       return { success: true };
-
     },
 
     requestResetPassword: async (_, { email }, { dataSources }) => {
@@ -244,8 +307,62 @@ const resolvers = {
         message: "Password reset link sent successfully",
       };
     },
-  },
 
+    thirdPartyLogin: async (_, { input }, context) => {
+      try {
+        console.log('Resolver context:', context); // Debugging context
+        const { dataSources } = context;
+
+        // Validate dataSources and services
+        if (!dataSources?.userService) {
+          throw new GraphQLError('UserService is not defined in dataSources', {
+            extensions: { code: 'SERVICE_UNAVAILABLE' },
+          });
+        }
+
+        const { oAuthService, tokenService } = dataSources.userService;
+        if (!oAuthService || !tokenService) {
+          throw new GraphQLError('Required authentication services are missing', {
+            extensions: { code: 'SERVICE_UNAVAILABLE' },
+          });
+        }
+
+        // Validate the input
+        const { provider, providerToken } = input;
+        if (!provider || !providerToken) {
+          throw new GraphQLError("Invalid third-party login input", {
+            extensions: { code: "BAD_USER_INPUT" },
+          });
+        }
+
+        // Validate the provider token
+        const userInfo = await oAuthService.validateProviderToken(provider, providerToken);
+        if (!userInfo) {
+          throw new AuthenticationError("Invalid credentials");
+        }
+
+        // Generate a JWT for the authenticated user
+        const jwtToken = await tokenService.generateToken(userInfo); // Ensure this method is correctly implemented
+
+        return {
+          token: jwtToken,
+          success: true,
+        };
+      } catch (error) {
+        console.error('Error in thirdPartyLogin resolver:', error);
+
+        // Rethrow GraphQL-specific errors directly
+        if (error instanceof GraphQLError || error instanceof AuthenticationError) {
+          throw error;
+        }
+
+        // Wrap and throw unexpected errors
+        throw new GraphQLError('An unexpected error occurred', {
+          extensions: { code: 'INTERNAL_SERVER_ERROR', originalError: error },
+        });
+      }
+    }
+  },
   _Entity: {
     __resolveType(entity) {
       if (entity.__typename === 'Host') {
@@ -279,5 +396,6 @@ const resolvers = {
     },
   }
 }
+
 
 export default resolvers;
