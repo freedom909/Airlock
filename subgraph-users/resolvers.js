@@ -113,11 +113,12 @@ const resolvers = {
 
 
     signUp: async (_, { input }, { dataSources }) => {
+
       if (!dataSources || !dataSources.userService) {
         throw new Error('dataSources.userService is not defined');
       }
 
-      const { localAuthService } = dataSources.userService;
+      const { localAuthService, tokenService } = dataSources.userService;
 
       // Proceed with the sign-up logic
       const { email, password, name, nickname, role, inviteCode, picture } = input;
@@ -145,7 +146,7 @@ const resolvers = {
           picture,
         });
 
-        const token = await generateToken({ id: user._id, role: user.role });
+        const token = await tokenService.generateToken({ id: user._id, role: user.role });
 
         return {
           token,
@@ -157,6 +158,41 @@ const resolvers = {
         throw new GraphQLError('User registration failed', {
           extensions: { code: 'INTERNAL_SERVER_ERROR' },
         });
+      }
+    },
+
+    loginWithOAuth: async (_, { input }, context) => {
+      try {
+        const { dataSources } = context;
+        // Validate dataSources and services
+        if (!dataSources || !dataSources.userService) {
+          throw new GraphQLError('UserService is not defined in dataSources', {
+            extensions: { code: 'SERVICE_UNAVAILABLE' },
+          });
+        }
+
+        const { tokenService, oAuthService } = dataSources.userService;
+        if (!tokenService || !oAuthService) {
+          throw new GraphQLError('Required authentication services are missing', {
+            extensions: { code: 'SERVICE_UNAVAILABLE' },
+          });
+        }
+
+        const { provider, providerToken } = input;
+        const user = await oAuthService.loginWithProvider(provider, providerToken);
+        if (!user) {
+          throw new AuthenticationError('Invalid credentials');
+        }
+        const token = await tokenService.generateToken({ id: user._id, role: user.role });
+
+        return {
+          token,
+          userId: user._id,
+          role: user.role,
+        }
+      } catch (error) {
+        console.error('Error in loginWithOAuth resolver:', error);
+        throw error; // Re-throw the error to be handled by Apollo Server
       }
     },
 
