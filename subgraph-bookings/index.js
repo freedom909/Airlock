@@ -14,9 +14,9 @@ import resolvers from './resolvers.js';
 import initializeBookingContainer from '../services/DB/initBookingContainer.js'
 import ListingService from '../services/listingService.js';
 import BookingService from '../services/bookingService.js'
-import UserService from '../services/userService.js';
+import UserService from '../services/userService/index.js';
 import initMongoContainer from '../services/DB/initMongoContainer.js';
-import getUserFromToken from '../services/auth/getUserFromToken.js';
+import getUserFromToken from '../infrastructure/auth/getUserFromToken.js';
 import { useServer } from 'graphql-ws/lib/use/ws';
 import { WebSocketServer } from 'ws';
 
@@ -75,13 +75,18 @@ const startApolloServer = async () => {
       context: async ({ req }) => {
         const token = req.headers.authorization || '';
         const user = getUserFromToken(token);
+        const userService = {
+          localAuthService: container.resolve('localAuthService'),
+          oAuthService: container.resolve('oAuthService'),
+          tokenService: container.resolve('tokenService'),
+        };
 
         return {
           user,
           dataSources: {
             listingService: mysqlContainer.resolve('listingService'),  // Resolve MySQL services
             bookingService: mysqlContainer.resolve('bookingService'),
-            userService: mongoContainer.resolve('userService'), // Resolve MongoDB services
+            userService,// Resolve MongoDB services
             cacheClient, // Cache client is available globally, no need to resolve from container
           }
         };
