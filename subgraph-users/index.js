@@ -1,7 +1,6 @@
 import express from 'express';
 import http from 'http';
 import { ApolloServer } from '@apollo/server';
-import { createContainer, asClass } from 'awilix';
 import { buildSubgraphSchema } from '@apollo/subgraph';
 import initUserContainer from '../services/DB/initUserContainer.js'; // Your container initialization function
 import { readFileSync } from 'fs';

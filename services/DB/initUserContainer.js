@@ -5,6 +5,8 @@ import LocalAuthService from '../userService/localAuthService.js';
 import OAuthService from '../userService/oauthService.js';
 import TokenService from '../userService/tokenService.js';
 import connectToMongoDB from './connectMongoDB.js';
+import dotenv from 'dotenv';
+dotenv.config();  // Load environment variables from.env file
 
 const initUserContainer = async () => {
     const mongodb = await connectToMongoDB();

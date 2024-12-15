@@ -46,21 +46,21 @@ interface User @key(fields: "id") {
 
 # User Types
 type Guest implements User @key(fields: "id") {
-  id: ID!
-  name: String!
-  picture: String 
-  nickname: String! 
-  role: Role! 
-  provider: String!
+  id: ID! 
+  name: String! @shareable
+  picture: String @shareable
+  nickname: String!  @shareable
+  role: Role! @shareable
+  provider: String! @shareable
 }
 
 type Host implements User @key(fields: "id") {
   id: ID!
-  name: String!
-  picture: String 
-  nickname: String! 
-  role: Role! 
-  provider: String!
+  name: String! @shareable
+  picture: String @shareable
+  nickname: String! @shareable
+  role: Role! @shareable
+  provider: String! @shareable
   description: String @shareable
 }
 
@@ -93,27 +93,27 @@ input ThirdPartyLoginInput {
 
 # Authentication Responses
 type AuthPayload {
-  token: String! 
-  userId: ID!
-  role: Role 
+  token: String! @shareable
+  userId: ID! @shareable
+  role: Role @shareable
 }
 
 type SignInResponse implements Response {
-  code: Int!
-  success: Boolean!
-  message: String!
-  token: String!
-  userId: ID!
-  role: Role
+  code: Int! @shareable
+  success: Boolean! @shareable
+  message: String! @shareable
+  token: String! @shareable
+  userId: ID! @shareable
+  role: Role @shareable
 }
 
 type ThirdPartyLoginResponse implements Response {
-  code: Int!
-  success: Boolean!
-  message: String!
-  token: String! # JWT token after successful third-party login
-  userId: ID!
-  role: Role
+  code: Int! @shareable
+  success: Boolean! @shareable
+  message: String! @shareable
+  token: String! @shareable
+  userId: ID! @shareable
+  role: Role @shareable
 }
 
 # Profile Update
@@ -124,39 +124,39 @@ input UpdateProfileInput {
 }
 
 type UpdateProfileResponse implements Response {
-  code: Int!
-  success: Boolean!
-  message: String!
-  user: User
+  code: Int! @shareable
+  success: Boolean! @shareable
+  message: String! @shareable
+  user: User @shareable
 }
 
 # Password and Invite Management
 type ReqResetPwdResponse implements Response {
-  code: Int!
-  success: Boolean!
-  message: String!
-  link: String!
+  code: Int! @shareable
+  success: Boolean! @shareable
+  message: String! @shareable
+  link: String! @shareable
 }
 
 type ForgotPasswordResponse implements Response {
-  code: Int!
-  success: Boolean!
-  message: String!
-  email: String!
+  code: Int! @shareable
+  success: Boolean! @shareable
+  message: String! @shareable
+  email: String! @shareable
 }
 
 type InviteCodeResponse implements Response {
-  code: Int!
-  success: Boolean!
-  message: String!
+  code: Int! @shareable
+  success: Boolean! @shareable
+  message: String! @shareable
 }
 
 # Queries and Mutations
 type Mutation {
   signUp(input: SignUpInput!): AuthPayload! 
   signIn(input: SignInInput!): SignInResponse!
-  thirdPartyLogin(input: ThirdPartyLoginInput!): ThirdPartyLoginResponse!
-  updateProfile(updateProfileInput: UpdateProfileInput): UpdateProfileResponse!
+  thirdPartyLogin(input: ThirdPartyLoginInput!): ThirdPartyLoginResponse! @shareable
+  updateProfile(updateProfileInput: UpdateProfileInput): UpdateProfileResponse! @shareable
   updatePassword(newPassword: String!, password: String!, userId: ID!): AuthPayload!
   requestResetPassword(email: String!): ReqResetPwdResponse!
   forgotPassword(email: String!): ForgotPasswordResponse!
@@ -188,8 +188,8 @@ type Generator {
 }
 
 type LoginWithOAuth {
-  token: String!
-  userId: ID!
-  role: Role!
+  token: String! @shareable
+  userId: ID! @shareable
+  role: Role! @shareable
 }
 

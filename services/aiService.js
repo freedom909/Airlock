@@ -21,7 +21,7 @@ dotenv.config();
  * @param {string} reply - The ChatGPT's response.
  * @returns {Promise<Object>} The saved message document.
  */
-class SupportService extends RESTDataSource {
+class AiService extends RESTDataSource {
     constructor() {
         super();
         this.baseURL = "http://localhost:4000/";
@@ -62,4 +62,4 @@ class SupportService extends RESTDataSource {
     }
 }
 
-export default SupportService;
+export default AiService;

@@ -273,24 +273,33 @@ input CreateListingInput {
   "The title of the listing"
   title: String!
   "The description of the listing"
-  description: String
+  description: String!
   "The price of the listing"
   price: Float!
-  "The ID of the location"
-  locationId: String!
+  "The ID of an existing location if available"
+  locationId: String 
   "The ID of the host"
   hostId: String!
-  "The photo thumbnail of the listing"
-  photoThumbnail: String!
+  "The photo thumbnails of the listing"
+  pictures: [String!]!
   "The number of beds in the listing"
   numOfBeds: Int!
   "The cost per night of the listing"
   costPerNight: Float!
   "The type of location"
   locationType: LocationType!
-  "The amenities of the listing"
-  amenities: [AmenityInput!]!
-  listingStatus : ListingStatus
+  "The amenity IDs for the listing"
+  amenityIds: [String!]!
+  "Status of the listing"
+  listingStatus: ListingStatus
+  "Check-in date for the listing availability"
+  checkInDate: String!
+  "Check-out date for the listing availability"
+  checkOutDate: String!
+  "Indicates if the listing is featured"
+  isFeatured: Boolean
+  "New location details for the listing if creating a new location"
+  locationInput: CreateLocationInput 
 }
 
 input AmenityInput {

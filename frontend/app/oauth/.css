@@ -1,0 +1,25 @@
+.facebook-login-button {
+    background-color: #3b5998;
+    color: white;
+    padding: 10px 20px;
+    margin: 10px;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+.facebook-login-button:hover {
+    background-color: #2d4373;
+}
+
+.twitter-login-button {
+    background-color: #1DA1F2;
+    color: white;
+    padding: 10px 20px;
+    margin: 10px;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+.twitter-login-button:hover {
+    background-color: #1A91DA;
+}

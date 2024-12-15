@@ -10,6 +10,7 @@ class AmenityService {
     // this.Amenity = Amenity;
   }
 
+
   async getAllAmenities() {
     try {
       const query = 'SELECT * FROM AMENITIES';
@@ -106,7 +107,7 @@ class AmenityService {
 
     // Insert the records using bulkCreate
     try {
-      await ListingAmenities.bulkCreate(listingAmenitiesData);
+      await listingAmenities.bulkCreate(listingAmenitiesData);
       console.log('Amenities linked to listing successfully.');
     } catch (error) {
       console.error('Error linking amenities to listing:', error);

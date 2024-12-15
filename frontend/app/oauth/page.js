@@ -1,74 +1,82 @@
-"use client";
-
-import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
+"use client"
 import { useEffect, useState } from "react";
-
+import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
+import FacebookLogin from "react-facebook-login";
+import TwitterLogin from "react-twitter-login";
 import dayjs from "dayjs";
 
-
 const googleId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+const facebookAppId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID; // Add your Facebook App ID here
+const twitterConsumerKey = process.env.NEXT_PUBLIC_TWITTER_CONSUMER_KEY; // Add your Twitter Consumer Key here
+const twitterConsumerSecret = process.env.NEXT_PUBLIC_TWITTER_CONSUMER_SECRET; // Add your Twitter Consumer Secret here
 
 export default function OAuth() {
-    const [date, setDate] = useState("");
     const [authToken, setAuthToken] = useState(null);
-    const [userInfo, setUserInfo] = useState(null);
+    const [isClient, setIsClient] = useState(false);
+    const [time, setTime] = useState(null);
+    const [date, setDate] = useState("");
 
     useEffect(() => {
-        if (!googleId) {
-            console.error("Missing GOOGLE_CLIENT_ID environment variable");
-        }
-
+        setIsClient(true);
+        setTime(Date.now());
         setDate(dayjs().format("YYYY-MM-DD"));
-
-        // Parse the token from the URL hash
-        const hashParams = new URLSearchParams(window.location.hash.slice(1));
-        const token = hashParams.get("access_token");
-        if (token) {
-            setAuthToken(token);
-        }
     }, []);
 
-    useEffect(() => {
-        const fetchUserInfo = async () => {
-            if (!authToken) return;
+    // Google Login Success
+    const handleGoogleSuccess = (response) => {
+        const token = response.credential;
+        setAuthToken(token);
+        console.log("Google Login Success:", response);
+    };
 
-            try {
-                const response = await fetch(
-                    "https://www.googleapis.com/oauth2/v3/userinfo",
-                    {
-                        headers: { Authorization: `Bearer ${authToken}` },
-                    }
-                );
-                const userData = await response.json();
-                setUserInfo(userData);
-                alert(`Hello, ${userData.name || "User"}!`);
-            } catch (error) {
-                console.error("Error fetching user info:", error);
-            }
-        };
+    // Google Login Error
+    const handleGoogleError = () => {
+        console.error("Google Login Failed");
+    };
 
-        fetchUserInfo();
-    }, [authToken]);
+    // Facebook Login Success
+    const handleFacebookResponse = (response) => {
+        console.log("Facebook Login Success:", response);
+        // You can use response.accessToken to make API requests
+    };
+
+    // Twitter Login Success
+    const handleTwitterResponse = (response) => {
+        console.log("Twitter Login Success:", response);
+        // You can use response.oauth_token to make API requests
+    };
+
+    if (!isClient || !time || !date) return null;
 
     return (
         <GoogleOAuthProvider clientId={googleId}>
             <div className="flex flex-col items-center justify-center min-h-screen">
-                <h1 className="text-xl font-bold mb-4">Google OAuth</h1>
+                <h1 className="text-xl font-bold mb-4">OAuth Login</h1>
+
+                {/* Google Login */}
                 <GoogleLogin
-                    onSuccess={(response) => {
-                        console.log("Login Success:", response);
-                    }}
-                    onError={() => {
-                        console.error("Login Failed");
-                    }}
+                    onSuccess={handleGoogleSuccess}
+                    onError={handleGoogleError}
+                    useOneTap
                 />
-                {authToken && <p>Access Token: {authToken}</p>}
-                {userInfo && (
-                    <div>
-                        <p>Welcome, {userInfo.name}</p>
-                        <p>Email: {userInfo.email}</p>
-                    </div>
-                )}
+
+                {/* Facebook Login */}
+                <FacebookLogin
+                    appId={facebookAppId}
+                    autoLoad={false}
+                    fields="name,email,picture"
+                    callback={handleFacebookResponse}
+                    cssClass="facebook-login-button"
+                    icon="fa-facebook"
+                />
+
+                {/* Twitter Login */}
+                <TwitterLogin
+                    authCallback={handleTwitterResponse}
+                    consumerKey={twitterConsumerKey}
+                    consumerSecret={twitterConsumerSecret}
+                    buttonTheme="dark"
+                />
             </div>
         </GoogleOAuthProvider>
     );

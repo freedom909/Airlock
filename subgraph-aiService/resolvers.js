@@ -20,9 +20,9 @@ const resolvers = {
             if (!dataSources) {
                 throw new Error('Data sources are not defined');
             }
-            const { supportService, userService } = dataSources; // message": "Cannot destructure property 'supportService' of 'dataSources' as it is undefined.",
-            if (!supportService) {
-                throw new Error('Support service is not available in data sources');
+            const { aiService, userService } = dataSources; // message": "Cannot destructure property 'aiService' of 'dataSources' as it is undefined.",
+            if (!aiService) {
+                throw new Error('ai service is not available in data sources');
             }
             try {
                 const response = await openai.createChatCompletion({
@@ -31,7 +31,7 @@ const resolvers = {
                 });
                 const reply = await response.data.choices[0].message.content
                 //save message and reply to the database
-                const savedMessage = await supportService.savedMessageToDB(message, reply)
+                const savedMessage = await aiService.savedMessageToDB(message, reply)
                 return { reply: response.data.choices[0].message.content };
             } catch (error) {
                 console.error(error);
@@ -39,7 +39,7 @@ const resolvers = {
             }
         },
         getListingInfo: async (_, { listingTitle }, { dataSource, userId }) => {
-            const { supportService } = dataSource;
+            const { aiService } = dataSource;
             const listingData = await Listing.findOne({ title: listingTitle }).exec();
 
             if (!listingData) throw new Error(`Listing with title "${listingTitle}" not found`);
@@ -62,7 +62,7 @@ const resolvers = {
             });
 
             const reply = response.data.choices[0].message.content;
-            await supportService.saveMessageToDB(message, reply);
+            await aiService.saveMessageToDB(message, reply);
 
             return {
                 ...listingData.toObject(),
