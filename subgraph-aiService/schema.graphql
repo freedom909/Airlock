@@ -12,48 +12,204 @@ extend schema
 
 scalar DateTime
 directive @cacheControl(maxAge: Int, scope: CacheControlScope) on FIELD_DEFINITION | OBJECT | INTERFACE  
-  directive @auth(requires: AuthLevel) on FIELD_DEFINITION | OBJECT | INTERFACE
+  directive @auth(requires: Role) on FIELD_DEFINITION | OBJECT | INTERFACE
 
-type Mutation {
-  sendMessageToChatGPT(message: String!): ChatGPTResponse!
-  getListingInfo(listingTitle: String!): Listing!
+type Query {
+  
+  # query room availability
+  checkListingAvailability(filter: ListingAvailabilityInput!): [AvailableListing!]! @auth(requires: USER) @shareable 
+
+  # get review analyze
+  analyzeReviews(listingId: ID!): ReviewAnalysis! @auth(requires: GUEST) @shareable 
+
+  # get FAQ
+  getFAQ: [FAQ!]! @shareable 
 }
 
+type Mutation {
+   # send message to AI
+  sendMessageToAI(message: String!): ChatGPTResponse! @auth(requires: GUEST) @shareable 
+
+  # Process payments
+  processPayment(paymentDetails: PaymentInput!): PaymentResponse! @auth(requires: USER) @shareable 
+
+  # submit Review
+  submitReview(reviewDetails: ReviewInput!): Review! @auth(requires: USER) @shareable 
+
+  # update listing information
+  updateListingInfo(listingId: ID!, listingDetails: ListingInput!): Listing! @auth(requires: USER) @shareable 
+
+  # delete listing
+  deleteListing(listingId: ID!): String! @auth(requires: USER) @shareable 
+}
+
+type BookingStatusResponse {
+
+  getListingInfo(listingTitle: String!): Listing! @shareable 
+}
+
+
 type ChatGPTResponse {
-  reply: String!
+  reply: String! @shareable 
+  context: String @shareable 
+}
+
+type BookingStatusResponse {
+  bookingId: ID! @shareable 
+  status: String! @shareable 
+  message: String @shareable 
+  estimatedTime: DateTime @shareable 
+}
+
+input ListingAvailabilityInput {
+  checkInDate: DateTime!
+  checkOutDate: DateTime!
+  numOfGuests: Int!
+  locationId: ID
+  priceRange: PriceRangeInput
+}
+
+type AvailableListing {
+  id: ID! @shareable 
+  title: String! @shareable 
+  numOfBeds: Int! @shareable 
+  costPerNight: Float! @shareable 
+  amenities: [Amenity!]! @shareable 
+}
+
+type ReviewAnalysis {
+  listingId: ID! @shareable 
+  totalReviews: Int! @shareable 
+  averageRating: Float! @shareable 
+  positiveFeedback: [String!]! @shareable 
+  negativeFeedback: [String!]! @shareable 
+}
+
+type FAQ {
+  id: ID!
+  question: String! @shareable 
+  answer: String! @shareable 
+}
+
+input PaymentInput {
+  amount: Float!
+  currency: String!
+  paymentMethod: PaymentMethod!
+}
+
+enum PaymentMethod {
+  CREDIT_CARD
+  DEBIT_CARD
+  PAYPAL
+  STRIPE
+}
+
+type PaymentResponse {
+  transactionId: ID!
+  status: PaymentStatus! @shareable 
+  message: String @shareable 
+}
+
+enum PaymentStatus {
+  SUCCESS
+  FAILURE
+  PENDING
+}
+
+input ReviewInput {
+  listingId: ID!
+  rating: Float!
+  content: String!
+  guestId: ID!
+}
+
+type Booking {
+  id: ID! @shareable 
+  listingId: ID! @shareable 
+  guestId: ID! @shareable 
+  checkInDate: String! @shareable 
+  checkOutDate: String! @shareable 
+  name: String! @shareable 
+  email: String! @shareable 
+  phoneNumber: String! @shareable 
+  totalCost: Float! @shareable 
+}
+
+input ListingInput {
+  title: String!
+  description: String!
+  pictures: [PictureInput!]!
+  numOfBeds: Int!
+  costPerNight: Float!
+  locationType: LocationType!
+  hostId: ID!
+  amenities: [Amenity!]!
+  priceRange: PriceRange!
+  totalCostRange: TotalCostRange!
+  locationFilter: Location!
+  distance: Float
+  filterListings(filter: ListingFilterInput): [Listing!]!
+}
+
+input PictureInput {
+  url: String!
+}
+
+input PriceRangeInput {
+  min: Float
+  max: Float
+}
+
+input TotalCostRange {
+  min: Float
+  max: Float
+}
+
+input Location {
+  latitude: Float!
+  longitude: Float!
+}
+
+enum LocationFilter {
+  NEARBY
+  CITY
+}
+
+enum ListingStatus {
+  ACTIVE
+  PENDING
+  SOLD
+  DELETED
+  REJECT
+  CANCELLED
+  EXPIRED
+  COMPLETED
+}
+
+type Amenity {
+  id: ID! 
+  name: String! @shareable 
+}
+
+type Available {
+  date: String! @shareable 
+  available: Boolean! @shareable 
+  bookings: [Booking!]! @auth(requires: "GUEST") @shareable 
+  availableBookings: [Booking!]! @auth(requires: "GUEST") @shareable 
 }
 
 type Listing {
   id: ID!
   title: String! @shareable
   description: String! @shareable
-  pictures: [Picture!]! @shareable  
-  numOfBeds: Int! @shareable
   costPerNight: Float! @shareable
-  locationType: LocationType! @shareable
-  hostId: ID! @shareable
+  location: Location! @shareable
   amenities: [Amenity!]! @shareable
-  numberOfUpcomingBookings: Int! @shareable
-  currentlyBookedDates: [ReservedDate]! @shareable @auth(requires: "GUEST")
-  totalCost(checkInDate: String!, checkOutDate: String!): Float @shareable
-  locationId: ID! @shareable
-  saleAmount: Float @shareable
-  bookingNumber: Int @shareable
-  checkInDate: String! @shareable
-  checkOutDate: String! @shareable
-  listingStatus: ListingStatus @shareable
-  bookings: [Booking!]! @auth(requires: "GUEST")
-  availability: [Availability]! @shareable
-  priceRange: PriceRange! @shareable
-  totalCostRange: TotalCostRange! @shareable
-  locationFilter: Location! @shareable
-  distance: Float @shareable
-  filterListings(filter: ListingFilterInput): [Listing!]! @shareable
 }
 
 type Picture {
-  id: ID!
-  url: String!
+  id: ID! @shareable 
+  url: String! @shareable 
 }
 
 enum LocationType {
@@ -64,9 +220,16 @@ enum LocationType {
   ROOM
 }
 
-type Amenity {
-  id: ID! @shareable
-  name: String! @shareable
+input ListingFilterInput {
+  priceRange: PriceRangeInput
+  locationType: LocationType
+  amenities: [ID!] # Use amenity IDs for clarity
+  matchType: MatchType # AND or OR logic
+}
+
+enum MatchType {
+  AND
+  OR
 }
 
 enum ListingStatus {
@@ -82,14 +245,13 @@ enum ListingStatus {
 }
 
 type Booking @key(fields: "id") {
-  id: ID!
+  id: ID! @shareable
   listing: Listing! @shareable @cacheControl(maxAge: 3600) 
   guest: Guest! @shareable @cacheControl(maxAge: 3600) 
   review: Review @shareable
   checkInDate: DateTime! @shareable @cacheControl(maxAge: 3600) 
   checkOutDate: DateTime! @shareable @cacheControl(maxAge: 3600) 
   totalPrice: Float! @shareable @cacheControl(maxAge: 3600) 
-  criteriaTime: Int! @shareable @cacheControl(maxAge: 3600) 
   status: BookingStatus! @shareable @cacheControl(maxAge: 60) 
   cancelledAt: DateTime @shareable @cacheControl(maxAge: 60)
   confirmedAt: DateTime @shareable @cacheControl(maxAge: 60)
@@ -106,10 +268,6 @@ enum AvailabilityStatus {
   UNAVAILABLE
 }
 
-input PriceRangeInput {
-  min: Float
-  max: Float
-}
 
 input TotalCostRangeInput {
   min: Float
@@ -125,17 +283,13 @@ type Location {
   id: ID! @shareable
   name: String! @shareable
   address: String! @shareable
-  city: String! @shareable
-  state: String! @shareable
-  country: String! @shareable
+  latitude: Float!
+  longitude: Float!
 }
 
-input ListingFilterInput {
-  location: String
-  priceRange: PriceRangeInput
-  totalCostRange: TotalCostRangeInput
-  locationType: [LocationType]
-  amenities: [AmenityInput]
+input LocationInput {
+  latitude: Float!
+  longitude: Float!
 }
 
 enum BookingStatus {
@@ -233,8 +387,29 @@ type Host implements User @key(fields: "id")  {
   role: Role! @shareable
 }
 
-enum AuthLevel{
+enum Role {
   ADMIN
+  HOST
   USER
   GUEST
+}
+
+type Error {
+  code: String!
+  message: String!
+}
+
+input PaginationInput {
+  page: Int
+  limit: Int
+}
+
+input SortInput {
+  field: String!
+  order: SortOrder!
+}
+
+enum SortOrder {
+  ASC
+  DESC
 }

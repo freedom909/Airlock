@@ -1,7 +1,7 @@
 extend schema
   @link(
     url: "https://specs.apollo.dev/federation/v2.5"
-    import: ["@key", "@shareable"]
+    import: ["@key", "@shareable","@external"]
   )
 
 scalar DateTime
@@ -29,7 +29,7 @@ type Booking @key(fields: "id") {
 }
 
 type Listing @key(fields: "id") {
-  id: ID!
+  id: ID! @external
   "The list of bookings for a listing"
   bookings: [Booking]! @shareable
 }
@@ -84,6 +84,8 @@ input CreateBookingInput {
   checkInDate: DateTime!
   "Date of check-out"
   checkOutDate: DateTime!
+  "Guest ID associated with the booking"
+  guestId: ID!
 }
 
 type Mutation {

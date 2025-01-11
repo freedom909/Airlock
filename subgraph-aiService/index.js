@@ -14,6 +14,7 @@ import resolvers from './resolvers.js';
 import LocationService from '../services/locationService.js';
 import BookingService from '../services/bookingService.js';
 import BookingRepository from '../services/repositories/bookingRepository.js';
+import AiService from '../services/aiService.js';
 
 dotenv.config();
 
@@ -36,22 +37,26 @@ const startApolloServer = async () => {
                     async serverWillStart() {
                         return {
                             async drainServer() {
-                                await mysqlContainer.resolve('MySQL').end();
+                                await mysqlContainer.resolve('mysqldb').end();
                             }
                         };
                     }
                 }
             ],
-            context: async ({ req }) => ({
-                token: req.headers.authorization || '',
-                dataSources: {
-                    listingService: mysqlContainer.resolve('listingService'),
-                    locationService: mysqlContainer.resolve('locationService'),
-                    bookingService: mysqlContainer.resolve('bookingService'),
-                    BookingRepository: mysqlContainer.resolve('bookingRepository'),
-
-                },
-            })
+            context: async ({ req }) => {
+                // This function should be called for every request
+                console.log('Apollo Server Context function executed');
+                return {
+                    token: req.headers.authorization || '',
+                    dataSources: {
+                        listingService: mysqlContainer.resolve('listingService'),
+                        locationService: mysqlContainer.resolve('locationService'),
+                        bookingService: mysqlContainer.resolve('bookingService'),
+                        bookingRepository: mysqlContainer.resolve('bookingRepository'),
+                        aiService: mysqlContainer.resolve('aiService'),
+                    },
+                };
+            },
         });
 
         await server.start();
@@ -60,15 +65,7 @@ const startApolloServer = async () => {
             '/graphql',
             cors(),
             express.json(),
-            expressMiddleware(server, {
-                context: async ({ req }) => ({
-                    token: req.headers.authorization || '',
-                    dataSources: {
-                        listingService: mysqlContainer.resolve('listingService'),
-                        locationService: mysqlContainer.resolve('locationService')
-                    },
-                })
-            })
+            expressMiddleware(server)
         );
 
         httpServer.listen({ port: 4100 }, () =>

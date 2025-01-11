@@ -24,6 +24,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.8.0",
     "mysql2": "^3.11.3",
+    "neo4j-driver": "^5.27.0",
     "sequelize": "^6.37.5"
   }
 }

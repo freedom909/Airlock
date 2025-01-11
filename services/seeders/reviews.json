@@ -14,7 +14,7 @@
     ],
     "dislikes": [],
     "isFeatured": true,
-    "isHighlighted": false,
+    "isPositive": false,
     "isPinned": false,
     "round": 1
   },
@@ -34,7 +34,7 @@
       "60d21b4667d0d8992e610c88"
     ],
     "isFeatured": false,
-    "isHighlighted": true,
+    "isPositive": true,
     "isPinned": false,
     "round": 1
   },
@@ -54,7 +54,7 @@
     ],
     "dislikes": [],
     "isFeatured": false,
-    "isHighlighted": false,
+    "isPositive": false,
     "isPinned": true,
     "round": 1
   },
@@ -74,7 +74,7 @@
       "60d21b4667d0d8992e610c88"
     ],
     "isFeatured": false,
-    "isHighlighted": true,
+    "isPositive": true,
     "isPinned": false,
     "round": 1
   },
@@ -92,7 +92,7 @@
     "likes": [],
     "dislikes": [],
     "isFeatured": false,
-    "isHighlighted": false,
+    "isPositive": false,
     "isPinned": false,
     "round": 1
   }

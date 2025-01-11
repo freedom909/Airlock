@@ -13,12 +13,10 @@ const openai = new OpenAIApi(configuration);
 
 const resolvers = {
     Mutation: {
-        sendMessageToChatGPT: async (_, { message }, { context, userId }) => {
-            console.log("Context:", context); // Log the context  
-            const { dataSources } = context;
-
-            if (!dataSources) {
-                throw new Error('Data sources are not defined');
+        sendMessageToChatGPT: async (_, { message }, { dataSources, userId }) => {
+            console.log("Data sources:", dataSources); // Data sources: undefined
+            if (!dataSources || !dataSources.aiService) {
+                throw new Error('AI service is not available');
             }
             const { aiService, userService } = dataSources; // message": "Cannot destructure property 'aiService' of 'dataSources' as it is undefined.",
             if (!aiService) {

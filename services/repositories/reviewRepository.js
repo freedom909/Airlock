@@ -1,52 +1,99 @@
-import Review from '../models/review.js'; // Assuming you have a Review model defined
+import driver from '../DB/connectNeo4jDB.js';
+import { GraphQLError } from 'graphql';
 
 class ReviewRepository {
   async createReview(reviewData) {
-    return await Review.create(reviewData);
-  }
-
-  async searchReviews(query, filters) {
-    const searchParams = {
-      index: 'reviews',
-      body: {
-        query: query,
-        ...filters // Add any pagination or sorting filters here
-      }
-    };
-
+    const session = driver.session();
     try {
-      const response = await elasticsearchClient.search(searchParams);
-      return response.hits.hits.map(hit => hit._source); // Map the Elasticsearch hits to the review data
+      const result = await session.run(
+        `
+        CREATE (r:Review {
+          id: $id,
+          content: $content,
+          rating: $rating,
+          authorId: $authorId,
+          listingId: $listingId,
+          hostId: $hostId,
+          bookingId: $bookingId,
+          targetType: $targetType,
+          createdAt: datetime(),
+          updatedAt: datetime()
+        })
+        RETURN r
+        `,
+        reviewData
+      );
+      return result.records[0].get('r').properties;
     } catch (error) {
-      throw new Error(`Elasticsearch search failed: ${error.message}`);
+      throw new GraphQLError(`Failed to create review: ${error.message}`, {
+        extensions: { code: 'INTERNAL_SERVER_ERROR' }
+      });
+    } finally {
+      session.close();
     }
   }
 
   async getAverageRating({ targetType, listingId = null, hostId = null }) {
-    const where = { targetType };
-    if (listingId) where.listingId = listingId;
-    if (hostId) where.hostId = hostId;
-    const reviews = await Review.findAll({ where });
-    const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
-    return reviews.length ? totalRating / reviews.length : 0;
+    const session = driver.session();
+    try {
+      const query = `
+        MATCH (r:Review {targetType: $targetType})
+        ${listingId ? `WHERE r.listingId = $listingId` : ''}
+        ${hostId ? `WHERE r.hostId = $hostId` : ''}
+        RETURN avg(r.rating) AS averageRating
+      `;
+      const result = await session.run(query, { targetType, listingId, hostId });
+      return result.records[0].get('averageRating');
+    } catch (error) {
+      throw new GraphQLError(`Failed to get average rating: ${error.message}`, {
+        extensions: { code: 'INTERNAL_SERVER_ERROR' }
+      });
+    } finally {
+      session.close();
+    }
   }
 
   async getReviews({ targetType, listingId = null, hostId = null }) {
-    const where = { targetType };
-    if (listingId) where.listingId = listingId;
-    if (hostId) where.hostId = hostId;
-    return await Review.findAll({ where });
+    const session = driver.session();
+    try {
+      const query = `
+        MATCH (r:Review {targetType: $targetType})
+        ${listingId ? `WHERE r.listingId = $listingId` : ''}
+        ${hostId ? `WHERE r.hostId = $hostId` : ''}
+        RETURN r
+      `;
+      const result = await session.run(query, { targetType, listingId, hostId });
+      return result.records.map(record => record.get('r').properties);
+    } catch (error) {
+      throw new GraphQLError(`Failed to get reviews: ${error.message}`, {
+        extensions: { code: 'INTERNAL_SERVER_ERROR' }
+      });
+    } finally {
+      session.close();
+    }
   }
 
   async getReview({ targetType, bookingId }) {
-    return await Review.findOne({ where: { targetType, bookingId } });
-  }
-
-  async getUser(userId) {
-    return await Review.findOne({ where: { userId } });
-  }
-  async getListing(listingId) {
-    return await Review.findOne({ where: { listingId } });
+    const session = driver.session();
+    try {
+      const result = await session.run(
+        `
+        MATCH (r:Review {targetType: $targetType, bookingId: $bookingId})
+        RETURN r
+        `,
+        { targetType, bookingId }
+      );
+      if (result.records.length > 0) {
+        return result.records[0].get('r').properties;
+      }
+      return null;
+    } catch (error) {
+      throw new GraphQLError(`Failed to get review: ${error.message}`, {
+        extensions: { code: 'INTERNAL_SERVER_ERROR' }
+      });
+    } finally {
+      session.close();
+    }
   }
 }
 

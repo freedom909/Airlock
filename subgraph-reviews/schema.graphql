@@ -1,13 +1,18 @@
+directive @relation(name: String!, direction: String!) on FIELD_DEFINITION
+
 extend schema
   @link(
     url: "https://specs.apollo.dev/federation/v2.5"
-    import: ["@key", "@shareable"]
+    import: ["@key", "@shareable", "@external"]
   )
 
 ### Queries
 type Query {
   "Returns a list of reviews for a given listing"
   searchReviews(criteria: SearchReviewsInput!): [Review]
+  reviewsForListing(listingId: ID!): [Review]
+  review(id: ID!): [Review]
+  
 }
 
 ### Mutations
@@ -29,25 +34,30 @@ type Mutation {
 ### Reviews
 type Review @key(fields: "id") {
   id: ID!
-  rating: Float! @shareable
-  content: String! @shareable
-  author: User! @shareable
-  bookingId: ID! @shareable
-  locationId: ID @shareable
-  guestId: ID @shareable
-  hostId: ID @shareable
-  location: Location @shareable
-  createdAt: String! @shareable
-  updatedAt: String! @shareable
-  round: Int! @shareable
-  likes: [Like!] 
-  dislikes: [Like!] 
-  likesCount: Int!
-  dislikesCount: Int!
-  title: String! @shareable
-  isFeatured: Boolean! @shareable
-  isPinned: Boolean! @shareable
-  comment: Comment //to allow users to comment on reviews
+  content: String!
+  rating: Float!
+  author: User! @relation(name: "AUTHORED_BY", direction: OUT)
+  booking: Booking! @relation(name: "ASSOCIATED_WITH", direction: OUT)
+  location: Location @relation(name: "BELONGS_TO", direction: OUT)
+  guest: Guest @relation(name: "SUBMITTED_BY", direction: OUT)
+  host: Host @relation(name: "REVIEWED_BY", direction: OUT)
+  likes: [Like!] @relation(name: "HAS_LIKE", direction: OUT)
+  dislikes: [Like!] @relation(name: "HAS_DISLIKE", direction: OUT)
+  comments: [Comment!] @relation(name: "HAS_COMMENT", direction: OUT)
+  createdAt: String!
+  updatedAt: String!
+}
+
+input SearchReviewsInput {
+  guestId: ID
+  authorId: ID
+  listingId: ID
+  hostId: ID
+  targetType: String
+  comment: String
+  limit: Int
+  offset: Int
+  sortBy: String
 }
 
 ### Likes
@@ -55,9 +65,9 @@ type Like {
   id: ID!
   userId: ID!
   reviewId: ID!
-  createdAt: String!
+  createdAt: String! 
   updatedAt: String!
-  isLiked: Boolean! 
+  isPositive: Boolean! 
 }
 
 ### Location Type
@@ -77,30 +87,20 @@ input ReviewInput {
   hostId: ID
 }
 
-input SearchReviewsInput {
-  guestId: ID
-  authorId: ID
-  listingId: ID
-  hostId: ID
-  targetType: String
-  comment: String
-  # Add other filters as needed
-}
-
 ### Response Types
 type SubmitHostAndLocationReviewsResponse implements MutationResponse {
-  code: Int!
-  success: Boolean!
-  message: String!
-  hostReview: Review
-  locationReview: Review
+  code: Int! @shareable
+  success: Boolean! @shareable
+  message: String! @shareable
+  hostReview: Review @shareable
+  locationReview: Review @shareable
 }
 
 type SubmitGuestReviewResponse implements MutationResponse {
-  code: Int!
-  success: Boolean!
-  message: String!
-  guestReview: Review
+  code: Int! @shareable
+  success: Boolean! @shareable
+  message: String! @shareable
+  guestReview: Review @shareable
 }
 
 interface MutationResponse {
@@ -138,4 +138,13 @@ type Guest implements User @key(fields: "id") {
   id: ID! @shareable 
   name: String! @shareable
   picture: String @shareable
+}
+
+type Comment {
+  id: ID!
+  content: String! @shareable
+  author: User! @shareable
+  review: Review! @shareable
+  createdAt: String! @shareable 
+  updatedAt: String! @shareable
 }

@@ -1,4 +1,5 @@
 
+
 const resolvers = {
   Query: {
     listings: async (_, __, { dataSources }) => {
@@ -36,7 +37,7 @@ const resolvers = {
     __resolveReference: async (reference, { dataSources }) => {
       return await dataSources.listingService.getListingById(reference.id);
     },
-    amenities: async (listing, __, { dataSources }) => dataSources.amenityService.getAmenitiesByListingId(listing.id),
+    amenities: async (listing, __, { dataSources }) => dataSources.amenityService.getAmenitiesById(listing.amenityIds),
   },
 };
 export default resolvers;

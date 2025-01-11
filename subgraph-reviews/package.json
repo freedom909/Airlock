@@ -27,6 +27,7 @@
     "dotenv": "^16.3.1",
     "graphql": "^16.8.0",
     "graphql-tag": "^2.12.6",
+    "neo4j-driver": "^5.27.0",
     "sequelize": "^6.32.1",
     "uuid": "^9.0.0"
   },

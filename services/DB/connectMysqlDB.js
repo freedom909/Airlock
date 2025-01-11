@@ -27,5 +27,6 @@ console.log('DB Name:', process.env.DB_NAME);
 console.log('DB User:', process.env.DB_USER);
 console.log('DB Password:', process.env.DB_PASSWORD);
 connectMysql();
+
 export default connectMysql;
 

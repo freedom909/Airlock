@@ -24,7 +24,7 @@ dotenv.config();
 class AiService extends RESTDataSource {
     constructor() {
         super();
-        this.baseURL = "http://localhost:4000/";
+        this.baseURL = "http://localhost:4100/";
         // this.supportRepository = supportRepository;
         this.mailToUser = new MailToUser();
     }

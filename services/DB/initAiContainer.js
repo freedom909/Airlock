@@ -43,7 +43,7 @@ const initializeAiContainer = async ({ services = [] } = {}) => {
         locationService: asClass(LocationService).singleton(),
         bookingRepository: asClass(BookingRepository).singleton(),
         bookingService: asClass(BookingService).singleton(),
-
+        aiService: asClass(AiService).singleton(),
     });
 
 

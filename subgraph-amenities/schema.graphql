@@ -1,15 +1,16 @@
 extend schema
   @link(url: "https://specs.apollo.dev/federation/v2.7", 
-        import: ["@key", "@shareable"])
+        import: ["@key", "@shareable","@external","@requires"])
 
 
 # SCALARS
 scalar DateTime
 
-type Listing {
-  id: ID! @shareable
+extend type Listing @key(fields: "id"){
+  id: ID! @external
   title: String! @shareable
-  amenities: [Amenity!]! @shareable
+  amenities: [Amenity!]! @requires(fields: "amenityIds")
+  amenityIds: [ID!]! @external
 }
 
 type Amenity @key(fields: "id"){

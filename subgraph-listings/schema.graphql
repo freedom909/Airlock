@@ -1,14 +1,8 @@
-enum CacheControlScope {  
-  PUBLIC  
-  PRIVATE  
-  INHERIT  
-}
-
 extend schema
-  @link(url: "https://specs.apollo.dev/federation/v2.7", import: ["@key", "@shareable"])
+  @link(url: "https://specs.apollo.dev/federation/v2.7", import: ["@key", "@shareable","@external"])
 
 scalar DateTime
-directive @cacheControl(maxAge: Int, scope: CacheControlScope) on FIELD_DEFINITION | OBJECT | INTERFACE  
+directive @cacheControl(maxAge: Int) on FIELD_DEFINITION | OBJECT | INTERFACE  
 
 # Query definitions for retrieving listing data
 extend type Query {
@@ -30,13 +24,10 @@ extend type Query {
   "Returns all possible amenities for a listing"
   listingAmenities: [Amenity!]! @shareable
 
-  """
-  Search results for listings that fit the criteria provided
-  Returns the listings that match the criteria provided
-  """
-  listings(numOfBeds: Int, page: Int, limit: Int, sortBy: String): [Listing] @shareable
   
-  "Sort by sale amount"
+  """
+  Sort by sale amount
+  """
   hotListingsByMoney: [Listing] @shareable
   
   "Sort by the number of bookings"
@@ -247,16 +238,10 @@ type ReservedDate @shareable {
   checkOutDate: DateTime!
 }
 
-# Enum representing sorting criteria for listings
-enum SortByCriteria {
-  COST_ASC
-  COST_DESC
-}
-
 # Type representing a listing
-type Listing @key(fields: "id") {
+extend type Listing @key(fields: "id") {
     id: ID!  
-    title: String @shareable
+    title: String! @shareable
     description: String  @shareable
     pictures: [String]  @shareable
     numOfBeds: Int  @shareable
@@ -269,12 +254,12 @@ type Listing @key(fields: "id") {
     location: Location  @shareable
     locationType: LocationType @shareable
     bookingNumber: Int  @shareable
-    amenityIds: [ID!] !
+    amenityIds: [ID!] ! 
     host: User @shareable
     numberOfUpcomingBookings: Int  @shareable
     currentlyBookedDates: [String]  
     totalCost: Float  @shareable
-    bookings: [String]  @shareable
+    bookings: [Booking]!  @shareable
     availability: [String]  @shareable
     priceRange: PriceRange  @shareable
     totalCostRange: TotalCostRange  @shareable
@@ -397,5 +382,7 @@ input CreateBookingInput {
   checkInDate: DateTime!
   "Date of check-out"
   checkOutDate: DateTime!
+  "ID of the guest associated with the booking"
+  guestId: ID!
 }
 

@@ -30,7 +30,7 @@ class AmenityService {
     }
   }
 
-  async getAmenityById(id) {
+  async getAmenityById(listingId) {
     try {
       const amenity = await this.Amenity.findByPk(id);
       if (!amenity) {

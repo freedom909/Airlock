@@ -2,103 +2,243 @@ import { AuthenticationError, ForbiddenError } from "../infrastructure/utils/err
 import { requireAuth, requireRole } from "../infrastructure/auth/authAndRole.js";
 import { searchReviews } from "../infrastructure/search/searchReviews.js";
 import Review from "../services/models/review.js";
+import driver from "../services/DB/connectNeo4jDB.js";
+import getUserFromDb from "../services/repositories/userRepository.js";
 
 const resolvers = {
   Query: {
-    searchReviews: async (_, { criteria }) => {
+    searchReviews: async (_, { criteria }, context) => {
       try {
-        const results = await searchReviews(criteria);
-        return results;
+        const session = driver.session();
+        // according to the criteria to create query clauses
+        // assume that criteria includes guestId, authorId,listingId etc
+        let query = `
+       MATCH (r:Review)
+       WHERE true
+       `
+        let params = {};
+        if (criteria.guestId) {
+          query += ` AND r.guestId = $guestId`;
+          params = { ...params, guestId: criteria.guestId };
+        }
+        if (criteria.authorId) {
+          query += ` AND r.authorId = $authorId`;
+          params = { ...params, authorId: criteria.authorId };
+        }
+        if (criteria.listingId) {
+          query += ` AND r.listingId = $listingId`;
+          params = { ...params, listingId: criteria.listingId };
+        }
+        if (criteria.sortBy) {
+          query += ` ORDER BY r.${criteria.sortBy}`;
+        }
+        if (criteria.limit) {
+          query += ` LIMIT $limit`;
+          params = { ...params, limit: criteria.limit };
+        }
+        if (criteria.offset) {
+          query += ` SKIP $offset`;
+          params = { ...params, offset: criteria.offset };
+        }
+        const results = await session.run(query, params);
+        session.close();
+        return results.records.map(record => record.get('r').properties);
       } catch (error) {
-        throw new Error(`Failed to search reviews: ${error.message}`);
+        throw new ApolloError(`Failed to search reviews: ${error.message}`, 'INTERNAL_SERVER_ERROR');
       }
     },
 
-    reviews: async (_, { criteria }) => {
-      const reviews = await Review.findAll({ where: criteria });
-      return reviews.map(review => {
-        if (review.guestId) {
-          const guest = User.findByPk(review.guestId);
-          return {
-            ...review.toJSON(),
-            author: {
-              ...guest.toJSON(),
-              name: guest.nickname, // Replace full name with nickname
-            },
-          };
+    reviews: async (_, { id }, __) => {
+      try {
+        const session = driver.session();
+        const result = await session.run(
+          `
+          MATCH (r:Review {id: $id})
+          RETURN r
+          `,
+          { id }
+        );
+        session.close()
+        if (result.records.length > 0) {
+          return result.records[0].get('r').properties;
         }
-        return review;
-      });
+      } catch (error) {
+        throw new NotFoundError(`Failed to fetch review: ${error.message}`);
+      }
+    },
+    getReviewForListing: async (_, { listingId }, context) => {
+      try {
+        const session = driver.session()
+        const result = await session.run(
+          `
+          MATCH (r:Review)-[:ASSOCIATED_WITH]->(l:Listing {id: $listingId})
+            RETURN r
+          `,
+          { listingId }
+        )
+        session.close()
+        return result.records.map(record => record.get('r').properties);
+      } catch (error) {
+        throw new ApolloError('Error fetching reviews for listing', 'INTERNAL_SERVER_ERROR', { error });
+      }
     },
   },
   Mutation: {
-    submitGuestReview: requireAuth(async (
-      _,
-      { guestReview: guestReviewInput, bookingId },
-      { dataSources, userId }
-    ) => {
-      const { reviewService, bookingService } = dataSources;
-      const booking = await bookingService.getBooking(bookingId);
+    submitGuestReview: requireAuth(
+      async (
+        _,
+        { guestReview: guestReviewInput, bookingId },
+        { dataSources, userId }
+      ) => {
+        const { reviewService, bookingService } = dataSources;
+        const booking = await bookingService.getBooking(bookingId);
 
-      if (!booking) {
-        throw new ForbiddenError("Booking not found", { extensions: { code: 'NOT_FOUND' } });
-      }
+        if (!booking) {
+          throw new ForbiddenError("Booking not found", { extensions: { code: 'NOT_FOUND' } });
+        }
 
-      if (booking.status !== 'complete') {
-        throw new ForbiddenError("You can't review this booking now", { extensions: { code: 'UNSUPPORTED' } });
-      }
+        if (booking.status !== 'complete') {
+          throw new ForbiddenError("You can't review this booking now", { extensions: { code: 'UNSUPPORTED' } });
+        }
 
-      const guestId = booking.guestId;
-      const createGuestReview = await reviewService.postReview({
-        ...guestReviewInput,
-        guestId,
-        authorId: userId,
-        bookingId,
-      });
+        try {
+          const session = driver.session();
+          const result = await session.run(
+            `
+          MATCH (b:Booking {id: $bookingId})
+          MERGE (r:Review {
+            content: $content,
+            rating: $rating,
+            authorId: $authorId,
+            bookingId: $bookingId,
+            createdAt: datetime(),
+            updatedAt: datetime()
+          })
+          MERGE (r)-[:SUBMITTED_BY]->(g:Guest {id: $guestId})
+          RETURN r
+        `,
+            {
+              bookingId,
+              content: guestReviewInput.content,
+              rating: guestReviewInput.rating,
+              authorId: userId,
+              guestId: booking.guestId
+            }
+          );
+          if (result.records.length === 0) {
+            throw new ApolloError('Failed to submit guest review', 'INTERNAL_SERVER_ERROR');
+          }
+          return {
+            code: 200,
+            success: true,
+            message: 'Guest review submitted successfully',
+            guestReview: result.records[0].get('r').properties
+          };
+        } catch (error) {
+          throw new ApolloError('Error submitting guest review', 'INTERNAL_SERVER_ERROR', { error });
+        }
+      }),
 
-      return {
-        code: 200,
-        success: true,
-        message: "Review submitted",
-        guestReview: createGuestReview,
-      };
-    }),
-    submitHostAndLocationReviews: requireRole('HOST', async (
-      _,
-      { hostReview: hostReviewInput, bookingId, locationReview: locationReviewInput },
-      { dataSources, userId }
-    ) => {
-      const { listingService, bookingService, reviewService } = dataSources;
-      const booking = await bookingService.getBooking(bookingId);
+    submitHostAndLocationReviews: requireRole(
+      'HOST',
+      async (
+        _,
+        { hostReview: hostReviewInput, bookingId, locationReview: locationReviewInput },
+        { dataSources, userId }
+      ) => {
+        const { listingService, bookingService, reviewService } = dataSources;
+        const booking = await bookingService.getBooking(bookingId);
 
-      if (!booking) {
-        throw new ForbiddenError("Booking not found", { extensions: { code: 'NOT_FOUND' } });
-      }
+        if (!booking) {
+          throw new ForbiddenError("Booking not found", { extensions: { code: 'NOT_FOUND' } });
+        }
 
-      const listingId = await listingService.getListingIdForBooking(bookingId);
-      const locationReview = await reviewService.createReviewForListing({
-        ...locationReviewInput,
-        listingId,
-        authorId: userId,
-        bookingId,
-      });
+        const session = driver.session();
 
-      const { hostId } = await listingService.getListing(listingId);
-      const createdHostReview = await reviewService.createReviewForHost({
-        ...hostReviewInput,
-        authorId: userId,
-        hostId,
-        bookingId,
-      });
+        try {
+          // retrieve listingId and hostId
+          const listingResult = await session.run(
+            `
+          MATCH (b:Booking {id: $bookingId})-[:BOOKED_FOR]->(l:Listing)
+          RETURN l.id AS listingId, l.hostId AS hostId
+          `,
+            { bookingId }
+          );
 
-      return {
-        code: 200,
-        success: true,
-        message: "Location review successfully created",
-        locationReview,
-        hostReview: createdHostReview,
-      };
-    }),
+          if (listingResult.records.length === 0) {
+            throw new ForbiddenError("Listing not found", { extensions: { code: 'NOT_FOUND' } });
+          }
+
+          const { listingId, hostId } = listingResult.records[0].get('listingId');
+
+          // 创建 location review
+          const locationReviewResult = await session.run(
+            `
+          MATCH (l:Listing {id: $listingId})
+          MERGE (r:Review {
+            content: $content,
+            rating: $rating,
+            authorId: $authorId,
+            listingId: $listingId,
+            bookingId: $bookingId,
+            createdAt: datetime(),
+            updatedAt: datetime()
+          })
+          MERGE (r)-[:FOR_LISTING]->(l)
+          RETURN r
+          `,
+            {
+              listingId,
+              content: locationReviewInput.content,
+              rating: locationReviewInput.rating,
+              authorId: userId,
+              bookingId
+            }
+          );
+
+          const locationReview = locationReviewResult.records[0].get('r').properties;
+
+          // 创建 host review
+          const hostReviewResult = await session.run(
+            `
+          MATCH (h:Host {id: $hostId})
+          MERGE (r:Review {
+            content: $content,
+            rating: $rating,
+            authorId: $authorId,
+            hostId: $hostId,
+            bookingId: $bookingId,
+            createdAt: datetime(),
+            updatedAt: datetime()
+          })
+          MERGE (r)-[:FOR_HOST]->(h)
+          RETURN r
+          `,
+            {
+              hostId,
+              content: hostReviewInput.content,
+              rating: hostReviewInput.rating,
+              authorId: userId,
+              bookingId
+            }
+          );
+
+          const hostReview = hostReviewResult.records[0].get('r').properties;
+
+          session.close();
+
+          return {
+            code: 200,
+            success: true,
+            message: "Location and host reviews successfully created",
+            locationReview,
+            hostReview
+          };
+        } catch (error) {
+          session.close();
+          throw new ApolloError('Error submitting reviews', 'INTERNAL_SERVER_ERROR', { error });
+        }
+      }),
   },
 
   Listing: {
@@ -145,7 +285,7 @@ const resolvers = {
   Guest: {
     __resolveReference: (user, { dataSources }) => {
       const { userService } = dataSources;
-      return userService.getUser(user.id);
+      return userService.getUserFromDb(user.id);
     },
   },
 

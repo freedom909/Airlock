@@ -1,9 +1,9 @@
 import neo4j from 'neo4j-driver';
-import  driver from './driver.js';
+import driver from '../../services/DB/connectNeo4jDB.js';
 
 async function validateInviteCode(inviteCode) {
   const session = driver.session();
-  
+
   try {
     const result = await session.run(
       `MATCH (ic:InviteCode { code: $inviteCode })
@@ -25,4 +25,4 @@ async function validateInviteCode(inviteCode) {
   }
 }
 
- export default validateInviteCode;
+export default validateInviteCode;

@@ -1,3 +1,5 @@
+federation_version: "2.9.3"
+
 headers:
   all:
     request:
@@ -13,15 +15,13 @@ cors:
     - https://studio.apollographql.com # Allows Apollo Studio to still run queries against your Router
 
 supergraph:
-  schema: ./supergraph.graphql
+  schema: ./subgraph.graphql
+
+subgraphs:
   users:
     routing_url: http://localhost:4010
     schema:
       file: ./subgraph-users/schema.graphql
-  accounts:
-    routing_url: http://localhost:4020/graphql
-    schema:
-      file: ./subgraph-accounts/schema.graphql
   profiles:
     routing_url: http://localhost:4030/graphql
     schema:

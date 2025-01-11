@@ -3,13 +3,12 @@ import { AuthenticationError, ForbiddenError } from '../../infrastructure/utils/
 import connectMysql from '../DB/connectMysqlDB.js'
 import Listing from '../models/listing.js';
 import Location from '../models/location.js';
+
 class ListingRepository {
     constructor(httpClient, database) {
         this.httpClient = httpClient;
         this.db = database;
     }
-
-
 
     async findAll() {
         try {
@@ -101,8 +100,6 @@ class ListingRepository {
             throw error;
         }
     }
-
-
 
     async getAmenities(id) {
         try {

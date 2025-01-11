@@ -1,22 +1,23 @@
-import connectToMongoDB from "../DB/connectMongoDB.js";
+
 import Review from "../models/review.js";
-import mongoose from "mongoose";
+import neo4j from "neo4j-driver";
+
 const mockData = [
     {
         title: "Amazing Stay!",
         rating: 5,
         content: "I had a wonderful experience at this location. The host was very welcoming and the amenities were top-notch.",
         picture: "https://example.com/image1.jpg",
-        locationId: "60d21b4667d0d8992e610c85", // Replace with actual ObjectId  
-        hostId: "60d21b4667d0d8992e610c86", // Replace with actual ObjectId  
-        guestId: "60d21b4667d0d8992e610c87", // Replace with actual ObjectId  
-        authorId: "60d21b4667d0d8992e610c88", // Replace with actual ObjectId  
-        bookingId: "60d21b4667d0d8992e610c89", // Replace with actual ObjectId  
+        locationId: "60d21b4667d0d8992e610c85",
+        hostId: "60d21b4667d0d8992e610c86",
+        guestId: "60d21b4667d0d8992e610c87",
+        authorId: "60d21b4667d0d8992e610c88",
+        bookingId: "60d21b4667d0d8992e610c89",
         comments: [], // No comments yet  
         likes: ["60d21b4667d0d8992e610c87"], // User who liked the review  
         dislikes: [], // No dislikes  
         isFeatured: true,
-        isHighlighted: false,
+        isRecommended: false,
         isPinned: false,
         round: 1,
     },
@@ -25,16 +26,16 @@ const mockData = [
         rating: 2,
         content: "The place was not clean, and the host was unresponsive. Very disappointed.",
         picture: "https://example.com/image2.jpg",
-        locationId: "60d21b4667d0d8992e610c85", // Replace with actual ObjectId  
-        hostId: "60d21b4667d0d8992e610c86", // Replace with actual ObjectId  
-        guestId: "60d21b4667d0d8992e610c87", // Replace with actual ObjectId  
-        authorId: "60d21b4667d0d8992e610c88", // Replace with actual ObjectId  
-        bookingId: "60d21b4667d0d8992e610c89", // Replace with actual ObjectId  
+        locationId: "60d21b4667d0d8992e610c85",
+        hostId: "60d21b4667d0d8992e610c86",
+        guestId: "60d21b4667d0d8992e610c87",
+        authorId: "60d21b4667d0d8992e610c88",
+        bookingId: "60d21b4667d0d8992e610c89",
         comments: [], // No comments yet  
         likes: [], // No likes  
         dislikes: ["60d21b4667d0d8992e610c88"], // User who disliked the review  
         isFeatured: false,
-        isHighlighted: true,
+        isRecommended: true,
         isPinned: false,
         round: 1,
     },
@@ -43,16 +44,16 @@ const mockData = [
         rating: 4,
         content: "The location is great and the price is very reasonable. Would recommend to others!",
         picture: "https://example.com/image3.jpg",
-        locationId: "60d21b4667d0d8992e610c85", // Replace with actual ObjectId  
-        hostId: "60d21b4667d0d8992e610c86", // Replace with actual ObjectId  
-        guestId: "60d21b4667d0d8992e610c87", // Replace with actual ObjectId  
-        authorId: "60d21b4667d0d8992e610c88", // Replace with actual ObjectId  
-        bookingId: "60d21b4667d0d8992e610c89", // Replace with actual ObjectId  
+        locationId: "60d21b4667d0d8992e610c85",
+        hostId: "60d21b4667d0d8992e610c86",
+        guestId: "60d21b4667d0d8992e610c87",
+        authorId: "60d21b4667d0d8992e610c88",
+        bookingId: "60d21b4667d0d8992e610c89",
         comments: [], // No comments yet  
         likes: ["60d21b4667d0d8992e610c87"], // User who liked the review  
         dislikes: [], // No dislikes  
         isFeatured: false,
-        isHighlighted: false,
+        isRecommended: false,
         isPinned: true,
         round: 1,
     },
@@ -61,16 +62,16 @@ const mockData = [
         rating: 1,
         content: "The worst place I've ever stayed. Do not recommend at all.",
         picture: "https://example.com/image4.jpg",
-        locationId: "60d21b4667d0d8992e610c85", // Replace with actual ObjectId  
-        hostId: "60d21b4667d0d8992e610c86", // Replace with actual ObjectId  
-        guestId: "60d21b4667d0d8992e610c87", // Replace with actual ObjectId  
-        authorId: "60d21b4667d0d8992e610c88", // Replace with actual ObjectId  
-        bookingId: "60d21b4667d0d8992e610c89", // Replace with actual ObjectId  
+        locationId: "60d21b4667d0d8992e610c85",
+        hostId: "60d21b4667d0d8992e610c86",
+        guestId: "60d21b4667d0d8992e610c87",
+        authorId: "60d21b4667d0d8992e610c88",
+        bookingId: "60d21b4667d0d8992e610c89",
         comments: [], // No comments yet  
         likes: [], // No likes  
         dislikes: ["60d21b4667d0d8992e610c88"], // User who disliked the review  
         isFeatured: false,
-        isHighlighted: true,
+        isRecommended: true,
         isPinned: false,
         round: 1,
     },
@@ -79,16 +80,16 @@ const mockData = [
         rating: 3,
         content: "The stay was okay, but there were a few issues with the plumbing.",
         picture: "https://example.com/image5.jpg",
-        locationId: "60d21b4667d0d8992e610c85", // Replace with actual ObjectId  
-        hostId: "60d21b4667d0d8992e610c86", // Replace with actual ObjectId  
-        guestId: "60d21b4667d0d8992e610c87", // Replace with actual ObjectId  
-        authorId: "60d21b4667d0d8992e610c88", // Replace with actual ObjectId  
-        bookingId: "60d21b4667d0d8992e610c89", // Replace with actual ObjectId  
+        locationId: "60d21b4667d0d8992e610c85",
+        hostId: "60d21b4667d0d8992e610c86",
+        guestId: "60d21b4667d0d8992e610c87",
+        authorId: "60d21b4667d0d8992e610c88",
+        bookingId: "60d21b4667d0d8992e610c89",
         comments: [], // No comments yet  
         likes: [], // No likes  
         dislikes: [], // No dislikes  
         isFeatured: false,
-        isHighlighted: false,
+        isRecommended: false,
         isPinned: false,
         round: 1,
     }
@@ -119,7 +120,7 @@ const insertMockData = async () => {
                 likes: review.likes,
                 dislikes: review.dislikes,
                 isFeatured: review.isFeatured,
-                isHighlighted: review.isHighlighted,
+                isRecommended: review.isRecommended,
                 isPinned: review.isPinned,
                 round: review.round,
                 rating: review.rating,

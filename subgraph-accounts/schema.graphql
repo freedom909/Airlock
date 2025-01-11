@@ -352,3 +352,26 @@ type Booking @key(fields: "id") {
   "The total price for the booking"
   totalPrice: Float! @shareable
 }
+
+input CreateLocationInput {
+  "The name of the location"
+  name: String!
+  "The latitude of the location"
+  latitude: Float!
+  "The radius around the location"
+  radius: Int!
+  "The longitude of the location"
+  longitude: Float!
+  "The street address of the location"
+  address: String!
+  "The city where the location is situated"
+  city: String!
+  "The state or province of the location"
+  state: String!
+  "The country of the location"
+  country: String!
+  "The postal code of the location"
+  zipCode: String!
+  "Units for the radius (e.g., kilometers, miles)"
+  units: String! 
+}
