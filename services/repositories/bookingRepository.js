@@ -1,6 +1,6 @@
 import axios from 'axios';
 import mysql from 'mysql2/promise';
-import dbConfig from '../DB/dbconfig.js';
+import dbConfig from '../DB/dbConfig.js';
 
 class BookingRepository {
   constructor(dbConfig) {

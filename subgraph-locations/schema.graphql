@@ -10,13 +10,13 @@ type Query {
 
 extend type Mutation {
   "Creates a new Location for the currently authenticated host"
-  createLocation(input: CreateLocationInput!): CreateLocationResponse!
+  createLocation(input: CreateLocationInput!): CreateLocationResponse! @shareable
   # Updates an existing Location
   updateLocation(
     locationId: ID!
     location: UpdateLocationInput
   ): UpdateLocationResponse!
-  deleteLocation(locationId: ID!): Boolean!
+  deleteLocation(locationId: ID!): Boolean! @shareable
 }
 
 type Location @key(fields: "id") {
@@ -25,7 +25,7 @@ type Location @key(fields: "id") {
   name: String! @shareable
   country: String! @shareable
   zipCode: String! @shareable  
-  city: String @shareable
+  city: String! @shareable
   state: String! @shareable
   address: String! @shareable
   latitude: Float! @shareable

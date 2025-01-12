@@ -2,7 +2,7 @@ import { AuthenticationError, ForbiddenError } from '../infrastructure/utils/err
 import { permissions } from '../infrastructure/auth/permission.js';
 import Listing from '../services/models/listing.js';
 import Coordinate from '../services/models/location.js';
-import dbConfig from '../services/DB/dbconfig.js';
+import dbConfig from '../services/DB/dbConfig.js';
 import Location from '../services/models/location.js';
 import { GraphQLError } from 'graphql';
 import Amenity from '../services/models/amenity.js';

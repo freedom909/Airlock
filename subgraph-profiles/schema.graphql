@@ -1,6 +1,7 @@
 extend schema
   @link(url: "https://specs.apollo.dev/federation/v2.7", 
-        import: ["@key", "@shareable", "@provides", "@external"])
+        import: ["@key", "@shareable", "@provides", "@external"]
+  )
 
 """
 An ISO 8601-encoded UTC date string.

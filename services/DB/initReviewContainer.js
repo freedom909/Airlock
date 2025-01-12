@@ -1,6 +1,6 @@
 // initializeAmenityContainer.js
 import { createContainer, asValue, asClass } from 'awilix';
-import dbconfig from './dbconfig.js';
+import dbConfig from './dbConfig.js';
 import ListingService from '../listingService.js';
 import ListingRepository from '../repositories/listingRepository.js';
 import LocalAuthService from '../userService/localAuthService.js';

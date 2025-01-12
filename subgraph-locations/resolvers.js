@@ -1,7 +1,7 @@
 
 import { AuthenticationError } from '../infrastructure/utils/errors.js';
 import Listing from '../services/models/listing.js';
-import dbConfig from '../services/DB/dbconfig.js';
+import dbConfig from '../services/DB/dbConfig.js';
 import Location from '../services/models/location.js';
 
 

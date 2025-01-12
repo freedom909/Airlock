@@ -6,7 +6,6 @@ import express from 'express';
 import http from 'http';
 import { expressMiddleware } from '@apollo/server/express4';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
-
 import initializeBookingContainer from '../services/DB/initBookingContainer.js';
 import cors from 'cors';
 
@@ -19,8 +18,6 @@ import initializeCartContainer from '../services/DB/initCartContainer.js';
 import CartService from '../services/cartService.js';
 import PaymentRepository from '../services/repositories/paymentRepository.js';
 import PaymentService from '../services/paymentService.js';
-
-
 
 const typeDefs = gql(readFileSync('./schema.graphql', { encoding: 'utf-8' }));
 

@@ -11,9 +11,9 @@ const connectMysql = async () => {
   if (!pool) {
     pool = mysql.createPool({
       host: '127.0.0.1',
-      user: 'root',
-      password: 'princess',
-      database: 'air',
+      user: user,
+      password: password,
+      database: db,
       waitForConnections: true,
       connectionLimit: 10,
       queueLimit: 0,

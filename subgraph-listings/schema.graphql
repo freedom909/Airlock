@@ -1,5 +1,6 @@
 extend schema
-  @link(url: "https://specs.apollo.dev/federation/v2.7", import: ["@key", "@shareable","@external"])
+  @link(url: "https://specs.apollo.dev/federation/v2.7",
+   import: ["@key", "@shareable","@external"])
 
 scalar DateTime
 directive @cacheControl(maxAge: Int) on FIELD_DEFINITION | OBJECT | INTERFACE  
@@ -305,7 +306,8 @@ type Booking @key(fields: "id") {
 type Host @key(fields: "id") {
   id: ID!
  listing:[Listing] @shareable
- picture: String @shareable
+ "The HOST's profile photo URL"
+ picture: String! @shareable
 }
 
 # Input for full-text search
@@ -337,7 +339,7 @@ type Location @key(fields: "id") {
   radius: Int! @shareable 
   units: String! @shareable
   "The location's city"
-  city: String @shareable 
+  city: String! @shareable 
   listingId: String! @shareable
   name: String! @shareable
   country: String! @shareable
@@ -363,16 +365,18 @@ type Review @key(fields: "id") {
 type Guest @key(fields: "id") {
   id: ID!
   name: String! @shareable
-  picture: String @shareable
+  picture: String!@shareable
 }
 
 "Represents an Airlock user's common properties"
 interface User {
   id: ID!
-  "The user's first and last name"
+  """
+  The user's full name
+  """
   name: String! 
   "The user's profile photo URL"
-  picture: String
+  picture: String!
 }
 
 input CreateBookingInput {
@@ -382,7 +386,7 @@ input CreateBookingInput {
   checkInDate: DateTime!
   "Date of check-out"
   checkOutDate: DateTime!
-  "ID of the guest associated with the booking"
+  "Guest ID associated with the booking"
   guestId: ID!
 }
 

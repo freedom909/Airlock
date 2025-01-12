@@ -24,7 +24,7 @@ type Mutation {
 interface User {
   id: ID!
   name: String!
-  picture: String
+  picture: String!
 }
 
 # Interface for mutation responses
@@ -73,7 +73,7 @@ type Guest implements User @key(fields: "id") {
   id: ID!
   name: String! @shareable
   funds: Float! @shareable
-  picture: String @shareable
+  picture: String! @shareable
 }
 
 # Host type implementing User interface with federated key
@@ -81,6 +81,7 @@ type Host implements User @key(fields: "id") {
   id: ID!
   name: String! @shareable
   earnings: Float! @shareable
-  picture: String @shareable
+  "The HOST's profile photo URL"
+  picture: String! @shareable
 }
 

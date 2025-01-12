@@ -1,5 +1,6 @@
 extend schema
-  @link(url: "https://specs.apollo.dev/federation/v2.5", import: ["@key", "@shareable", "@override", "@requires", "@provides"])
+  @link(url: "https://specs.apollo.dev/federation/v2.8", 
+  import: ["@key", "@shareable", "@override", "@requires", "@provides"])
 
 enum CacheControlScope {  
   PUBLIC  
@@ -11,33 +12,33 @@ directive @cacheControl(maxAge: Int, scope: CacheControlScope) on FIELD_DEFINITI
 
 type Query {
   ### Bookings
-  bookingsForHost(listingId: ID!, status: BookingStatus): [Booking]! @shareable
-  currentGuestBooking: Booking @shareable
-  upcomingGuestBookings: [Booking]! @shareable
-  pastGuestBookings: [Booking]! @shareable
-  guestBookings: [Booking]! @shareable
-  booking(id: ID!): Booking @shareable
-  bookingsForGuest(userId: ID!): [Booking] @shareable
+  bookingsForHost(listingId: ID!, status: BookingStatus): [Booking!]! @shareable
+  currentGuestBooking: Booking! @shareable
+  upcomingGuestBookings: [Booking!]! @shareable
+  pastGuestBookings: [Booking!]! @shareable
+  guestBookings: [Booking!]! @shareable
+  booking(id: ID!): Booking! @shareable
+  bookingsForGuest(userId: ID!): [Booking!] @shareable
 }
 
 type CancelBookingResponse implements MutationResponse {
   code: Int! @shareable
   success: Boolean! @shareable
   message: String! @shareable
-  booking: Booking @shareable
+  booking: Booking! @shareable
 }
 
 type Mutation {
   createBooking(input: CreateBookingInput!): CreateBookingResponse! @shareable
   cancelBooking(id: ID!): CancelBookingResponse @shareable
-  confirmBooking(id: ID!): Booking @shareable
+  confirmBooking(id: ID!): Booking! @shareable
 }
 
 type CreateBookingResponse {
   code: Int! @shareable
   success: Boolean! @shareable
   message: String! @shareable
-  booking: Booking @shareable
+  booking: Booking! @shareable
 }
 
 enum BookingStatus {
@@ -70,12 +71,12 @@ type ReservedDate @shareable {
 
 type Listing @key(fields: "id") {
   id: ID!
-  bookings: [Booking]! @shareable
+  bookings: [Booking!]! @shareable
 }
 
 type Guest @key(fields: "id") {
   id: ID!
-  bookings: [Booking]! @shareable
+  bookings: [Booking!]! @shareable
   picture: String! @shareable
 }
 

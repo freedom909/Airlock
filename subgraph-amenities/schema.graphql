@@ -1,6 +1,8 @@
 extend schema
-  @link(url: "https://specs.apollo.dev/federation/v2.7", 
-        import: ["@key", "@shareable","@external","@requires"])
+  @link(
+    url: "https://specs.apollo.dev/federation/v2.7", 
+      import: ["@key", "@shareable","@external","@requires"]
+      )
 
 
 # SCALARS

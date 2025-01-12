@@ -1,6 +1,6 @@
 extend schema
   @link(
-    url: "https://specs.apollo.dev/federation/v2.5"
+    url: "https://specs.apollo.dev/federation/v2.8"
     import: ["@key", "@shareable","@external"]
   )
 
@@ -18,7 +18,7 @@ type Booking @key(fields: "id") {
   checkInDate: DateTime! @shareable
   "Check-out date for the reservation"
   checkOutDate: DateTime! @shareable
-  "Total price paid, calculated using the listing's costPerNight and the check-in check-out dates"
+  "Total price price, calculated using the listing's costPerNight and the check-in check-out dates"
   totalPrice: Float! @shareable
   "The status of the booking - check BookingStatus type for all possibilities"
   status: BookingStatus! @shareable
@@ -90,11 +90,11 @@ input CreateBookingInput {
 
 type Mutation {
   "Guest create a booking."
-  createBooking(input: CreateBookingInput): CreateBookingResponse! @shareable
+  createBooking(input: CreateBookingInput!): CreateBookingResponse! @shareable
   "Research booking information according to guestId."
   researchBooking(guestId: ID!): [Booking!]! @shareable
   "Guest confirms the status of booking."
-  confirmBooking(id: ID!): Booking! @shareable
+  confirmBooking(id: ID!): Booking! @shareable 
   "Guest cancels the status of booking."
   cancelBooking(id: ID!): CancelBookingResponse! @shareable
 }

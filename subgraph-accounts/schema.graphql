@@ -1,10 +1,11 @@
 extend schema
   @link(url: "https://specs.apollo.dev/federation/v2.7",
-  import: ["@key", "@shareable"])
+  import: ["@key", "@shareable"]
+      )
 
 # SCALARS
 scalar DateTime
-
+ 
 # OBJECTS
 
 type Account @key(fields: "id") {
@@ -21,12 +22,14 @@ type AuthPayload {
   token: String! @shareable
   "The user's ID"
   userId: ID! @shareable
+  "The user's role"
+  role: Role! @shareable
 }
 
 "Represents an Airlock user's common properties"
 interface User @key(fields: "id") {
   id: ID!
-  "The user's first and last name"
+  "The user's full name"
   name: String!
   "The user's role"
   role: Role!
@@ -79,7 +82,7 @@ type Guest implements User @key(fields: "id") {
   "The role of the user"
   role: Role! @shareable
   "The bookings of the user"  
-  bookings: [Booking]! @shareable
+  bookings: [Booking!]! @shareable
   "The carts of the user"
   carts: [Cart]! @shareable
   listings:[Listing] @shareable
@@ -187,10 +190,6 @@ interface Node {
 
 type _Service {
   sdl: String
-}
-
-type UserId {
-  id: ID! @shareable
 }
 
 scalar _Any
@@ -347,9 +346,9 @@ type Booking @key(fields: "id") {
   listingId: ID! @shareable
   "The check-in date for the booking"
   checkInDate: DateTime! @shareable
-  "The check-out date for the booking"
+  "The check-out date for the reservation"
   checkOutDate: DateTime! @shareable
-  "The total price for the booking"
+  "Total price price, calculated using the listing's costPerNight and the check-in check-out dates"
   totalPrice: Float! @shareable
 }
 

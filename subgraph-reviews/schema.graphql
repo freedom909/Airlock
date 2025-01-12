@@ -1,10 +1,9 @@
-directive @relation(name: String!, direction: String!) on FIELD_DEFINITION
-
 extend schema
   @link(
     url: "https://specs.apollo.dev/federation/v2.5"
     import: ["@key", "@shareable", "@external"]
   )
+directive @relation(name: String!, direction: String!) on FIELD_DEFINITION
 
 ### Queries
 type Query {
@@ -123,21 +122,22 @@ type Listing @key(fields: "id") {
 interface User {
   id: ID!
   name: String!
-  picture: String
+  "The user's profile photo URL"
+  picture: String!
 }
 
 type Host implements User @key(fields: "id") {
   id: ID!
   name: String! @shareable
   overallRating: Float @shareable
-  picture: String @shareable
+  picture: String! @shareable
 
 }
 
 type Guest implements User @key(fields: "id") {
   id: ID! @shareable 
   name: String! @shareable
-  picture: String @shareable
+  picture: String! @shareable
 }
 
 type Comment {

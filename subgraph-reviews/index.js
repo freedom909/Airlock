@@ -51,6 +51,7 @@ const startApolloServer = async () => {
               async drainServer() {
                 await mysqlContainer.resolve('mysqldb').close();
                 await mongoContainer.resolve('mongodb').close();  // Ensure MongoDB client is closed properly
+                await neo4jContainer.resolve('neo4j').close();
               }
             };
           }
@@ -63,7 +64,8 @@ const startApolloServer = async () => {
           listingService: mysqlContainer.resolve('listingService'),  // Ensure correct resolution of services
           bookingService: mysqlContainer.resolve('bookingService'),  // Ensure correct resolution of services 
           cartService: mysqlContainer.resolve('cartService'),
-          userService: mongoContainer.resolve('userService') // Ensure correct resolution of services
+          userService: mongoContainer.resolve('userService'), // Ensure correct resolution of services
+          reviewService: neo4jContainer.resolve('reviewService') // Ensure correct resolution of services
         }
       })
     });

@@ -15,7 +15,7 @@ import queryDatabase from './DB/dbUtils.js'
 import Listing from './models/listing.js';
 import Amenity from './models/amenity.js';
 import Coordinate from './models/location.js'
-import dbConfig from './DB/dbconfig.js';
+import dbConfig from './DB/dbConfig.js';
 import Location from './models/location.js';
 import { query } from 'express';
 // import UUIDV4 from 'uuid';
